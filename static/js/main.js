@@ -17,6 +17,42 @@ toggle.addEventListener("click", () => {
   applyTheme(root.getAttribute("data-theme") === "dark" ? "light" : "dark");
 });
 
+/* --- The pink tile: boing --- */
+
+const boingTile = document.querySelector(".tile--empty");
+const BOING_WORDS = ["boing!", "boioioing!", "BOING!", "boing boing!"];
+
+function spawnBoingLabel(x, y) {
+  const label = document.createElement("span");
+  label.className = "boing-label";
+  label.textContent = BOING_WORDS[Math.floor(Math.random() * BOING_WORDS.length)];
+  label.style.left = `${x}px`;
+  label.style.top = `${y}px`;
+  label.style.setProperty("--rot", `${(Math.random() * 30 - 15).toFixed(1)}deg`);
+  document.body.append(label);
+  label.addEventListener("animationend", () => label.remove());
+}
+
+boingTile.addEventListener("click", (event) => {
+  boingTile.classList.remove("is-boinging");
+  void boingTile.offsetWidth; // restart the animation on rapid clicks
+  boingTile.classList.add("is-boinging");
+
+  if (!reduceMotion.matches) {
+    let { clientX: x, clientY: y } = event;
+    if (!x && !y) { // keyboard activation — pop from the tile's centre
+      const r = boingTile.getBoundingClientRect();
+      x = r.x + r.width / 2;
+      y = r.y + r.height / 2;
+    }
+    spawnBoingLabel(x, y);
+  }
+});
+
+boingTile.addEventListener("animationend", () => {
+  boingTile.classList.remove("is-boinging");
+});
+
 /* --- Tile overlay: flip & expand via the View Transitions API.
    The clicked tile and its label get the same view-transition-names as
    the dialog card and heading, so the browser morphs one into the
@@ -39,8 +75,6 @@ function withTransition(update) {
 
 function setFlipNames(tile, on) {
   tile.style.viewTransitionName = on ? "flip-card" : "";
-  const label = tile.querySelector("span");
-  if (label) label.style.viewTransitionName = on ? "flip-heading" : "";
 }
 
 function openOverlay(tile) {

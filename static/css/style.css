@@ -10,6 +10,7 @@
   --bg: #ffffff;
   --line: #161616;
   --text: #000000;
+  --accent: #fc9bc1; /* same pair as the cursors: pink light, teal dark */
 
   --radius: clamp(24px, 2.083vw, 40px);   /* 40 @ 1920 */
   --gap-col: clamp(12px, 1.25vw, 24px);   /* 24 @ 1920 */
@@ -22,6 +23,7 @@
   --bg: #161616;
   --line: #f4f4f4;
   --text: #ffffff;
+  --accent: #00857a;
   color-scheme: dark;
 }
 
@@ -59,11 +61,12 @@ button {
   display: none !important;
 }
 
-/* --- Theme toggle: fixed in the top band, flush with the content's
-       right edge. Design: 32×32 at left 1688, top 40 @ 1920×1080. --- */
+/* --- Theme toggle: in the top band of the first screen, flush with the
+       content's right edge; scrolls away with the page.
+       Design: 32×32 at left 1688, top 40 @ 1920×1080. --- */
 
 .theme-toggle {
-  position: fixed;
+  position: absolute;
   top: clamp(16px, 3.704dvh, 40px);                                   /* 40/1080 */
   right: max(clamp(20px, 10.417vw, 200px), calc((100vw - 1520px) / 2));
   z-index: 10;
@@ -190,6 +193,58 @@ button.card:focus-visible {
   min-height: 0; /* the fr tracks alone decide tile sizes */
 }
 
+/* The pink one. Clicks just boing. */
+
+button.tile--empty {
+  background: var(--accent);
+  border: 0;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+button.tile--empty:hover,
+button.tile--empty:focus-visible {
+  background: color-mix(in srgb, var(--line) 6%, var(--accent));
+}
+
+.tile--empty.is-boinging {
+  animation: boing 0.7s ease-out;
+}
+
+@keyframes boing {
+  0%   { transform: scale(1, 1); }
+  20%  { transform: scale(0.9, 0.9); }
+  40%  { transform: scale(1.14, 0.86); }
+  60%  { transform: scale(0.92, 1.1); }
+  75%  { transform: scale(1.06, 0.95); }
+  90%  { transform: scale(0.98, 1.02); }
+  100% { transform: scale(1, 1); }
+}
+
+/* Comic sound-effect labels spawned at the click point */
+
+.boing-label {
+  position: fixed;
+  z-index: 20;
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(1.5rem, 2.1vw, 2.5rem);
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  animation: boing-label 0.9s ease-out both;
+}
+
+@keyframes boing-label {
+  0%       { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(var(--rot, 0deg)); }
+  18%      { opacity: 1; transform: translate(-50%, -68%) scale(1.25) rotate(var(--rot, 0deg)); }
+  30%      { transform: translate(-50%, -62%) scale(0.95) rotate(var(--rot, 0deg)); }
+  42%      { transform: translate(-50%, -66%) scale(1.05) rotate(var(--rot, 0deg)); }
+  55%, 70% { opacity: 1; transform: translate(-50%, -64%) scale(1) rotate(var(--rot, 0deg)); }
+  100%     { opacity: 0; transform: translate(-50%, -130%) scale(1) rotate(var(--rot, 0deg)); }
+}
+
 .tile--kontakt span {
   font-weight: 700;
   font-size: clamp(1.25rem, 12.431cqi, 2.8125rem); /* 45/362 */
@@ -197,16 +252,15 @@ button.card:focus-visible {
 }
 
 /* --- Work masonry (screen 2) ---
-   @ 1920: tall left tile 362×768, then a 129 gap to a 1029-wide block
-   of two rows (row gap 44). Row 1: 362 + 157 + 510, row 2: 503 + 164
-   + 362. Column gaps are percentages of their grid, so the layout keeps
-   the exact frame proportions at every width. */
+   @ 1920: tall left tile 362×768, then a uniform 44 gap everywhere.
+   Produkt and Typografie stay 362 squares; the two wide tiles absorb
+   the rest (708 each): 362 + 44 + (362 + 44 + 708) = 1520. */
 
 .work {
   display: grid;
-  grid-template-columns: 362fr 1029fr;
+  grid-template-columns: 362fr 1114fr;
   aspect-ratio: 1520 / 768;
-  column-gap: clamp(24px, 6.719vw, 129px); /* 129 @ 1920, fixed while tracks animate */
+  column-gap: var(--gap-row); /* 44 @ 1920 — same as between the rows */
   container-type: inline-size;
 }
 
@@ -218,16 +272,15 @@ button.card:focus-visible {
 
 .work-row {
   display: grid;
+  column-gap: var(--gap-row);
 }
 
 .work-row--1 {
-  grid-template-columns: 362fr 510fr;
-  column-gap: clamp(24px, 8.177vw, 157px); /* 157 @ 1920 */
+  grid-template-columns: 362fr 708fr;
 }
 
 .work-row--2 {
-  grid-template-columns: 503fr 362fr;
-  column-gap: clamp(24px, 8.542vw, 164px); /* 164 @ 1920 */
+  grid-template-columns: 708fr 362fr;
 }
 
 .wtile {
@@ -265,16 +318,16 @@ button.card:focus-visible {
   .tiles:has(.tile--empty:hover)   { grid-template-rows: 442fr 282fr; }
   .tiles:has(.tile--kontakt:hover) { grid-template-rows: 282fr 442fr; }
 
-  .work:has(.wtile--viz:hover)     { grid-template-columns: 442fr 949fr; }
-  .work:has(.work-right :hover)    { grid-template-columns: 302fr 1089fr; }
+  .work:has(.wtile--viz:hover)     { grid-template-columns: 442fr 1034fr; }
+  .work:has(.work-right :hover)    { grid-template-columns: 302fr 1174fr; }
 
   .work-right:has(.work-row--1 :hover) { grid-template-rows: 422fr 302fr; }
   .work-right:has(.work-row--2 :hover) { grid-template-rows: 302fr 422fr; }
 
-  .work-row--1:has(.wtile--produkt:hover)    { grid-template-columns: 442fr 430fr; }
-  .work-row--1:has(.wtile--profilovky:hover) { grid-template-columns: 282fr 590fr; }
-  .work-row--2:has(.wtile--videa:hover)      { grid-template-columns: 583fr 282fr; }
-  .work-row--2:has(.wtile--typografie:hover) { grid-template-columns: 423fr 442fr; }
+  .work-row--1:has(.wtile--produkt:hover)    { grid-template-columns: 442fr 628fr; }
+  .work-row--1:has(.wtile--profilovky:hover) { grid-template-columns: 282fr 788fr; }
+  .work-row--2:has(.wtile--videa:hover)      { grid-template-columns: 788fr 282fr; }
+  .work-row--2:has(.wtile--typografie:hover) { grid-template-columns: 628fr 442fr; }
 }
 
 /* --- Tile overlay ---
@@ -293,7 +346,7 @@ button.card:focus-visible {
 }
 
 .overlay-card::backdrop {
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  background: var(--bg); /* solid — the page disappears behind the card */
 }
 
 .overlay-heading {
@@ -301,7 +354,6 @@ button.card:focus-visible {
   font-weight: 700;
   font-size: clamp(1.25rem, 2.344vw, 2.8125rem); /* 45/1920 */
   line-height: 1.4889;                           /* 67/45 */
-  view-transition-name: flip-heading;
 }
 
 .overlay-close {
@@ -322,8 +374,24 @@ button.card:focus-visible {
   opacity: 0.6;
 }
 
-/* Flip: the old face turns away while the new face turns in; the
-   browser's default group animation morphs position and size. */
+/* Flip: the old face turns away while the new face turns in. The
+   browser's group animation morphs position and size — slowed to match
+   the flip so the flight and the rotation are one movement. Labels are
+   part of the faces, so text flips with the card. */
+
+::view-transition-group(flip-card) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-image-pair(flip-card) {
+  perspective: 1200px;
+}
+
+::view-transition-old(flip-card),
+::view-transition-new(flip-card) {
+  height: 100%; /* faces fill the morphing box instead of keeping their own aspect */
+}
 
 ::view-transition-old(flip-card) {
   animation: flip-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
@@ -356,8 +424,8 @@ button.card:focus-visible {
   .tile { aspect-ratio: 1; }
   .wtile--produkt,
   .wtile--typografie { aspect-ratio: 1; }
-  .wtile--profilovky { aspect-ratio: 510 / 362; }
-  .wtile--videa      { aspect-ratio: 503 / 362; }
+  .wtile--profilovky,
+  .wtile--videa      { aspect-ratio: 708 / 362; }
 
   .card--hero {
     grid-row: auto;
@@ -409,5 +477,9 @@ button.card:focus-visible {
   .work-right,
   .work-row {
     transition: none;
+  }
+
+  .tile--empty.is-boinging {
+    animation: none;
   }
 }
