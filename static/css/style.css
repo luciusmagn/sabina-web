@@ -1,0 +1,413 @@
+/* ----------------------------------------------------------------------
+   Sabina Mácha — portfolio
+   Reference design: 1920×1080 frames, one stacked per screen.
+   Page chrome (margins, gaps, radius) scales with the viewport and caps
+   at the original design values; type scales with its own card via
+   container-query units (cqi), so it stays proportional in any layout.
+   ---------------------------------------------------------------------- */
+
+:root {
+  --bg: #ffffff;
+  --line: #161616;
+  --text: #000000;
+
+  --radius: clamp(24px, 2.083vw, 40px);   /* 40 @ 1920 */
+  --gap-col: clamp(12px, 1.25vw, 24px);   /* 24 @ 1920 */
+  --gap-row: clamp(20px, 2.292vw, 44px);  /* 44 @ 1920 */
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #161616;
+  --line: #f4f4f4;
+  --text: #ffffff;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  cursor: url("/cursors/cursor-light.svg") 10 10, auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+html[data-theme="dark"] {
+  cursor: url("/cursors/cursor-dark.svg") 10 10, auto;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  padding: 0;
+  cursor: inherit; /* keep the custom cursor over clickable tiles */
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* --- Theme toggle: fixed in the top band, flush with the content's
+       right edge. Design: 32×32 at left 1688, top 40 @ 1920×1080. --- */
+
+.theme-toggle {
+  position: fixed;
+  top: clamp(16px, 3.704dvh, 40px);                                   /* 40/1080 */
+  right: max(clamp(20px, 10.417vw, 200px), calc((100vw - 1520px) / 2));
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  color: var(--line);
+}
+
+.theme-toggle svg {
+  display: block;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--line);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.theme-toggle .icon-moon { display: none; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+
+/* --- Full-height screens: 200px sides, 156px top/bottom @ 1920×1080 --- */
+
+.frame {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(72px, 14.45dvh, 156px) clamp(20px, 10.417vw, 200px);
+  scroll-snap-align: start;
+}
+
+.content {
+  width: 100%;
+  max-width: 1520px; /* 1920 − 2×200 */
+}
+
+/* Scroll hint: a plain arrow centred in the bottom band of screen 1 */
+
+.scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc((clamp(72px, 14.45dvh, 156px) - 32px) / 2);
+  translate: -50% 0;
+  color: var(--line);
+}
+
+.scroll-hint svg {
+  display: block;
+}
+
+/* --- Cards --- */
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+a.card,
+button.card {
+  text-decoration: none;
+}
+
+a.card:hover,
+button.card:hover,
+a.card:focus-visible,
+button.card:focus-visible {
+  background: color-mix(in srgb, var(--line) 5%, transparent);
+}
+
+/* --- Landing grid ---
+   Columns 1134 : 362, column gap 24 @ 1920. The grid's own aspect ratio
+   pins its height to 768 @ 1920, and the two rows split it evenly
+   (362 + 44 + 362) — explicit fr rows so hover can animate them. */
+
+.tiles {
+  display: grid;
+  grid-template-columns: 1134fr 362fr;
+  grid-template-rows: 362fr 362fr;
+  aspect-ratio: 1520 / 768;
+  column-gap: var(--gap-col);
+  row-gap: var(--gap-row);
+}
+
+/* --- Hero card --- */
+
+.card--hero {
+  grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 9.26%; /* 105/1134 — title indent in the frame */
+  container-type: inline-size;
+}
+
+.card--hero h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 13.668cqi, 9.6875rem); /* 155/1134 */
+  line-height: 1.1613;                            /* 180/155 */
+}
+
+.card--hero .tagline {
+  margin: clamp(1.25rem, 3.88cqi, 2.75rem) 0 0;   /* 44/1134 */
+  font-weight: 400;
+  font-size: clamp(1rem, 2.91cqi, 2.0625rem);     /* 33/1134 */
+  line-height: 1.1515;                            /* 38/33 */
+}
+
+/* --- Landing square tiles --- */
+
+.tile {
+  container-type: inline-size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0; /* the fr tracks alone decide tile sizes */
+}
+
+.tile--kontakt span {
+  font-weight: 700;
+  font-size: clamp(1.25rem, 12.431cqi, 2.8125rem); /* 45/362 */
+  line-height: 1.4889;                             /* 67/45 */
+}
+
+/* --- Work masonry (screen 2) ---
+   @ 1920: tall left tile 362×768, then a 129 gap to a 1029-wide block
+   of two rows (row gap 44). Row 1: 362 + 157 + 510, row 2: 503 + 164
+   + 362. Column gaps are percentages of their grid, so the layout keeps
+   the exact frame proportions at every width. */
+
+.work {
+  display: grid;
+  grid-template-columns: 362fr 1029fr;
+  aspect-ratio: 1520 / 768;
+  column-gap: clamp(24px, 6.719vw, 129px); /* 129 @ 1920, fixed while tracks animate */
+  container-type: inline-size;
+}
+
+.work-right {
+  display: grid;
+  grid-template-rows: 362fr 362fr;
+  row-gap: var(--gap-row);
+}
+
+.work-row {
+  display: grid;
+}
+
+.work-row--1 {
+  grid-template-columns: 362fr 510fr;
+  column-gap: clamp(24px, 8.177vw, 157px); /* 157 @ 1920 */
+}
+
+.work-row--2 {
+  grid-template-columns: 503fr 362fr;
+  column-gap: clamp(24px, 8.542vw, 164px); /* 164 @ 1920 */
+}
+
+.wtile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8%;
+  min-width: 0;
+  min-height: 0; /* the fr tracks alone decide tile sizes */
+}
+
+.wtile span {
+  font-weight: 700;
+  font-size: clamp(1.25rem, 2.961cqi, 2.8125rem); /* 45/1520 of the section */
+  line-height: 1.4889;                            /* 67/45 */
+}
+
+/* --- Hover: the hovered tile expands, its neighbours cede space.
+       Track sums stay constant, so gaps and outer edges never move. --- */
+
+@media (hover: hover) and (min-width: 861px) {
+  .tiles,
+  .work,
+  .work-right,
+  .work-row {
+    transition:
+      grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tiles:has(.card--hero:hover)   { grid-template-columns: 1214fr 282fr; }
+  .tiles:has(.tile--empty:hover),
+  .tiles:has(.tile--kontakt:hover) { grid-template-columns: 1054fr 442fr; }
+  .tiles:has(.tile--empty:hover)   { grid-template-rows: 442fr 282fr; }
+  .tiles:has(.tile--kontakt:hover) { grid-template-rows: 282fr 442fr; }
+
+  .work:has(.wtile--viz:hover)     { grid-template-columns: 442fr 949fr; }
+  .work:has(.work-right :hover)    { grid-template-columns: 302fr 1089fr; }
+
+  .work-right:has(.work-row--1 :hover) { grid-template-rows: 422fr 302fr; }
+  .work-right:has(.work-row--2 :hover) { grid-template-rows: 302fr 422fr; }
+
+  .work-row--1:has(.wtile--produkt:hover)    { grid-template-columns: 442fr 430fr; }
+  .work-row--1:has(.wtile--profilovky:hover) { grid-template-columns: 282fr 590fr; }
+  .work-row--2:has(.wtile--videa:hover)      { grid-template-columns: 583fr 282fr; }
+  .work-row--2:has(.wtile--typografie:hover) { grid-template-columns: 423fr 442fr; }
+}
+
+/* --- Tile overlay ---
+   Design: 1262×700 centred @ 1920×1080 (left 329, top 190), heading
+   104 from the card's left edge and 73 from its top. */
+
+.overlay-card {
+  width: min(1262px, 65.73vw);    /* 1262/1920 */
+  height: min(700px, 64.815dvh);  /* 700/1080 */
+  /* % padding on a <dialog> resolves against the viewport, so these are
+     viewport units mirroring the card's own scale: 73/1080, 104/1920 */
+  padding: min(73px, 6.759dvh) min(104px, 5.417vw);
+  background: var(--bg);
+  color: var(--text);
+  view-transition-name: flip-card;
+}
+
+.overlay-card::backdrop {
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+.overlay-heading {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(1.25rem, 2.344vw, 2.8125rem); /* 45/1920 */
+  line-height: 1.4889;                           /* 67/45 */
+  view-transition-name: flip-heading;
+}
+
+.overlay-close {
+  position: absolute;
+  top: 10.43%;   /* level with the heading band */
+  right: 8.241%;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--line);
+}
+
+.overlay-close:hover {
+  opacity: 0.6;
+}
+
+/* Flip: the old face turns away while the new face turns in; the
+   browser's default group animation morphs position and size. */
+
+::view-transition-old(flip-card) {
+  animation: flip-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+::view-transition-new(flip-card) {
+  animation: flip-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes flip-out {
+  0%        { opacity: 1; transform: rotateY(0deg); }
+  45%, 100% { opacity: 0; transform: rotateY(-90deg); }
+}
+
+@keyframes flip-in {
+  0%, 45% { opacity: 0; transform: rotateY(90deg); }
+  100%    { opacity: 1; transform: rotateY(0deg); }
+}
+
+/* --- Small screens --- */
+
+@media (max-width: 860px) {
+  .tiles {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    aspect-ratio: auto;
+  }
+
+  /* With auto rows, tile shapes come from their aspect ratios */
+  .tile { aspect-ratio: 1; }
+  .wtile--produkt,
+  .wtile--typografie { aspect-ratio: 1; }
+  .wtile--profilovky { aspect-ratio: 510 / 362; }
+  .wtile--videa      { aspect-ratio: 503 / 362; }
+
+  .card--hero {
+    grid-row: auto;
+    grid-column: 1 / -1;
+    padding-block: 14%;
+  }
+
+  /* Work masonry restacks: tall tile + the two squares keep their
+     desktop relationship, the wide tiles go full width below. */
+  .work {
+    grid-template-columns: 1fr 1fr;
+    aspect-ratio: auto;
+    column-gap: var(--gap-col);
+    row-gap: var(--gap-row);
+    grid-template-areas:
+      "viz produkt"
+      "viz typografie"
+      "profilovky profilovky"
+      "videa videa";
+  }
+
+  .work-right,
+  .work-row {
+    display: contents;
+  }
+
+  .wtile--viz        { grid-area: viz; }
+  .wtile--produkt    { grid-area: produkt; }
+  .wtile--profilovky { grid-area: profilovky; }
+  .wtile--videa      { grid-area: videa; }
+  .wtile--typografie { grid-area: typografie; }
+
+  .overlay-card {
+    width: calc(100vw - 32px);
+    height: min(700px, 75dvh);
+    padding: 28px 24px;
+  }
+}
+
+/* --- Reduced motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .tiles,
+  .work,
+  .work-right,
+  .work-row {
+    transition: none;
+  }
+}
