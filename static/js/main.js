@@ -53,6 +53,21 @@ boingTile.addEventListener("animationend", () => {
   boingTile.classList.remove("is-boinging");
 });
 
+/* Sphere illusion: the gradient's light point follows the cursor over
+   the circle, so the pulse originates from the touched point. CSS
+   transitions on the registered --px/--py ease it back to centre. */
+
+boingTile.addEventListener("pointermove", (event) => {
+  const r = boingTile.getBoundingClientRect();
+  boingTile.style.setProperty("--px", `${((event.clientX - r.left) / r.width * 100).toFixed(1)}%`);
+  boingTile.style.setProperty("--py", `${((event.clientY - r.top) / r.height * 100).toFixed(1)}%`);
+});
+
+boingTile.addEventListener("pointerleave", () => {
+  boingTile.style.removeProperty("--px");
+  boingTile.style.removeProperty("--py");
+});
+
 /* --- Tile overlay: flip & expand via the View Transitions API.
    The clicked tile and its label get the same view-transition-names as
    the dialog card and heading, so the browser morphs one into the
@@ -129,10 +144,11 @@ function buildCarousel(slideCount) {
     btn.setAttribute("aria-label", label);
     btn.innerHTML = CHEVRON_SVG;
     btn.addEventListener("click", () => {
-      const slide = track.firstElementChild;
-      if (!slide) return;
-      // Aim at an exact snap point — mandatory snap re-targets anything else
-      const step = slide.getBoundingClientRect().width + parseFloat(getComputedStyle(track).columnGap || "0");
+      const slides = track.children;
+      if (!slides.length) return;
+      // Aim at an exact snap point — mandatory snap re-targets anything else.
+      // Step = distance between slide starts (width + gap), no style parsing.
+      const step = slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : track.clientWidth;
       const index = Math.round(track.scrollLeft / step) + direction;
       const target = Math.max(0, index) * step;
       const from = track.scrollLeft;
@@ -231,6 +247,10 @@ overlay.addEventListener("cancel", (event) => {
 });
 
 overlay.addEventListener("click", (event) => {
+  // Only the backdrop targets the dialog itself; clicks on content target
+  // children. Keyboard/synthetic clicks report (0,0) — without the target
+  // check they would read as "outside" and wrongly close the overlay.
+  if (event.target !== overlay) return;
   const r = overlay.getBoundingClientRect();
   const outside =
     event.clientX < r.left || event.clientX > r.right ||

@@ -88,9 +88,10 @@ button {
   border-radius: 50%;
 }
 
-.theme-toggle .icon-moon { display: none; }
-[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
-[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+/* The icon shows the mode you switch TO: moon in light, sun in dark */
+.theme-toggle .icon-sun { display: none; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
 /* --- Full-height screens: 200px sides, 156px top/bottom @ 1920×1080 --- */
 
@@ -136,10 +137,12 @@ button.card {
   text-decoration: none;
 }
 
+/* The sphere (.tile--empty) is excluded — this tint would override its
+   gradient and turn it gray. */
 a.card:hover,
-button.card:hover,
+button.card:not(.tile--empty):hover,
 a.card:focus-visible,
-button.card:focus-visible {
+button.card:not(.tile--empty):focus-visible {
   background: color-mix(in srgb, var(--line) 5%, transparent);
 }
 
@@ -193,22 +196,60 @@ button.card:focus-visible {
   min-height: 0; /* the fr tracks alone decide tile sizes */
 }
 
-/* The pink one. Clicks just boing. */
+/* The pink one: a softly pulsing sphere. The light point (--px/--py)
+   follows the cursor, so the pulse radiates from the touched spot;
+   --pulse breathes the highlight. Registered properties make both
+   animatable. */
 
-button.tile--empty {
-  background: var(--accent);
-  border: 0;
-  cursor: pointer;
-  transition: background-color 0.25s ease;
+@property --pulse {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
 }
 
-button.tile--empty:hover,
-button.tile--empty:focus-visible {
-  background: color-mix(in srgb, var(--line) 6%, var(--accent));
+@property --glow {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --px {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+
+@property --py {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+
+button.tile--empty {
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  /* Rest: a small dim highlight and a strong dark limb — reads as a
+     sphere. The pulse swells the highlight's radius (--pulse) and its
+     brightness (--glow) together. */
+  background: radial-gradient(
+    circle at var(--px) var(--py),
+    color-mix(in srgb, #ffffff calc(35% + var(--glow)), var(--accent)) 0%,
+    color-mix(in srgb, #ffffff calc(10% + var(--glow)), var(--accent)) calc(7% + var(--pulse)),
+    var(--accent) calc(26% + var(--pulse)),
+    color-mix(in srgb, #000000 26%, var(--accent)) 95%
+  );
+  animation: sphere-pulse 2.4s ease-in-out infinite;
+  transition: --px 0.15s ease-out, --py 0.15s ease-out;
+}
+
+@keyframes sphere-pulse {
+  0%, 100% { --pulse: 0%; --glow: 0%; }
+  50%      { --pulse: 24%; --glow: 20%; }
 }
 
 .tile--empty.is-boinging {
-  animation: boing 0.7s ease-out;
+  animation: boing 0.7s ease-out, sphere-pulse 2.6s ease-in-out infinite;
 }
 
 @keyframes boing {
@@ -300,7 +341,10 @@ button.tile--empty:focus-visible {
 }
 
 /* --- Hover: the hovered tile expands, its neighbours cede space.
-       Track sums stay constant, so gaps and outer edges never move. --- */
+       Track sums stay constant, so gaps and outer edges never move.
+
+       TEMPORARILY DISABLED — remove this comment block's outer markers
+       (and the closing one below) to re-enable.
 
 @media (hover: hover) and (min-width: 861px) {
   .tiles,
@@ -329,6 +373,7 @@ button.tile--empty:focus-visible {
   .work-row--2:has(.wtile--videa:hover)      { grid-template-columns: 788fr 282fr; }
   .work-row--2:has(.wtile--typografie:hover) { grid-template-columns: 628fr 442fr; }
 }
+   END temporarily disabled hover expansion */
 
 /* --- Tile overlay ---
    Design: 1262×700 centred @ 1920×1080 (left 329, top 190), heading
@@ -626,7 +671,8 @@ a.gallery-thumb:focus-visible {
     transition: none;
   }
 
+  button.tile--empty,
   .tile--empty.is-boinging {
-    animation: none;
+    animation: none; /* no pulse, no boing */
   }
 }
