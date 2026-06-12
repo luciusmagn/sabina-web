@@ -33,24 +33,34 @@ function spawnBoingLabel(x, y) {
   label.addEventListener("animationend", () => label.remove());
 }
 
+/* Boing runs through the Web Animations API: a CSS class swap would
+   replace the element's animation list and restart the sphere-pulse
+   gradient mid-breath. */
+const BOING_KEYFRAMES = [
+  { transform: "scale(1, 1)" },
+  { transform: "scale(0.9, 0.9)", offset: 0.2 },
+  { transform: "scale(1.14, 0.86)", offset: 0.4 },
+  { transform: "scale(0.92, 1.1)", offset: 0.6 },
+  { transform: "scale(1.06, 0.95)", offset: 0.75 },
+  { transform: "scale(0.98, 1.02)", offset: 0.9 },
+  { transform: "scale(1, 1)" },
+];
+
+let boingAnimation = null;
+
 boingTile.addEventListener("click", (event) => {
-  boingTile.classList.remove("is-boinging");
-  void boingTile.offsetWidth; // restart the animation on rapid clicks
-  boingTile.classList.add("is-boinging");
+  if (reduceMotion.matches) return;
 
-  if (!reduceMotion.matches) {
-    let { clientX: x, clientY: y } = event;
-    if (!x && !y) { // keyboard activation — pop from the tile's centre
-      const r = boingTile.getBoundingClientRect();
-      x = r.x + r.width / 2;
-      y = r.y + r.height / 2;
-    }
-    spawnBoingLabel(x, y);
+  if (boingAnimation) boingAnimation.cancel(); // restart cleanly on rapid clicks
+  boingAnimation = boingTile.animate(BOING_KEYFRAMES, { duration: 700, easing: "ease-out" });
+
+  let { clientX: x, clientY: y } = event;
+  if (!x && !y) { // keyboard activation — pop from the tile's centre
+    const r = boingTile.getBoundingClientRect();
+    x = r.x + r.width / 2;
+    y = r.y + r.height / 2;
   }
-});
-
-boingTile.addEventListener("animationend", () => {
-  boingTile.classList.remove("is-boinging");
+  spawnBoingLabel(x, y);
 });
 
 /* Sphere illusion: the gradient's light point follows the cursor over
@@ -99,24 +109,17 @@ function setFlipNames(tile, on) {
 
 const CAROUSEL_OVERLAYS = { viz: 5, typografie: 5 };
 
-const GALLERY_OVERLAYS = {
-  produkt: Array.from({ length: 9 }, (_, i) => ({
-    title: `Produkt ${String(i + 1).padStart(2, "0")}`,
-    desc: "Krátký popis projektu — doplníme.",
+const GALLERY_SPECS = { produkt: 9, profilovky: 9, videa: 3 };
+
+function galleryItems(key) {
+  const t = I18N[lang];
+  return Array.from({ length: GALLERY_SPECS[key] }, (_, i) => ({
+    title: `${t.galleryTitle[key]} ${String(i + 1).padStart(2, "0")}`,
+    desc: t.galleryDesc[key],
     href: "#",
-  })),
-  profilovky: Array.from({ length: 9 }, (_, i) => ({
-    title: `Profilovka ${String(i + 1).padStart(2, "0")}`,
-    desc: "Krátký popis focení — doplníme.",
-    href: "#",
-  })),
-  videa: Array.from({ length: 3 }, (_, i) => ({
-    title: `Video ${String(i + 1).padStart(2, "0")}`,
-    desc: "Odkaz na YouTube — doplníme.",
-    href: "#",
-    video: true,
-  })),
-};
+    video: key === "videa",
+  }));
+}
 
 const CHEVRON_SVG =
   '<svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">' +
@@ -134,9 +137,10 @@ function buildCarousel(slideCount) {
     track.append(slide);
   }
 
+  const t = I18N[lang];
   for (const [cls, label, direction] of [
-    ["carousel-btn carousel-btn--prev", "Předchozí", -1],
-    ["carousel-btn carousel-btn--next", "Další", 1],
+    ["carousel-btn carousel-btn--prev", t.ariaPrev, -1],
+    ["carousel-btn carousel-btn--next", t.ariaNext, 1],
   ]) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -201,8 +205,7 @@ function buildGallery(items) {
   return gallery;
 }
 
-function openOverlay(tile) {
-  sourceTile = tile;
+function fillOverlay(tile) {
   overlayHeading.textContent = tile.innerText.replace(/\s+/g, " ").trim();
 
   // Per-tile card content: a matching <template>, a carousel, or a gallery
@@ -213,10 +216,14 @@ function openOverlay(tile) {
     overlayBody.append(template.content.cloneNode(true));
   } else if (CAROUSEL_OVERLAYS[key]) {
     overlayBody.append(buildCarousel(CAROUSEL_OVERLAYS[key]));
-  } else if (GALLERY_OVERLAYS[key]) {
-    overlayBody.append(buildGallery(GALLERY_OVERLAYS[key]));
+  } else if (GALLERY_SPECS[key]) {
+    overlayBody.append(buildGallery(galleryItems(key)));
   }
+}
 
+function openOverlay(tile) {
+  sourceTile = tile;
+  fillOverlay(tile);
   setFlipNames(tile, true);
   withTransition(() => {
     setFlipNames(tile, false);
@@ -257,3 +264,91 @@ overlay.addEventListener("click", (event) => {
     event.clientY < r.top || event.clientY > r.bottom;
   if (outside) closeOverlay();
 });
+
+/* --- Language: CZ default, EN alternative. Elements marked with
+   data-i18n (innerHTML) or data-i18n-aria (aria-label) swap from the
+   dictionary; the button shows the language you switch TO. --- */
+
+const I18N = {
+  cs: {
+    kontakt: "Kontakt",
+    viz: "Vizuální<br>identita",
+    produkt: "Produktové<br>fotky",
+    profilovky: "Profilové<br>fotky",
+    videa: "Videa",
+    typografie: "Typografie",
+    ariaTheme: "Tmavý režim",
+    ariaClose: "Zavřít",
+    ariaScroll: "Přejít na práci",
+    ariaLang: "Switch to English",
+    ariaPrev: "Předchozí",
+    ariaNext: "Další",
+    galleryTitle: { produkt: "Produkt", profilovky: "Profilovka", videa: "Video" },
+    galleryDesc: {
+      produkt: "Krátký popis projektu — doplníme.",
+      profilovky: "Krátký popis focení — doplníme.",
+      videa: "Odkaz na YouTube — doplníme.",
+    },
+    langButton: "EN",
+  },
+  en: {
+    kontakt: "Contact",
+    viz: "Visual<br>identity",
+    produkt: "Product<br>photos",
+    profilovky: "Profile<br>photos",
+    videa: "Videos",
+    typografie: "Typography",
+    ariaTheme: "Dark mode",
+    ariaClose: "Close",
+    ariaScroll: "Scroll to my work",
+    ariaLang: "Přepnout do češtiny",
+    ariaPrev: "Previous",
+    ariaNext: "Next",
+    galleryTitle: { produkt: "Product", profilovky: "Portrait", videa: "Video" },
+    galleryDesc: {
+      produkt: "Short project description — coming soon.",
+      profilovky: "Short shoot description — coming soon.",
+      videa: "YouTube link — coming soon.",
+    },
+    langButton: "CZ",
+  },
+};
+
+const langToggle = document.querySelector(".lang-toggle");
+
+let lang = "cs";
+try {
+  const saved = localStorage.getItem("lang");
+  if (saved === "cs" || saved === "en") {
+    lang = saved;
+  } else {
+    lang = (navigator.language || "cs").toLowerCase().startsWith("cs") ? "cs" : "en";
+  }
+} catch (e) {
+  /* keep Czech */
+}
+
+function applyLang(next) {
+  lang = next;
+  const t = I18N[next];
+  document.documentElement.lang = next;
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    el.innerHTML = t[el.dataset.i18n];
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+    el.setAttribute("aria-label", t[el.dataset.i18nAria]);
+  });
+  langToggle.textContent = t.langButton;
+  if (overlay.open && sourceTile) fillOverlay(sourceTile); // re-render in the new language
+  try {
+    localStorage.setItem("lang", next);
+  } catch (e) {
+    /* private mode — language just won't persist */
+  }
+}
+
+langToggle.addEventListener("click", () => {
+  applyLang(lang === "cs" ? "en" : "cs");
+});
+
+applyLang(lang);

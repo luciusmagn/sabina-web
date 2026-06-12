@@ -62,15 +62,33 @@ button {
   display: none !important;
 }
 
-/* --- Theme toggle: in the top band of the first screen, flush with the
-       content's right edge; scrolls away with the page.
-       Design: 32×32 at left 1688, top 40 @ 1920×1080. --- */
+/* --- Top-right controls (language + theme) in the first screen's band,
+       flush with the content's right edge; they scroll away with the
+       page. Theme icon per design: 32×32 at left 1688, top 40 @ 1920×1080. --- */
 
-.theme-toggle {
+.top-controls {
   position: absolute;
   top: clamp(16px, 3.704dvh, 40px);                                   /* 40/1080 */
   right: max(clamp(20px, 10.417vw, 200px), calc((100vw - 1520px) / 2));
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.25vw, 24px);
+}
+
+.lang-toggle {
+  border: 0;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: 0.04em;
+  color: var(--line);
+}
+
+.lang-toggle:hover {
+  opacity: 0.65;
+}
+
+.theme-toggle {
   width: 32px;
   height: 32px;
   border: 0;
@@ -150,6 +168,19 @@ button.card:not(.tile--empty):focus-visible {
   color: #ffffff;
 }
 
+/* The cursor inverts over the accent fill: the green arrow on pink
+   cards (light mode), the pink arrow on green cards (dark mode).
+   The files are named after the theme they normally serve. */
+a.card:hover,
+button.card:not(.tile--empty):hover {
+  cursor: url("/cursors/cursor-dark.svg") 4 4, pointer;
+}
+
+[data-theme="dark"] a.card:hover,
+[data-theme="dark"] button.card:not(.tile--empty):hover {
+  cursor: url("/cursors/cursor-light.svg") 4 4, pointer;
+}
+
 /* --- Landing grid ---
    Columns 1134 : 362, column gap 24 @ 1920. The grid's own aspect ratio
    pins its height to 768 @ 1920, and the two rows split it evenly
@@ -217,10 +248,10 @@ button.card:not(.tile--empty):focus-visible {
   initial-value: 0%;
 }
 
-@property --ringo {
-  syntax: "<length>";
+@property --ringR {
+  syntax: "<percentage>";
   inherits: false;
-  initial-value: 0px;
+  initial-value: 50%;
 }
 
 @property --px {
@@ -244,17 +275,86 @@ button.tile--empty {
   cursor: pointer;
   /* Rest: a small dim highlight and a strong dark limb — reads as a
      sphere. The pulse swells the highlight's radius (--pulse) and its
-     brightness (--glow), while topographic contour rings (--ringo
-     phase-shifts them by one 30px period) ripple out from the same
-     origin in a much lighter wash of the accent. */
+     brightness (--glow). Contour rings sit at sin(θ)-projected radii —
+     evenly spaced ON the sphere's surface, so they compress toward the
+     limb — and the whole system breathes via --ringR (the gradient
+     radius, 50% of the ball at rest). */
   --ring-line: color-mix(in srgb, color-mix(in srgb, #ffffff 75%, var(--accent)) 65%, transparent);
   background:
-    repeating-radial-gradient(
-      circle at var(--px) var(--py),
-      var(--ring-line) calc(var(--ringo) + 0px),
-      var(--ring-line) calc(var(--ringo) + 1.5px),
-      transparent calc(var(--ringo) + 1.5px),
-      transparent calc(var(--ringo) + 30px)
+    radial-gradient(
+      ellipse var(--ringR) var(--ringR) at var(--px) var(--py),
+      transparent 0 calc(15.6% - 0.75px),
+      var(--ring-line) calc(15.6% - 0.75px) calc(15.6% + 0.75px),
+      transparent calc(15.6% + 0.75px) calc(30.9% - 0.75px),
+      var(--ring-line) calc(30.9% - 0.75px) calc(30.9% + 0.75px),
+      transparent calc(30.9% + 0.75px) calc(45.4% - 0.75px),
+      var(--ring-line) calc(45.4% - 0.75px) calc(45.4% + 0.75px),
+      transparent calc(45.4% + 0.75px) calc(58.8% - 0.75px),
+      var(--ring-line) calc(58.8% - 0.75px) calc(58.8% + 0.75px),
+      transparent calc(58.8% + 0.75px) calc(70.7% - 0.75px),
+      var(--ring-line) calc(70.7% - 0.75px) calc(70.7% + 0.75px),
+      transparent calc(70.7% + 0.75px) calc(80.9% - 0.75px),
+      var(--ring-line) calc(80.9% - 0.75px) calc(80.9% + 0.75px),
+      transparent calc(80.9% + 0.75px) calc(89.1% - 0.75px),
+      var(--ring-line) calc(89.1% - 0.75px) calc(89.1% + 0.75px),
+      transparent calc(89.1% + 0.75px) calc(95.1% - 0.75px),
+      var(--ring-line) calc(95.1% - 0.75px) calc(95.1% + 0.75px),
+      transparent calc(95.1% + 0.75px) calc(98.8% - 0.75px),
+      var(--ring-line) calc(98.8% - 0.75px) calc(98.8% + 0.75px),
+      /* Past the touch-axis equator: dense far-field contours so the
+         rings cover the whole ball when the origin is off-centre (up
+         to 2R for an edge touch). At rest they're clipped away. */
+      transparent calc(98.8% + 0.75px) calc(102.8% - 0.75px),
+      var(--ring-line) calc(102.8% - 0.75px) calc(102.8% + 0.75px),
+      transparent calc(102.8% + 0.75px) calc(106.8% - 0.75px),
+      var(--ring-line) calc(106.8% - 0.75px) calc(106.8% + 0.75px),
+      transparent calc(106.8% + 0.75px) calc(110.8% - 0.75px),
+      var(--ring-line) calc(110.8% - 0.75px) calc(110.8% + 0.75px),
+      transparent calc(110.8% + 0.75px) calc(114.8% - 0.75px),
+      var(--ring-line) calc(114.8% - 0.75px) calc(114.8% + 0.75px),
+      transparent calc(114.8% + 0.75px) calc(118.8% - 0.75px),
+      var(--ring-line) calc(118.8% - 0.75px) calc(118.8% + 0.75px),
+      transparent calc(118.8% + 0.75px) calc(122.8% - 0.75px),
+      var(--ring-line) calc(122.8% - 0.75px) calc(122.8% + 0.75px),
+      transparent calc(122.8% + 0.75px) calc(126.8% - 0.75px),
+      var(--ring-line) calc(126.8% - 0.75px) calc(126.8% + 0.75px),
+      transparent calc(126.8% + 0.75px) calc(130.8% - 0.75px),
+      var(--ring-line) calc(130.8% - 0.75px) calc(130.8% + 0.75px),
+      transparent calc(130.8% + 0.75px) calc(134.8% - 0.75px),
+      var(--ring-line) calc(134.8% - 0.75px) calc(134.8% + 0.75px),
+      transparent calc(134.8% + 0.75px) calc(138.8% - 0.75px),
+      var(--ring-line) calc(138.8% - 0.75px) calc(138.8% + 0.75px),
+      transparent calc(138.8% + 0.75px) calc(142.8% - 0.75px),
+      var(--ring-line) calc(142.8% - 0.75px) calc(142.8% + 0.75px),
+      transparent calc(142.8% + 0.75px) calc(146.8% - 0.75px),
+      var(--ring-line) calc(146.8% - 0.75px) calc(146.8% + 0.75px),
+      transparent calc(146.8% + 0.75px) calc(150.8% - 0.75px),
+      var(--ring-line) calc(150.8% - 0.75px) calc(150.8% + 0.75px),
+      transparent calc(150.8% + 0.75px) calc(154.8% - 0.75px),
+      var(--ring-line) calc(154.8% - 0.75px) calc(154.8% + 0.75px),
+      transparent calc(154.8% + 0.75px) calc(158.8% - 0.75px),
+      var(--ring-line) calc(158.8% - 0.75px) calc(158.8% + 0.75px),
+      transparent calc(158.8% + 0.75px) calc(162.8% - 0.75px),
+      var(--ring-line) calc(162.8% - 0.75px) calc(162.8% + 0.75px),
+      transparent calc(162.8% + 0.75px) calc(166.8% - 0.75px),
+      var(--ring-line) calc(166.8% - 0.75px) calc(166.8% + 0.75px),
+      transparent calc(166.8% + 0.75px) calc(170.8% - 0.75px),
+      var(--ring-line) calc(170.8% - 0.75px) calc(170.8% + 0.75px),
+      transparent calc(170.8% + 0.75px) calc(174.8% - 0.75px),
+      var(--ring-line) calc(174.8% - 0.75px) calc(174.8% + 0.75px),
+      transparent calc(174.8% + 0.75px) calc(178.8% - 0.75px),
+      var(--ring-line) calc(178.8% - 0.75px) calc(178.8% + 0.75px),
+      transparent calc(178.8% + 0.75px) calc(182.8% - 0.75px),
+      var(--ring-line) calc(182.8% - 0.75px) calc(182.8% + 0.75px),
+      transparent calc(182.8% + 0.75px) calc(186.8% - 0.75px),
+      var(--ring-line) calc(186.8% - 0.75px) calc(186.8% + 0.75px),
+      transparent calc(186.8% + 0.75px) calc(190.8% - 0.75px),
+      var(--ring-line) calc(190.8% - 0.75px) calc(190.8% + 0.75px),
+      transparent calc(190.8% + 0.75px) calc(194.8% - 0.75px),
+      var(--ring-line) calc(194.8% - 0.75px) calc(194.8% + 0.75px),
+      transparent calc(194.8% + 0.75px) calc(198.8% - 0.75px),
+      var(--ring-line) calc(198.8% - 0.75px) calc(198.8% + 0.75px),
+      transparent calc(198.8% + 0.75px)
     ),
     radial-gradient(
       circle at var(--px) var(--py),
@@ -268,23 +368,13 @@ button.tile--empty {
 }
 
 @keyframes sphere-pulse {
-  0%, 100% { --pulse: 0%; --glow: 0%; --ringo: 0px; }
-  50%      { --pulse: 24%; --glow: 20%; --ringo: 30px; }
+  0%, 100% { --pulse: 0%; --glow: 0%; --ringR: 50%; }
+  50%      { --pulse: 24%; --glow: 20%; --ringR: 54%; }
 }
 
-.tile--empty.is-boinging {
-  animation: boing 0.7s ease-out, sphere-pulse 2.6s ease-in-out infinite;
-}
-
-@keyframes boing {
-  0%   { transform: scale(1, 1); }
-  20%  { transform: scale(0.9, 0.9); }
-  40%  { transform: scale(1.14, 0.86); }
-  60%  { transform: scale(0.92, 1.1); }
-  75%  { transform: scale(1.06, 0.95); }
-  90%  { transform: scale(0.98, 1.02); }
-  100% { transform: scale(1, 1); }
-}
+/* The boing squash runs via the Web Animations API (see main.js) — a
+   CSS class swap would replace the animation list and restart the
+   sphere-pulse gradient mid-breath. */
 
 /* Comic sound-effect labels spawned at the click point */
 
@@ -700,8 +790,7 @@ a.gallery-thumb:focus-visible {
     transition: none;
   }
 
-  button.tile--empty,
-  .tile--empty.is-boinging {
-    animation: none; /* no pulse, no boing */
+  button.tile--empty {
+    animation: none; /* no pulse */
   }
 }
