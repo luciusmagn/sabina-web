@@ -23,7 +23,7 @@
   --bg: #000000;
   --line: #f4f4f4;
   --text: #ffffff;
-  --accent: #00857a;
+  --accent: #00c0b8;
   color-scheme: dark;
 }
 
@@ -32,14 +32,14 @@
 }
 
 html {
-  /* 28px intrinsic size ≈ a normal OS cursor; hotspot = arrow tip */
-  cursor: url("/cursors/cursor-light.svg") 3 3, auto;
+  /* 36px intrinsic size — a touch above a normal OS cursor; hotspot = arrow tip */
+  cursor: url("/cursors/cursor-light.svg") 4 4, auto;
   scroll-behavior: smooth;
   scroll-snap-type: y proximity;
 }
 
 html[data-theme="dark"] {
-  cursor: url("/cursors/cursor-dark.svg") 3 3, auto;
+  cursor: url("/cursors/cursor-dark.svg") 4 4, auto;
 }
 
 body {
@@ -130,7 +130,7 @@ button {
 .card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  transition: border-color 0.25s ease, background-color 0.25s ease;
+  transition: border-color 0.25s ease, background-color 0.25s ease, color 0.25s ease;
 }
 
 a.card,
@@ -138,13 +138,16 @@ button.card {
   text-decoration: none;
 }
 
-/* The sphere (.tile--empty) is excluded — this tint would override its
-   gradient and turn it gray. */
+/* Interactive cards fill with the accent on hover — border melts into
+   the fill, text goes white. The sphere (.tile--empty) is excluded;
+   it has its own gradient. */
 a.card:hover,
 button.card:not(.tile--empty):hover,
 a.card:focus-visible,
 button.card:not(.tile--empty):focus-visible {
-  background: color-mix(in srgb, var(--line) 5%, transparent);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
 }
 
 /* --- Landing grid ---
@@ -214,6 +217,12 @@ button.card:not(.tile--empty):focus-visible {
   initial-value: 0%;
 }
 
+@property --ringo {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
 @property --px {
   syntax: "<percentage>";
   inherits: false;
@@ -227,26 +236,40 @@ button.card:not(.tile--empty):focus-visible {
 }
 
 button.tile--empty {
+  /* Figma: 290×290 ball at (1398, 208) inside the 362 cell at (1358, 156)
+     → insets 52/32/20/40, kept as percentages of the cell so it scales. */
+  margin: 14.365% 8.84% 5.525% 11.05%;
   border: 0;
   border-radius: 50%;
   cursor: pointer;
   /* Rest: a small dim highlight and a strong dark limb — reads as a
      sphere. The pulse swells the highlight's radius (--pulse) and its
-     brightness (--glow) together. */
-  background: radial-gradient(
-    circle at var(--px) var(--py),
-    color-mix(in srgb, #ffffff calc(35% + var(--glow)), var(--accent)) 0%,
-    color-mix(in srgb, #ffffff calc(10% + var(--glow)), var(--accent)) calc(7% + var(--pulse)),
-    var(--accent) calc(26% + var(--pulse)),
-    color-mix(in srgb, #000000 26%, var(--accent)) 95%
-  );
+     brightness (--glow), while topographic contour rings (--ringo
+     phase-shifts them by one 30px period) ripple out from the same
+     origin in a much lighter wash of the accent. */
+  --ring-line: color-mix(in srgb, color-mix(in srgb, #ffffff 75%, var(--accent)) 65%, transparent);
+  background:
+    repeating-radial-gradient(
+      circle at var(--px) var(--py),
+      var(--ring-line) calc(var(--ringo) + 0px),
+      var(--ring-line) calc(var(--ringo) + 1.5px),
+      transparent calc(var(--ringo) + 1.5px),
+      transparent calc(var(--ringo) + 30px)
+    ),
+    radial-gradient(
+      circle at var(--px) var(--py),
+      color-mix(in srgb, #ffffff calc(35% + var(--glow)), var(--accent)) 0%,
+      color-mix(in srgb, #ffffff calc(10% + var(--glow)), var(--accent)) calc(7% + var(--pulse)),
+      var(--accent) calc(26% + var(--pulse)),
+      color-mix(in srgb, #000000 26%, var(--accent)) 95%
+    );
   animation: sphere-pulse 2.4s ease-in-out infinite;
   transition: --px 0.15s ease-out, --py 0.15s ease-out;
 }
 
 @keyframes sphere-pulse {
-  0%, 100% { --pulse: 0%; --glow: 0%; }
-  50%      { --pulse: 24%; --glow: 20%; }
+  0%, 100% { --pulse: 0%; --glow: 0%; --ringo: 0px; }
+  50%      { --pulse: 24%; --glow: 20%; --ringo: 30px; }
 }
 
 .tile--empty.is-boinging {
@@ -415,7 +438,10 @@ button.tile--empty {
 }
 
 .contact-link {
-  display: inline-flex;
+  /* Table-like: a fixed icon column (widest icon = 28px) so the text
+     in every row starts at the same x. */
+  display: grid;
+  grid-template-columns: 28px auto;
   align-items: center;
   column-gap: clamp(12px, 1.042vw, 20px);
   color: var(--text);
@@ -427,7 +453,7 @@ button.tile--empty {
 
 .contact-link svg {
   display: block;
-  flex: none;
+  justify-self: center;
 }
 
 .contact-link:hover span,

@@ -110,7 +110,7 @@ const GALLERY_OVERLAYS = {
     desc: "Krátký popis focení — doplníme.",
     href: "#",
   })),
-  videa: Array.from({ length: 6 }, (_, i) => ({
+  videa: Array.from({ length: 3 }, (_, i) => ({
     title: `Video ${String(i + 1).padStart(2, "0")}`,
     desc: "Odkaz na YouTube — doplníme.",
     href: "#",
