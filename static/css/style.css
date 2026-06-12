@@ -10,7 +10,7 @@
   --bg: #ffffff;
   --line: #161616;
   --text: #000000;
-  --accent: #fc9bc1; /* same pair as the cursors: pink light, teal dark */
+  --accent: #ff87b1; /* same pair as the cursors: pink light, teal dark */
 
   --radius: clamp(24px, 2.083vw, 40px);   /* 40 @ 1920 */
   --gap-col: clamp(12px, 1.25vw, 24px);   /* 24 @ 1920 */
@@ -32,13 +32,14 @@
 }
 
 html {
-  cursor: url("/cursors/cursor-light.svg") 10 10, auto;
+  /* 28px intrinsic size ≈ a normal OS cursor; hotspot = arrow tip */
+  cursor: url("/cursors/cursor-light.svg") 3 3, auto;
   scroll-behavior: smooth;
   scroll-snap-type: y proximity;
 }
 
 html[data-theme="dark"] {
-  cursor: url("/cursors/cursor-dark.svg") 10 10, auto;
+  cursor: url("/cursors/cursor-dark.svg") 3 3, auto;
 }
 
 body {
@@ -402,9 +403,7 @@ button.tile--empty {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* tall content (galleries) scrolls inside the card */
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--line) 40%, transparent) transparent;
+  overflow: hidden; /* only the gallery scrolls — see .gallery */
 }
 
 .contact-stack {
@@ -507,6 +506,10 @@ button.tile--empty {
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(24px, 2.08vw, 40px) clamp(20px, 1.667vw, 32px);
   padding-right: clamp(8px, 0.83vw, 16px); /* breathing room from the scrollbar */
+  min-height: 0;
+  overflow-y: auto; /* the gallery scrolls past the card height */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--line) 40%, transparent) transparent;
 }
 
 .gallery-thumb {
