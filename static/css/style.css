@@ -20,7 +20,7 @@
 }
 
 [data-theme="dark"] {
-  --bg: #161616;
+  --bg: #000000;
   --line: #f4f4f4;
   --text: #ffffff;
   --accent: #00857a;
@@ -345,6 +345,149 @@ button.tile--empty:focus-visible {
   view-transition-name: flip-card;
 }
 
+/* Scoped to [open]: a bare display override would make the CLOSED dialog
+   render as an invisible click-blocking box over the page. */
+.overlay-card[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.overlay-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* tall content (galleries) scrolls inside the card */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--line) 40%, transparent) transparent;
+}
+
+.contact-stack {
+  margin-top: auto; /* contact links sit at the card's bottom */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  row-gap: clamp(16px, 1.25vw, 24px);
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  column-gap: clamp(12px, 1.042vw, 20px);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 400;
+  font-size: clamp(1rem, 1.719vw, 2.0625rem); /* 33/1920 */
+  line-height: 1.1515;                        /* 38/33 */
+}
+
+.contact-link svg {
+  display: block;
+  flex: none;
+}
+
+.contact-link:hover span,
+.contact-link:focus-visible span {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+/* --- Overlay content: placeholders until the real work goes in --- */
+
+.placeholder-surface {
+  border: 1px solid var(--line);
+  border-radius: 8.87px; /* media corner radius from the design */
+  background: repeating-linear-gradient(
+    45deg,
+    transparent 0 18px,
+    color-mix(in srgb, var(--line) 12%, transparent) 18px 19px
+  );
+}
+
+/* Carousel (Vizuální identita, Typografie) */
+
+.carousel {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.carousel-track {
+  height: 100%;
+  display: flex;
+  column-gap: clamp(16px, 1.25vw, 24px);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--line) 40%, transparent) transparent;
+}
+
+.carousel-slide {
+  flex: none;
+  height: calc(100% - 12px); /* room for the slim scrollbar */
+  aspect-ratio: 3 / 2;
+  scroll-snap-align: start;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--line);
+}
+
+.carousel-btn--prev { left: clamp(8px, 0.83vw, 16px); }
+.carousel-btn--next { right: clamp(8px, 0.83vw, 16px); }
+
+.carousel-btn--prev svg { rotate: 90deg; }
+.carousel-btn--next svg { rotate: -90deg; }
+
+.carousel-btn:hover {
+  background: color-mix(in srgb, var(--line) 8%, var(--bg));
+}
+
+/* Three-column media gallery (Produkt, Profilovky, Videa) */
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 2.08vw, 40px) clamp(20px, 1.667vw, 32px);
+  padding-right: clamp(8px, 0.83vw, 16px); /* breathing room from the scrollbar */
+}
+
+.gallery-thumb {
+  display: block;
+  aspect-ratio: 4 / 3;
+}
+
+a.gallery-thumb:hover,
+a.gallery-thumb:focus-visible {
+  background-color: color-mix(in srgb, var(--line) 5%, transparent);
+}
+
+.gallery-item h3 {
+  margin: clamp(10px, 0.83vw, 16px) 0 0;
+  font-weight: 700;
+  font-size: clamp(1.0625rem, 1.25vw, 1.5rem); /* 24 @ 1920 */
+  line-height: 1.25;
+}
+
+.gallery-item p {
+  margin: clamp(4px, 0.42vw, 8px) 0 0;
+  font-weight: 400;
+  font-size: clamp(0.875rem, 0.885vw, 1.0625rem); /* 17 @ 1920 */
+  line-height: 1.45;
+}
+
 .overlay-card::backdrop {
   background: var(--bg); /* solid — the page disappears behind the card */
 }
@@ -462,6 +605,10 @@ button.tile--empty:focus-visible {
     width: calc(100vw - 32px);
     height: min(700px, 75dvh);
     padding: 28px 24px;
+  }
+
+  .gallery {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
