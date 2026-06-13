@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ content.meta.title }}</title>
+  <meta name="description" content="{{ content.meta.description }}">
+  <script>
+    // Set the theme before first paint to avoid a flash of the wrong mode.
+    (function () {
+      var theme = null;
+      try { theme = localStorage.getItem("theme"); } catch (e) {}
+      if (theme !== "light" && theme !== "dark") {
+        theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="top-controls">
+  <button class="lang-toggle" type="button"
+          data-cs="{{ content.ui.languageButton.cs }}" data-en="{{ content.ui.languageButton.en }}"
+          data-aria-cs="{{ content.ui.languageToggle.cs }}" data-aria-en="{{ content.ui.languageToggle.en }}"
+          aria-label="{{ content.ui.languageToggle.cs }}">{{ content.ui.languageButton.cs }}</button>
+  <button class="theme-toggle" type="button" aria-pressed="false"
+          data-aria-cs="{{ content.ui.themeToggle.cs }}" data-aria-en="{{ content.ui.themeToggle.en }}"
+          aria-label="{{ content.ui.themeToggle.cs }}">
+    <svg class="icon-sun" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g clip-path="url(#clip0_2_35)">
+        <path d="M17 2H15V6.96H17V2Z" fill="currentColor"/>
+        <path d="M25.1939 5.38343L21.6866 8.89068L23.1009 10.3049L26.6081 6.79764L25.1939 5.38343Z" fill="currentColor"/>
+        <path d="M30 15H25.04V17H30V15Z" fill="currentColor"/>
+        <path d="M23.1067 21.6893L21.6925 23.1035L25.1998 26.6107L26.614 25.1965L23.1067 21.6893Z" fill="currentColor"/>
+        <path d="M17 25.04H15V30H17V25.04Z" fill="currentColor"/>
+        <path d="M8.90398 21.6951L5.39673 25.2024L6.81094 26.6166L10.3182 23.1093L8.90398 21.6951Z" fill="currentColor"/>
+        <path d="M6.96 15H2V17H6.96V15Z" fill="currentColor"/>
+        <path d="M6.80508 5.38927L5.39087 6.80348L8.89812 10.3107L10.3123 8.89652L6.80508 5.38927Z" fill="currentColor"/>
+        <path d="M16 12C16.7911 12 17.5645 12.2346 18.2223 12.6741C18.8801 13.1136 19.3928 13.7384 19.6955 14.4693C19.9983 15.2002 20.0775 16.0044 19.9231 16.7804C19.7688 17.5563 19.3878 18.269 18.8284 18.8284C18.269 19.3878 17.5563 19.7688 16.7804 19.9231C16.0044 20.0775 15.2002 19.9983 14.4693 19.6955C13.7384 19.3928 13.1136 18.8801 12.6741 18.2223C12.2346 17.5645 12 16.7911 12 16C12 14.9391 12.4214 13.9217 13.1716 13.1716C13.9217 12.4214 14.9391 12 16 12ZM16 10C14.8133 10 13.6533 10.3519 12.6666 11.0112C11.6799 11.6705 10.9109 12.6075 10.4567 13.7039C10.0026 14.8003 9.88378 16.0067 10.1153 17.1705C10.3468 18.3344 10.9182 19.4035 11.7574 20.2426C12.5965 21.0818 13.6656 21.6532 14.8295 21.8847C15.9933 22.1162 17.1997 21.9974 18.2961 21.5433C19.3925 21.0892 20.3295 20.3201 20.9888 19.3334C21.6481 18.3467 22 17.1867 22 16C22 14.4087 21.3679 12.8826 20.2426 11.7574C19.1174 10.6321 17.5913 10 16 10Z" fill="currentColor"/>
+      </g>
+      <defs>
+        <clipPath id="clip0_2_35">
+          <rect width="32" height="32" fill="white"/>
+        </clipPath>
+      </defs>
+    </svg>
+    <svg class="icon-moon" width="24" height="26" viewBox="0 0 24 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.50276 2.4136C9.04432 4.37083 8.98195 6.39997 9.3193 8.38167C9.65666 10.3634 10.3869 12.2576 11.4672 13.9529C12.5474 15.6481 13.9558 17.1103 15.6094 18.2532C17.2631 19.3962 19.1286 20.1969 21.0963 20.6082C20.0617 21.6784 18.8227 22.5299 17.4528 23.1121C16.0828 23.6943 14.6099 23.9954 13.1214 23.9975C12.9829 23.9975 12.8432 24.0026 12.7036 23.9975C10.1122 23.9058 7.63486 22.9094 5.70174 21.1812C3.76861 19.4531 2.50186 17.1024 2.1215 14.5375C1.74113 11.9726 2.27118 9.35546 3.61958 7.14068C4.96799 4.9259 7.04956 3.25338 9.50276 2.4136ZM10.9803 0C10.9217 9.13725e-05 10.8633 0.00531129 10.8057 0.0156C7.62142 0.581187 4.75908 2.30502 2.76995 4.85505C0.780832 7.40509 -0.194367 10.601 0.032193 13.8271C0.258753 17.0532 1.67105 20.0814 3.99705 22.3284C6.32305 24.5754 9.39823 25.8823 12.6303 25.9973C12.7944 26.0033 12.9585 25.9973 13.1212 25.9973C15.22 25.9984 17.2882 25.4941 19.151 24.5271C21.0138 23.5601 22.6163 22.1588 23.8232 20.4417C23.921 20.2937 23.9781 20.1226 23.9887 19.9455C23.9994 19.7684 23.9632 19.5917 23.8837 19.4331C23.8043 19.2744 23.6845 19.1396 23.5364 19.042C23.3882 18.9444 23.217 18.8876 23.0399 18.8773C21.0421 18.702 19.1113 18.0697 17.3968 17.0293C15.6824 15.9888 14.2301 14.568 13.1523 12.8767C12.0746 11.1855 11.4001 9.26903 11.1811 7.27554C10.9622 5.28204 11.2045 3.26489 11.8895 1.38C11.9477 1.22919 11.9691 1.06665 11.9519 0.905899C11.9346 0.745149 11.8792 0.590848 11.7903 0.455842C11.7013 0.320837 11.5814 0.209034 11.4405 0.129745C11.2996 0.0504546 11.1418 0.00597177 10.9803 0Z" fill="currentColor"/>
+    </svg>
+  </button>
+  </div>
+
+  <main>
+    <section class="frame" id="domu">
+      <div class="content">
+        <div class="tiles">
+          <div class="card card--hero">
+            <h1>{{ content.hero | safe }}</h1>
+            <p class="tagline" data-cs="{{ content.tagline.cs }}" data-en="{{ content.tagline.en }}">{{ content.tagline.cs }}</p>
+          </div>
+          <button class="card tile tile--empty" type="button" aria-label="Boing"></button>
+          <button class="card tile tile--kontakt" type="button" data-overlay="kontakt"><span data-cs="{{ content.tiles.kontakt.cs }}" data-en="{{ content.tiles.kontakt.en }}">{{ content.tiles.kontakt.cs | safe }}</span></button>
+        </div>
+      </div>
+      <a class="scroll-hint" href="#prace"
+         data-aria-cs="{{ content.ui.scrollDown.cs }}" data-aria-en="{{ content.ui.scrollDown.en }}"
+         aria-label="{{ content.ui.scrollDown.cs }}">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 12L16 21L25 12" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </a>
+    </section>
+
+    <section class="frame" id="prace">
+      <div class="content">
+        <div class="work">
+          <button class="card wtile wtile--viz" type="button" data-overlay="viz"><span data-cs="{{ content.tiles.viz.cs }}" data-en="{{ content.tiles.viz.en }}">{{ content.tiles.viz.cs | safe }}</span></button>
+          <div class="work-right">
+            <div class="work-row work-row--1">
+              <button class="card wtile wtile--produkt" type="button" data-overlay="produkt"><span data-cs="{{ content.tiles.produkt.cs }}" data-en="{{ content.tiles.produkt.en }}">{{ content.tiles.produkt.cs | safe }}</span></button>
+              <button class="card wtile wtile--profilovky" type="button" data-overlay="profilovky"><span data-cs="{{ content.tiles.profilovky.cs }}" data-en="{{ content.tiles.profilovky.en }}">{{ content.tiles.profilovky.cs | safe }}</span></button>
+            </div>
+            <div class="work-row work-row--2">
+              <button class="card wtile wtile--videa" type="button" data-overlay="videa"><span data-cs="{{ content.tiles.videa.cs }}" data-en="{{ content.tiles.videa.en }}">{{ content.tiles.videa.cs | safe }}</span></button>
+              <button class="card wtile wtile--typografie" type="button" data-overlay="typografie"><span data-cs="{{ content.tiles.typografie.cs }}" data-en="{{ content.tiles.typografie.en }}">{{ content.tiles.typografie.cs | safe }}</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="card overlay-card" aria-labelledby="overlay-heading">
+    <h2 class="overlay-heading" id="overlay-heading"></h2>
+    <button class="overlay-close" type="button"
+            data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
+            aria-label="{{ content.ui.close.cs }}">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M2 2L22 22M22 2L2 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="overlay-body"></div>
+  </dialog>
+
+  <dialog class="lightbox" aria-label="Náhled">
+    <button class="lightbox-close" type="button"
+            data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
+            aria-label="{{ content.ui.close.cs }}">&times;</button>
+    <div class="lightbox-media"></div>
+  </dialog>
+
+  {# ---- Overlay content, rendered server-side from content.json ---- #}
+
+  <template id="overlay-kontakt">
+    <div class="contact-stack">
+    <a class="contact-link" href="mailto:{{ content.contact.email }}">
+      <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M26 0H2C1.46957 0 0.960859 0.210714 0.585786 0.585786C0.210714 0.960859 0 1.46957 0 2V18C0 18.5304 0.210714 19.0391 0.585786 19.4142C0.960859 19.7893 1.46957 20 2 20H26C26.5304 20 27.0391 19.7893 27.4142 19.4142C27.7893 19.0391 28 18.5304 28 18V2C28 1.46957 27.7893 0.960859 27.4142 0.585786C27.0391 0.210714 26.5304 0 26 0ZM23.8 2L14 8.78L4.2 2H23.8ZM2 18V2.91L13.43 10.82C13.5974 10.9361 13.7963 10.9984 14 10.9984C14.2037 10.9984 14.4026 10.9361 14.57 10.82L26 2.91V18H2Z" fill="currentColor"/>
+      </svg>
+      <span>{{ content.contact.email }}</span>
+    </a>
+    <a class="contact-link" href="{{ content.contact.linkedinUrl }}" target="_blank" rel="noopener">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.2 0H1.8C0.8 0 0 0.8 0 1.7V22.2C0 23.1 0.8 23.9 1.8 23.9H22.2C23.2 23.9 24 23.1 24 22.2V1.7C24 0.8 23.2 0 22.2 0ZM7.1 20.4H3.6V9H7.1V20.4ZM5.4 7.4C4.3 7.4 3.3 6.5 3.3 5.3C3.3 4.1 4.2 3.2 5.4 3.2C6.5 3.2 7.5 4.1 7.5 5.3C7.5 6.5 6.5 7.4 5.4 7.4ZM20.5 20.3H17V14.7C17 13.4 17 11.6 15.1 11.6C13.2 11.6 13 13.1 13 14.5V20.2H9.5V9H12.8V10.5H12.9C13.4 9.6 14.6 8.6 16.3 8.6C19.9 8.6 20.6 11 20.6 14.1V20.3H20.5Z" fill="currentColor"/>
+      </svg>
+      <span>{{ content.contact.linkedinLabel }}</span>
+    </a>
+    </div>
+  </template>
+
+  <template id="overlay-videa">
+    <div class="videa">
+      {% for v in content.videos %}
+      <article class="videa-item">
+        <button class="videa-thumb" type="button" style="background-image:url('{{ v.poster }}')"
+                data-video-src="{{ v.src }}"
+                data-aria-cs="{{ v.name.cs }}" data-aria-en="{{ v.name.en }}" aria-label="{{ v.name.cs }}">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="28" cy="28" r="27" fill="rgba(0,0,0,0.42)" stroke="#fff" stroke-width="1.5"/>
+            <path d="M23 19L38 28L23 37V19Z" fill="#fff"/>
+          </svg>
+        </button>
+        <h3 class="videa-name">
+          {% if v.link %}<a href="{{ v.link }}" target="_blank" rel="noopener" data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</a>{% else %}<span data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</span>{% endif %}
+        </h3>
+        <p class="videa-work" data-cs="{{ v.work.cs }}" data-en="{{ v.work.en }}">{{ v.work.cs }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </template>
+
+  <template id="overlay-typografie">
+    <div class="vscroll">
+      {% for b in content.books %}
+      <div class="typo-screen vsection">
+        <div class="typo-text">
+          <div class="typo-book-group">
+            <strong class="typo-book">{{ b.title }}</strong>
+            <span class="typo-author">{{ b.author }}</span>
+          </div>
+          <strong class="typo-activity" data-cs="/{{ b.activity.cs }}/" data-en="/{{ b.activity.en }}/">/{{ b.activity.cs }}/</strong>
+        </div>
+        <img class="typo-image" src="{{ b.image }}" alt="{{ b.title }} — {{ b.author }}" loading="lazy"
+             tabindex="0" role="button"
+             data-aria-cs="{{ b.title }} — {{ content.ui.enlarge.cs }}" data-aria-en="{{ b.title }} — {{ content.ui.enlarge.en }}"
+             aria-label="{{ b.title }} — {{ content.ui.enlarge.cs }}">
+      </div>
+      {% endfor %}
+    </div>
+  </template>
+
+  <template id="overlay-viz">
+    <div class="vscroll">
+      <div class="viz-detail vsection">
+        <div class="viz-detail-text">
+          <strong class="viz-detail-title" data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</strong>
+          <span class="viz-detail-caption" data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</span>
+        </div>
+        <img class="viz-detail-wide" src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
+        <img class="viz-detail-side" src="{{ content.visualIdentity.detail.sideImage }}" alt="" loading="lazy">
+      </div>
+      <div class="viz-devices vsection">
+        {% for d in content.visualIdentity.devices %}
+        <button class="viz-pad{% if loop.index0 == 1 %} viz-pad--mid{% endif %}" type="button"
+                data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+          <img src="{{ d }}" alt="" loading="lazy">
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  </template>
+
+  <template id="overlay-produkt">
+    <div class="vscroll">
+      {% for set in content.productSets %}
+      <div class="produkt-screen vsection">
+        <div class="produkt-text">
+          <strong class="produkt-title" data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</strong>
+          <span class="produkt-desc" data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
+        </div>
+        {% if set.layout == "rows" %}
+        <div class="produkt-rows">
+          {% for row in set.rows %}
+          <div class="produkt-row">
+            {% for img in row %}
+            <button class="produkt-tile" type="button" style="flex: {{ img.1 }} 1 0"
+                    data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+              <img src="{{ img.0 }}" alt="" loading="lazy" style="aspect-ratio: {{ img.1 }}">
+            </button>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="produkt-grid">
+          {% for img in set.images %}
+          <button class="produkt-tile" type="button"
+                  data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+            <img src="{{ img.0 }}" alt="" loading="lazy" style="aspect-ratio: {{ img.1 }}">
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </template>
+
+  <template id="overlay-profilovky">
+    <div class="carousel">
+      <button class="carousel-btn carousel-btn--prev" type="button"
+              data-aria-cs="{{ content.ui.previous.cs }}" data-aria-en="{{ content.ui.previous.en }}" aria-label="{{ content.ui.previous.cs }}">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12L16 21L25 12" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="carousel-btn carousel-btn--next" type="button"
+              data-aria-cs="{{ content.ui.next.cs }}" data-aria-en="{{ content.ui.next.en }}" aria-label="{{ content.ui.next.cs }}">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12L16 21L25 12" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <div class="carousel-track">
+        {% for p in content.profilePhotos.photos %}
+        <div class="carousel-slide">
+          <div class="carousel-photo"><img src="{{ p }}" alt="" loading="lazy"></div>
+          <div class="carousel-caption">
+            <strong class="carousel-caption-title" data-cs="{{ content.profilePhotos.caption.title.cs }}" data-en="{{ content.profilePhotos.caption.title.en }}">{{ content.profilePhotos.caption.title.cs }}</strong>
+            <span class="carousel-caption-desc" data-cs="{{ content.profilePhotos.caption.text.cs }}" data-en="{{ content.profilePhotos.caption.text.en }}">{{ content.profilePhotos.caption.text.cs }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </template>
+
+  <script src="/js/main.js" defer></script>
+</body>
+</html>

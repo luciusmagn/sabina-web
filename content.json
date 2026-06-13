@@ -1,0 +1,135 @@
+{
+  "_readme": [
+    "THIS FILE HOLDS ALL THE TEXT ON THE WEBSITE.",
+    "To change wording, edit only the text inside the quotes \"...\". Keep the quotes, colons and commas exactly as they are, and don't rename the words on the LEFT of a colon.",
+    "'cs' is the Czech version, 'en' is the English version — edit both.",
+    "For a line break inside a tile label write <br> (for example: \"Vizuální<br>identita\").",
+    "Leave the file names (.png, .jpg, .mp4) and the numbers alone — those connect the text to the photos and videos.",
+    "Save the file and refresh the page to see your changes."
+  ],
+
+  "meta": {
+    "title": "Sabina Mácha — Graphic & Visual Media Designer",
+    "description": "Sabina Mácha — Graphic & Visual Media Designer."
+  },
+
+  "hero": "Sabina<br>Mácha",
+
+  "tagline": {
+    "cs": "Vizuální média & grafický design",
+    "en": "Graphic & Visual Media Designer"
+  },
+
+  "tiles": {
+    "kontakt":    { "cs": "Kontakt",                "en": "Contact" },
+    "viz":        { "cs": "Vizuální<br>identita",   "en": "Visual<br>identity" },
+    "produkt":    { "cs": "Produktové<br>fotky",    "en": "Product<br>photos" },
+    "profilovky": { "cs": "Profilové<br>fotky",     "en": "Profile<br>photos" },
+    "videa":      { "cs": "Videa",                  "en": "Videos" },
+    "typografie": { "cs": "Typografie",             "en": "Typography" }
+  },
+
+  "contact": {
+    "email": "spoluprace@sabinamacha.com",
+    "linkedinUrl": "https://www.linkedin.com/in/sabina-m%C3%A1cha-ab94b418a/",
+    "linkedinLabel": "Sabina Mácha"
+  },
+
+  "ui": {
+    "themeToggle":    { "cs": "Tmavý režim",       "en": "Dark mode" },
+    "languageToggle": { "cs": "Switch to English", "en": "Přepnout do češtiny" },
+    "languageButton": { "cs": "en",                "en": "cz" },
+    "scrollDown":     { "cs": "Přejít na práci",   "en": "Scroll to my work" },
+    "close":          { "cs": "Zavřít",            "en": "Close" },
+    "previous":       { "cs": "Předchozí",         "en": "Previous" },
+    "next":           { "cs": "Další",             "en": "Next" },
+    "enlarge":        { "cs": "Zvětšit",           "en": "Enlarge" }
+  },
+
+  "visualIdentity": {
+    "detail": {
+      "label":     { "cs": "BMM 101", "en": "BMM 101" },
+      "caption":   { "cs": "Popisek", "en": "Caption" },
+      "wideImage": "/vizualni-identita/group-25.png",
+      "sideImage": "/vizualni-identita/group-16.png"
+    },
+    "devices": [
+      "/vizualni-identita/ipad-1.png",
+      "/vizualni-identita/ipad-2.png",
+      "/vizualni-identita/ipad-3.png"
+    ]
+  },
+
+  "productSets": [
+    {
+      "label":   { "cs": "Sada 01", "en": "Set 01" },
+      "caption": { "cs": "Popisek", "en": "Caption" },
+      "layout": "grid",
+      "images": [
+        ["/produktove-fotky/set-1/web-1.png", 1.5],
+        ["/produktove-fotky/set-1/web-2.png", 1.503],
+        ["/produktove-fotky/set-1/web-3.png", 1.535],
+        ["/produktove-fotky/set-1/web-4.png", 1.535]
+      ]
+    },
+    {
+      "label":   { "cs": "Sada 02", "en": "Set 02" },
+      "caption": { "cs": "Popisek", "en": "Caption" },
+      "layout": "rows",
+      "rows": [
+        [
+          ["/produktove-fotky/set-2/web-1.png", 1.78],
+          ["/produktove-fotky/set-2/web-2.png", 1.0]
+        ],
+        [
+          ["/produktove-fotky/set-2/web-3.png", 0.87],
+          ["/produktove-fotky/set-2/web-4.png", 1.0],
+          ["/produktove-fotky/set-2/web-5.png", 0.86]
+        ]
+      ]
+    }
+  ],
+
+  "profilePhotos": {
+    "caption": {
+      "title": { "cs": "BMM 101", "en": "BMM 101" },
+      "text":  { "cs": "Popisek", "en": "Caption" }
+    },
+    "photos": [
+      "/profilove-fotky/web-1.jpg",
+      "/profilove-fotky/web-2.jpg",
+      "/profilove-fotky/web-3.jpg",
+      "/profilove-fotky/web-4.jpg"
+    ]
+  },
+
+  "books": [
+    { "title": "Lightning network",             "author": "Michal Novák",      "activity": { "cs": "sazba", "en": "typesetting" }, "image": "/typografie/lightning.png" },
+    { "title": "Ultimate bitcoin mining guide",  "author": "Kristian Csepcsar", "activity": { "cs": "sazba", "en": "typesetting" }, "image": "/typografie/ultimate-mining-guide.png" },
+    { "title": "Bitcoin mining handbook",        "author": "Daniel Frumkin",    "activity": { "cs": "sazba", "en": "typesetting" }, "image": "/typografie/mining-handbook.png" }
+  ],
+
+  "videos": [
+    {
+      "name":   { "cs": "We Stopped Selling Bitcoin, Here's How", "en": "We Stopped Selling Bitcoin, Here's How" },
+      "work":   { "cs": "Střih, color grading", "en": "Editing, color grading" },
+      "link":   "https://www.youtube.com/watch?v=IcKUAGvzCBw",
+      "poster": "/videa/video-1-poster.jpg",
+      "src":    "/videa/video-1.mp4"
+    },
+    {
+      "name":   { "cs": "Braiins na X", "en": "Braiins on X" },
+      "work":   { "cs": "Natáčení, střih, color grading", "en": "Shooting, editing, color grading" },
+      "link":   "https://x.com/Braiins/status/2062182676161814540",
+      "poster": "/videa/video-2-poster.jpg",
+      "src":    "/videa/video-2.mp4"
+    },
+    {
+      "name":   { "cs": "Super Mario on the Braiins Deck", "en": "Super Mario on the Braiins Deck" },
+      "work":   { "cs": "Natáčení, střih, color grading", "en": "Shooting, editing, color grading" },
+      "link":   "",
+      "poster": "/videa/video-3-poster.jpg",
+      "src":    "/videa/video-3.mp4"
+    }
+  ]
+}
