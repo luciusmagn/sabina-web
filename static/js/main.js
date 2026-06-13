@@ -90,17 +90,34 @@ const overlayClose = overlay.querySelector(".overlay-close");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 /* Lightbox: a top-layer dialog (sits above the overlay) showing one image
-   enlarged. Click anywhere or Esc to close. */
+   or video enlarged. Click anywhere or Esc to close. */
 const lightbox = document.querySelector(".lightbox");
-const lightboxImg = lightbox.querySelector(".lightbox-img");
+const lightboxMedia = lightbox.querySelector(".lightbox-media");
 
 function openLightbox(src) {
-  lightboxImg.src = src;
+  const img = document.createElement("img");
+  img.className = "lightbox-img";
+  img.src = src;
+  img.alt = "";
+  lightboxMedia.replaceChildren(img);
   lightbox.showModal();
 }
 
-lightbox.addEventListener("click", () => lightbox.close());
-lightbox.addEventListener("close", () => { lightboxImg.removeAttribute("src"); });
+function openVideoLightbox(src) {
+  const video = document.createElement("video");
+  video.className = "lightbox-img";
+  video.src = src;
+  video.controls = true;
+  video.autoplay = true;
+  video.playsInline = true;
+  lightboxMedia.replaceChildren(video);
+  lightbox.showModal();
+}
+
+lightbox.addEventListener("click", (event) => {
+  if (event.target.tagName !== "VIDEO") lightbox.close(); // don't close when using video controls
+});
+lightbox.addEventListener("close", () => { lightboxMedia.replaceChildren(); }); // stop/clear media
 
 let sourceTile = null;
 
@@ -116,11 +133,30 @@ function setFlipNames(tile, on) {
   tile.style.viewTransitionName = on ? "flip-card" : "";
 }
 
-/* Placeholder content — swap titles, descriptions and hrefs for the real
-   work. Gallery items: href "#" until each photo (full image URL) or
-   video (YouTube URL) exists; video items open in a new tab. */
-
-const GALLERY_SPECS = { videa: 3 };
+/* Videa: three videos. #1 is on YouTube (thumbnail → opens YouTube); #2
+   and #3 are local mp4s that play in the lightbox. */
+const VIDEOS = [
+  {
+    name: "We Stopped Selling Bitcoin, Here's How",
+    work: { cs: "Střih, color grading", en: "Editing, color grading" },
+    poster: "/videa/video-1-poster.jpg",
+    src: "/videa/video-1.mp4",
+    link: "https://www.youtube.com/watch?v=IcKUAGvzCBw",
+  },
+  {
+    name: { cs: "Braiins na X", en: "Braiins on X" },
+    work: { cs: "Natáčení, střih, color grading", en: "Shooting, editing, color grading" },
+    poster: "/videa/video-2-poster.jpg",
+    src: "/videa/video-2.mp4",
+    link: "https://x.com/Braiins/status/2062182676161814540",
+  },
+  {
+    name: "Super Mario on the Braiins Deck",
+    work: { cs: "Natáčení, střih, color grading", en: "Shooting, editing, color grading" },
+    poster: "/videa/video-3-poster.jpg",
+    src: "/videa/video-3.mp4",
+  },
+];
 
 /* Produktové fotky: two sets, scrolled vertically (like Vizuální identita).
    Each screen has a label + description on the left and a masonry of the
@@ -130,10 +166,10 @@ const PRODUKT_SETS = [
   {
     layout: "grid",
     images: [
-      "/produktove-fotky/set-1/web-1.png",
-      "/produktove-fotky/set-1/web-2.png",
-      "/produktove-fotky/set-1/web-3.png",
-      "/produktove-fotky/set-1/web-4.png",
+      ["/produktove-fotky/set-1/web-1.png", 1.5],
+      ["/produktove-fotky/set-1/web-2.png", 1.503],
+      ["/produktove-fotky/set-1/web-3.png", 1.535],
+      ["/produktove-fotky/set-1/web-4.png", 1.535],
     ],
   },
   {
@@ -178,55 +214,62 @@ const TYPO_SCREENS = [
   { book: "Bitcoin mining handbook", author: "Daniel Frumkin", activity: { cs: "sazba", en: "typesetting" }, image: "/typografie/mining-handbook.png" },
 ];
 
-function galleryItems(key) {
-  const t = I18N[lang];
-  return Array.from({ length: GALLERY_SPECS[key] }, (_, i) => ({
-    title: `${t.galleryTitle[key]} ${String(i + 1).padStart(2, "0")}`,
-    desc: t.galleryDesc[key],
-    href: "#",
-    video: key === "videa",
-  }));
-}
-
 const CHEVRON_SVG =
   '<svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">' +
   '<path d="M7 12L16 21L25 12" stroke="currentColor" stroke-width="2"/></svg>';
 
-function buildGallery(items) {
+const PLAY_SVG =
+  '<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+  '<circle cx="28" cy="28" r="27" fill="rgba(0,0,0,0.42)" stroke="#fff" stroke-width="1.5"/>' +
+  '<path d="M23 19L38 28L23 37V19Z" fill="#fff"/></svg>';
+
+/* Videa: a row of three video cards (thumbnail + name + work done). The
+   YouTube one opens in a new tab; the mp4s play in the lightbox. */
+function buildVidea() {
   const gallery = document.createElement("div");
-  gallery.className = "gallery";
+  gallery.className = "videa";
 
-  for (const item of items) {
-    const article = document.createElement("article");
-    article.className = "gallery-item";
+  for (const v of VIDEOS) {
+    const name = typeof v.name === "string" ? v.name : v.name[lang];
 
-    const thumb = document.createElement("a");
-    thumb.className = "gallery-thumb placeholder-surface";
-    thumb.href = item.href;
-    thumb.setAttribute("aria-label", item.title);
-    if (item.video && item.href !== "#") {
-      thumb.target = "_blank";
-      thumb.rel = "noopener";
+    const item = document.createElement("article");
+    item.className = "videa-item";
+
+    const thumb = document.createElement("button");
+    thumb.type = "button";
+    thumb.className = "videa-thumb";
+    thumb.style.backgroundImage = `url("${v.poster}")`;
+    thumb.setAttribute("aria-label", name);
+    thumb.innerHTML = PLAY_SVG;
+    thumb.addEventListener("click", () => openVideoLightbox(v.src)); // all play in the lightbox
+
+    const heading = document.createElement("h3");
+    heading.className = "videa-name";
+    if (v.link) {
+      // The title links out to the source (YouTube / X)
+      const a = document.createElement("a");
+      a.href = v.link;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = name;
+      heading.append(a);
+    } else {
+      heading.textContent = name;
     }
-    thumb.addEventListener("click", (event) => {
-      if (thumb.getAttribute("href") === "#") event.preventDefault(); // placeholder
-    });
 
-    const title = document.createElement("h3");
-    title.textContent = item.title;
+    const work = document.createElement("p");
+    work.className = "videa-work";
+    work.textContent = v.work[lang];
 
-    const desc = document.createElement("p");
-    desc.textContent = item.desc;
-
-    article.append(thumb, title, desc);
-    gallery.append(article);
+    item.append(thumb, heading, work);
+    gallery.append(item);
   }
 
   return gallery;
 }
 
-/* Horizontal carousel (Profilové fotky): one photo per view, scroll-snap,
-   prev/next arrows that step a slide and clamp at the ends. */
+/* Profilové fotky: photos in a horizontal track you scroll through with a
+   slim scrollbar (no arrows). Each photo has a caption below it. */
 function buildCarousel(images) {
   const t = I18N[lang];
   const carousel = document.createElement("div");
@@ -264,11 +307,9 @@ function buildCarousel(images) {
   function step(direction) {
     const w = track.clientWidth;
     const count = images.length;
-    const current = Math.round(track.scrollLeft / w);
-    const next = current + direction;
+    const next = Math.round(track.scrollLeft / w) + direction;
     const wrapping = next < 0 || next >= count; // last→first / first→last
     const index = (next + count) % count;
-    // Jump instantly when wrapping so it doesn't sweep across every slide.
     track.scrollTo({ left: index * w, behavior: (wrapping || reduceMotion.matches) ? "instant" : "smooth" });
   }
 
@@ -289,55 +330,22 @@ function buildCarousel(images) {
   return carousel;
 }
 
-/* Shared scaffold for the vertical "screens" overlays (Typografie,
-   Vizuální identita): full-card panels paged with scroll-snap and up/down
-   arrows (each hides at its end of the range), mirroring the main page. */
-function makeScreens(panels, ariaLabel) {
-  const t = I18N[lang];
-  const wrap = document.createElement("div");
-  wrap.className = "vscreens";
-
-  const track = document.createElement("div");
-  track.className = "vscreens-track";
-  for (const panel of panels) {
-    panel.classList.add("vscreen");
-    track.append(panel);
+/* Vertical scroller for the overlays (Typografie, Vizuální identita,
+   Produktové fotky): sections stack and the card scrolls with a slim
+   scrollbar — no arrows. */
+function makeScroller(sections) {
+  const scroller = document.createElement("div");
+  scroller.className = "vscroll";
+  for (const section of sections) {
+    section.classList.add("vsection");
+    scroller.append(section);
   }
-
-  function go(direction) {
-    const h = track.clientHeight;
-    const index = Math.round(track.scrollTop / h) + direction;
-    const clamped = Math.max(0, Math.min(panels.length - 1, index));
-    track.scrollTo({ top: clamped * h, behavior: reduceMotion.matches ? "instant" : "smooth" });
-  }
-
-  const up = document.createElement("button");
-  up.type = "button";
-  up.className = "vscreens-arrow vscreens-arrow--up";
-  up.setAttribute("aria-label", t.ariaPrev);
-  up.innerHTML = CHEVRON_SVG;
-  up.hidden = true; // start on the first screen
-  up.addEventListener("click", () => go(-1));
-
-  const down = document.createElement("button");
-  down.type = "button";
-  down.className = "vscreens-arrow vscreens-arrow--down";
-  down.setAttribute("aria-label", ariaLabel);
-  down.innerHTML = CHEVRON_SVG;
-  down.addEventListener("click", () => go(1));
-
-  track.addEventListener("scroll", () => {
-    const index = Math.round(track.scrollTop / track.clientHeight);
-    up.hidden = index <= 0;
-    down.hidden = index >= panels.length - 1;
-  });
-
-  wrap.append(track, up, down);
-  return wrap;
+  return scroller;
 }
 
 function typoPanel(screen) {
   const panel = document.createElement("div");
+  panel.className = "typo-screen";
 
   const text = document.createElement("div");
   text.className = "typo-text";
@@ -380,7 +388,7 @@ function typoPanel(screen) {
 }
 
 function buildTypo() {
-  return makeScreens(TYPO_SCREENS.map(typoPanel), I18N[lang].ariaTypoNext);
+  return makeScroller(TYPO_SCREENS.map(typoPanel));
 }
 
 // Vizuální identita screen 1: three iPad mockups, middle one bigger.
@@ -437,12 +445,12 @@ function vizDetailPanel() {
 
 function buildViz() {
   // Screen 1: the BMM 101 detail. Screen 2: the three iPads.
-  return makeScreens([vizDetailPanel(), vizDevicesPanel()], I18N[lang].ariaNext);
+  return makeScroller([vizDetailPanel(), vizDevicesPanel()]);
 }
 
 // Produktové fotky: one screen per set — label + description on the left,
 // masonry of clickable photos (→ lightbox) on the right.
-function produktTile(src) {
+function produktTile(src, aspect) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "produkt-tile";
@@ -451,6 +459,7 @@ function produktTile(src) {
   img.src = src;
   img.alt = "";
   img.loading = "lazy";
+  if (aspect) img.style.aspectRatio = String(aspect); // correct layout before load
   btn.append(img);
   btn.addEventListener("click", () => openLightbox(src));
   return btn;
@@ -480,7 +489,7 @@ function produktSetPanel(set, index) {
       const r = document.createElement("div");
       r.className = "produkt-row";
       for (const [src, aspect] of row) {
-        const tile = produktTile(src);
+        const tile = produktTile(src, aspect);
         tile.style.flex = `${aspect} 1 0`;
         r.append(tile);
       }
@@ -490,7 +499,7 @@ function produktSetPanel(set, index) {
   } else {
     const grid = document.createElement("div");
     grid.className = "produkt-grid";
-    for (const src of set.images) grid.append(produktTile(src));
+    for (const [src, aspect] of set.images) grid.append(produktTile(src, aspect));
     panel.append(text, grid);
   }
 
@@ -498,49 +507,15 @@ function produktSetPanel(set, index) {
 }
 
 function buildProdukt() {
-  const t = I18N[lang];
-  const wrap = document.createElement("div");
-  wrap.className = "produkt";
-
-  const track = document.createElement("div");
-  track.className = "produkt-track";
-  PRODUKT_SETS.forEach((set, i) => track.append(produktSetPanel(set, i)));
-
-  function step(direction) {
-    const w = track.clientWidth;
-    const index = Math.max(0, Math.min(PRODUKT_SETS.length - 1, Math.round(track.scrollLeft / w) + direction));
-    track.scrollTo({ left: index * w, behavior: reduceMotion.matches ? "instant" : "smooth" });
-  }
-
-  const prev = document.createElement("button");
-  prev.type = "button";
-  prev.className = "produkt-arrow produkt-arrow--prev";
-  prev.setAttribute("aria-label", t.ariaPrev);
-  prev.innerHTML = CHEVRON_SVG;
-  prev.hidden = true; // start on the first set
-  prev.addEventListener("click", () => step(-1));
-
-  const next = document.createElement("button");
-  next.type = "button";
-  next.className = "produkt-arrow produkt-arrow--next";
-  next.setAttribute("aria-label", t.ariaNext);
-  next.innerHTML = CHEVRON_SVG;
-  next.addEventListener("click", () => step(1));
-
-  track.addEventListener("scroll", () => {
-    const i = Math.round(track.scrollLeft / track.clientWidth);
-    prev.hidden = i <= 0;
-    next.hidden = i >= PRODUKT_SETS.length - 1;
-  });
-
-  wrap.append(track, prev, next);
-  return wrap;
+  // Two sets stacked vertically; the card scrolls (no arrows). Each set's
+  // masonry is at natural size — no crop, no scaling to fit.
+  return makeScroller(PRODUKT_SETS.map(produktSetPanel));
 }
 
 function fillOverlay(tile) {
   overlayHeading.textContent = tile.innerText.replace(/\s+/g, " ").trim();
 
-  // Per-tile card content: a matching <template>, vertical screens, or a gallery
+  // Per-tile card content
   overlayBody.replaceChildren();
   const key = tile.dataset.overlay;
   const template = key && document.getElementById(`overlay-${key}`);
@@ -554,9 +529,34 @@ function fillOverlay(tile) {
     overlayBody.append(buildProdukt());
   } else if (key === "profilovky") {
     overlayBody.append(buildCarousel(PROFILE_PHOTOS));
-  } else if (GALLERY_SPECS[key]) {
-    overlayBody.append(buildGallery(galleryItems(key)));
+  } else if (key === "videa") {
+    overlayBody.append(buildVidea());
   }
+}
+
+/* Each produkt set must fit its card-height section. Photos are exported to
+   fit, so shrinking the masonry's width (height follows the natural aspect)
+   scales the whole thing down with no crop. */
+function fitMasonries() {
+  if (!overlay.open) return;
+  for (const screen of document.querySelectorAll(".produkt-screen")) {
+    const masonry = screen.querySelector(".produkt-grid, .produkt-rows");
+    if (!masonry) continue;
+    masonry.style.flex = "";
+    masonry.style.width = "";
+    const cs = getComputedStyle(screen);
+    const availH = screen.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const natH = masonry.offsetHeight;
+    const natW = masonry.offsetWidth;
+    if (natH > availH && natH > 0) {
+      masonry.style.flex = "0 0 auto";
+      masonry.style.width = `${availH * (natW / natH)}px`;
+    }
+  }
+}
+
+function layoutOverlay() {
+  requestAnimationFrame(fitMasonries);
 }
 
 function openOverlay(tile) {
@@ -566,8 +566,10 @@ function openOverlay(tile) {
   withTransition(() => {
     setFlipNames(tile, false);
     overlay.showModal();
-  });
+  }).then(layoutOverlay);
 }
+
+window.addEventListener("resize", layoutOverlay);
 
 function closeOverlay() {
   const tile = sourceTile;
@@ -687,7 +689,7 @@ function applyLang(next) {
     el.setAttribute("aria-label", t[el.dataset.i18nAria]);
   });
   langToggle.textContent = t.langButton;
-  if (overlay.open && sourceTile) fillOverlay(sourceTile); // re-render in the new language
+  if (overlay.open && sourceTile) { fillOverlay(sourceTile); layoutOverlay(); } // re-render in the new language
   try {
     localStorage.setItem("lang", next);
   } catch (e) {
