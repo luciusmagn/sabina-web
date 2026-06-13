@@ -1,0 +1,105 @@
+<svg width="100%" viewBox="0 0 380 380" role="img" xmlns="http://www.w3.org/2000/svg" style="">
+  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Holographic chameleon orb — milky orange-pink with holographic shimmer</title>
+  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">A soft pulsing holographic orb with milky orange-pink tones and iridescent blue shimmer.</desc>
+
+  <defs>
+    <radialGradient id="base" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD8B0"/>
+      <stop offset="30%" stop-color="#FFAA70"/>
+      <stop offset="65%" stop-color="#FF8098"/>
+      <stop offset="100%" stop-color="#E8607A"/>
+    </radialGradient>
+
+    <radialGradient id="milkVeil" cx="45%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#FFF5EE" stop-opacity="0.82"/>
+      <stop offset="40%" stop-color="#FFE8D8" stop-opacity="0.55"/>
+      <stop offset="75%" stop-color="#FFDCC8" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#FFD0B8" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="shimmer1" cx="30%" cy="28%" r="52%">
+      <stop offset="0%" stop-color="#FFE8C0" stop-opacity="0.9"/>
+      <stop offset="35%" stop-color="#FFBCA0" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#FF88B0" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="shimmer2" cx="68%" cy="62%" r="48%">
+      <stop offset="0%" stop-color="#FFD0A0" stop-opacity="0.88"/>
+      <stop offset="40%" stop-color="#FFA888" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FF7090" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="pinkAccent" cx="72%" cy="22%" r="42%">
+      <stop offset="0%" stop-color="#FFCCDC" stop-opacity="0.75"/>
+      <stop offset="50%" stop-color="#FFB0C8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FF9060" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="bluePool" cx="20%" cy="74%" r="40%">
+      <stop offset="0%" stop-color="#A8DAFF" stop-opacity="0.65"/>
+      <stop offset="45%" stop-color="#C0B8FF" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FFB080" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="holoSheen1" cx="38%" cy="18%" r="35%">
+      <stop offset="0%" stop-color="#E8F8FF" stop-opacity="0.9"/>
+      <stop offset="30%" stop-color="#C8E8FF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#FFD0A0" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="holoSheen2" cx="78%" cy="55%" r="30%">
+      <stop offset="0%" stop-color="#F0FFEE" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#C8FFDC" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#FFAA80" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="holoSheen3" cx="15%" cy="42%" r="28%">
+      <stop offset="0%" stop-color="#FFF0FF" stop-opacity="0.8"/>
+      <stop offset="40%" stop-color="#E8C8FF" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#FF9070" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="specularDot" cx="38%" cy="32%" r="18%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.75"/>
+      <stop offset="50%" stop-color="#FFF8F0" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+    <filter id="medBlur" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="lightBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+
+    <clipPath id="orbClip">
+      <circle cx="190" cy="190" r="155"/>
+    </clipPath>
+  </defs>
+
+  
+
+  <g style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.921395;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+    <g clip-path="url(#orbClip)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+      <circle cx="190" cy="190" r="155" fill="url(#base)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+      <circle cx="190" cy="190" r="155" fill="url(#shimmer1)" filter="url(#softBlur)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.751956;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <circle cx="190" cy="190" r="155" fill="url(#shimmer2)" filter="url(#softBlur)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.740386;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <circle cx="190" cy="190" r="155" fill="url(#pinkAccent)" filter="url(#softBlur)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.447103;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <circle cx="190" cy="190" r="155" fill="url(#bluePool)" filter="url(#softBlur)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.513418;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+      <circle cx="190" cy="190" r="155" fill="url(#holoSheen1)" filter="url(#medBlur)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.858121;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <circle cx="190" cy="190" r="155" fill="url(#holoSheen2)" filter="url(#medBlur)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.460451;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <circle cx="190" cy="190" r="155" fill="url(#holoSheen3)" filter="url(#medBlur)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.272999;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+      <circle cx="190" cy="190" r="155" fill="url(#milkVeil)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.426276;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+      <circle cx="190" cy="190" r="155" fill="url(#specularDot)" filter="url(#lightBlur)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.300057;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    </g>
+    <circle cx="190" cy="190" r="155" fill="none" stroke="rgba(255,210,180,0.25)" stroke-width="1" style="fill:none;stroke:rgba(255, 210, 180, 0.25);color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  </g>
+
+</svg>

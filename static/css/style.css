@@ -146,7 +146,7 @@ button {
 /* --- Cards --- */
 
 .card {
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--line) 20%, transparent);
   border-radius: var(--radius);
   transition: border-color 0.25s ease, background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -155,7 +155,7 @@ button {
    bottom-right so it overhangs that corner. The sphere has its own
    gradient; the overlay sits on a solid backdrop. */
 .card:not(.tile--empty):not(.overlay-card) {
-  box-shadow: 14px 14px 0 -1px color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 12px 12px 5px -1px color-mix(in srgb, var(--line) 8%, transparent);
 }
 
 a.card,
