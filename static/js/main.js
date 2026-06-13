@@ -228,11 +228,12 @@ function fitMasonries() {
    the next arrow so the two share a vertical line. Kontakt has no media, so it
    keeps the CSS default (top-right of the card). */
 function closeAnchor(key) {
-  // The element whose RIGHT edge the cross lines up with, per overlay.
+  // The element whose RIGHT edge the cross lines up with, per overlay. All of
+  // these are SVGs/photos whose visible edge IS their box edge.
   if (key === "produkt") return overlay.querySelector(".produkt-grid, .produkt-rows"); // set 1
   if (key === "typografie") return overlay.querySelector(".typo-image");
   if (key === "viz") return overlay.querySelector(".viz-detail-side"); // first screen, not the iPads
-  if (key === "profilovky") return overlay.querySelector(".carousel-btn--next");
+  if (key === "profilovky") return overlay.querySelector(".carousel-btn--next svg"); // the chevron, not its button
   if (key === "videa") {
     const thumbs = overlay.querySelectorAll(".videa-thumb");
     return thumbs[thumbs.length - 1] || null;
@@ -241,23 +242,34 @@ function closeAnchor(key) {
 }
 
 function positionClose() {
-  // Pin the cross horizontally to the right edge of the page's rightmost photo
-  // (carousel: to the next arrow). It keeps its header height — only the
+  // Pin the cross's VISIBLE right edge (the SVG, which fills its own box — not
+  // the padded button) to the right edge of the page's rightmost photo
+  // (carousel: to the next chevron). It keeps its header height; only the
   // horizontal offset moves, so it lines up over the content's true right edge
-  // whatever the scrollbar does.
+  // whatever the scrollbar does. The heading is mirrored on the left.
   overlayClose.style.right = "";
+  overlayHeading.style.marginLeft = "";
   if (!overlay.open) return;
-  const anchor = closeAnchor(sourceTile && sourceTile.dataset.overlay);
-  if (!anchor) return; // kontakt → CSS default (no media to align to)
+  const key = sourceTile && sourceTile.dataset.overlay;
+  const anchor = closeAnchor(key);
+  if (!anchor) return; // kontakt → CSS defaults (no media to align to)
   const a = anchor.getBoundingClientRect();
   if (!a.width) return;
+
   const card = overlay.getBoundingClientRect();
   const br = parseFloat(getComputedStyle(overlay).borderRightWidth) || 0;
-  // Align the cross's VISIBLE right edge (the SVG, which fills its own box) —
-  // not the padded button — with the photo's right edge.
   const icon = overlayClose.querySelector("svg") || overlayClose;
-  const inset = overlayClose.getBoundingClientRect().right - icon.getBoundingClientRect().right;
-  overlayClose.style.right = `${card.right - br - a.right - inset}px`;
+  const iconInset = overlayClose.getBoundingClientRect().right - icon.getBoundingClientRect().right;
+  overlayClose.style.right = `${card.right - br - a.right - iconInset}px`;
+
+  // Carousel: mirror the heading's "P" onto the left chevron.
+  if (key === "profilovky") {
+    const prev = overlay.querySelector(".carousel-btn--prev svg");
+    if (prev) {
+      const base = overlayHeading.getBoundingClientRect().left; // left with margin reset above
+      overlayHeading.style.marginLeft = `${prev.getBoundingClientRect().left - base}px`;
+    }
+  }
 }
 
 function positionCarousel() {
