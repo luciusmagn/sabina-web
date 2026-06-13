@@ -237,11 +237,11 @@
     <div class="carousel">
       <button class="carousel-btn carousel-btn--prev" type="button"
               data-aria-cs="{{ content.ui.previous.cs }}" data-aria-en="{{ content.ui.previous.en }}" aria-label="{{ content.ui.previous.cs }}">
-        <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12L16 21L25 12" stroke="currentColor" stroke-width="2"/></svg>
+        <svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2L12 13L23 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
       <button class="carousel-btn carousel-btn--next" type="button"
               data-aria-cs="{{ content.ui.next.cs }}" data-aria-en="{{ content.ui.next.en }}" aria-label="{{ content.ui.next.cs }}">
-        <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 12L16 21L25 12" stroke="currentColor" stroke-width="2"/></svg>
+        <svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2L12 13L23 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
       <div class="carousel-track">
         {% for p in content.profilePhotos.photos %}

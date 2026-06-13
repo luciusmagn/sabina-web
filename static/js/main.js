@@ -231,7 +231,7 @@ function closeAnchor(key) {
   // The element whose RIGHT edge the cross lines up with, per overlay. All of
   // these are SVGs/photos whose visible edge IS their box edge.
   if (key === "produkt") return overlay.querySelector(".produkt-grid, .produkt-rows"); // set 1
-  if (key === "typografie") return overlay.querySelector(".typo-image");
+  // typografie: book image is centred, so leave the cross at its default spot
   if (key === "viz") return overlay.querySelector(".viz-detail-side"); // first screen, not the iPads
   if (key === "profilovky") return overlay.querySelector(".carousel-btn--next svg"); // the chevron, not its button
   if (key === "videa") {

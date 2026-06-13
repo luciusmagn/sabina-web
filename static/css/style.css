@@ -860,6 +860,9 @@ button.tile--empty {
 
 .carousel-btn--prev { left: var(--gutter); }
 .carousel-btn--next { right: var(--gutter); }
+/* The chevron fills its box, so its rendered edges are what JS aligns the
+   close cross (right) and heading (left) to. */
+.carousel-btn svg { display: block; width: 24px; height: 14px; }
 .carousel-btn--prev svg { rotate: 90deg; }
 .carousel-btn--next svg { rotate: -90deg; }
 .carousel-btn:hover { opacity: 0.6; }
@@ -939,8 +942,9 @@ button.tile--empty {
 }
 
 .overlay-heading {
-  /* Inset to mirror the close cross on the right (= the carousel's left arrow). */
-  margin: 0 0 0 var(--gutter);
+  /* Sits at the content's left edge (aligned with the section labels). JS
+     mirrors it onto the carousel's left arrow when that overlay is open. */
+  margin: 0;
   align-self: flex-start; /* shrink to text width so it doesn't cover the up arrow */
   font-weight: 700;
   font-size: clamp(1.25rem, 2.344vw, 2.8125rem); /* 45/1920 */
