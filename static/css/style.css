@@ -23,7 +23,7 @@
   --bg: #000000;
   --line: #f4f4f4;
   --text: #ffffff;
-  --accent: #00c0b8;
+  --accent: #fe5d40;
   color-scheme: dark;
 }
 
@@ -168,17 +168,11 @@ button.card:not(.tile--empty):focus-visible {
   color: #ffffff;
 }
 
-/* The cursor inverts over the accent fill: the green arrow on pink
-   cards (light mode), the pink arrow on green cards (dark mode).
-   The files are named after the theme they normally serve. */
+/* Over the accent fill the cursor goes white (same arrow, white +
+   half-transparent white inner layer) in both themes. */
 a.card:hover,
 button.card:not(.tile--empty):hover {
-  cursor: url("/cursors/cursor-dark.svg") 4 4, pointer;
-}
-
-[data-theme="dark"] a.card:hover,
-[data-theme="dark"] button.card:not(.tile--empty):hover {
-  cursor: url("/cursors/cursor-light.svg") 4 4, pointer;
+  cursor: url("/cursors/cursor-white.svg") 4 4, pointer;
 }
 
 /* --- Landing grid ---
@@ -242,18 +236,6 @@ button.card:not(.tile--empty):hover {
   initial-value: 0%;
 }
 
-@property --glow {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 0%;
-}
-
-@property --ringR {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 50%;
-}
-
 @property --px {
   syntax: "<percentage>";
   inherits: false;
@@ -273,103 +255,49 @@ button.tile--empty {
   border: 0;
   border-radius: 50%;
   cursor: pointer;
-  /* Rest: a small dim highlight and a strong dark limb — reads as a
-     sphere. The pulse swells the highlight's radius (--pulse) and its
-     brightness (--glow). Contour rings sit at sin(θ)-projected radii —
-     evenly spaced ON the sphere's surface, so they compress toward the
-     limb — and the whole system breathes via --ringR (the gradient
-     radius, 50% of the ball at rest). */
-  --ring-line: color-mix(in srgb, color-mix(in srgb, #ffffff 75%, var(--accent)) 65%, transparent);
+  /* Metallic holographic sphere, tracking the cursor (--px/--py) with a
+     gentle breathe (--pulse), no spin. Light and dark themes use distinct
+     gradients (below); this is the light one. */
   background:
     radial-gradient(
-      ellipse var(--ringR) var(--ringR) at var(--px) var(--py),
-      transparent 0 calc(15.6% - 0.75px),
-      var(--ring-line) calc(15.6% - 0.75px) calc(15.6% + 0.75px),
-      transparent calc(15.6% + 0.75px) calc(30.9% - 0.75px),
-      var(--ring-line) calc(30.9% - 0.75px) calc(30.9% + 0.75px),
-      transparent calc(30.9% + 0.75px) calc(45.4% - 0.75px),
-      var(--ring-line) calc(45.4% - 0.75px) calc(45.4% + 0.75px),
-      transparent calc(45.4% + 0.75px) calc(58.8% - 0.75px),
-      var(--ring-line) calc(58.8% - 0.75px) calc(58.8% + 0.75px),
-      transparent calc(58.8% + 0.75px) calc(70.7% - 0.75px),
-      var(--ring-line) calc(70.7% - 0.75px) calc(70.7% + 0.75px),
-      transparent calc(70.7% + 0.75px) calc(80.9% - 0.75px),
-      var(--ring-line) calc(80.9% - 0.75px) calc(80.9% + 0.75px),
-      transparent calc(80.9% + 0.75px) calc(89.1% - 0.75px),
-      var(--ring-line) calc(89.1% - 0.75px) calc(89.1% + 0.75px),
-      transparent calc(89.1% + 0.75px) calc(95.1% - 0.75px),
-      var(--ring-line) calc(95.1% - 0.75px) calc(95.1% + 0.75px),
-      transparent calc(95.1% + 0.75px) calc(98.8% - 0.75px),
-      var(--ring-line) calc(98.8% - 0.75px) calc(98.8% + 0.75px),
-      /* Past the touch-axis equator: dense far-field contours so the
-         rings cover the whole ball when the origin is off-centre (up
-         to 2R for an edge touch). At rest they're clipped away. */
-      transparent calc(98.8% + 0.75px) calc(102.8% - 0.75px),
-      var(--ring-line) calc(102.8% - 0.75px) calc(102.8% + 0.75px),
-      transparent calc(102.8% + 0.75px) calc(106.8% - 0.75px),
-      var(--ring-line) calc(106.8% - 0.75px) calc(106.8% + 0.75px),
-      transparent calc(106.8% + 0.75px) calc(110.8% - 0.75px),
-      var(--ring-line) calc(110.8% - 0.75px) calc(110.8% + 0.75px),
-      transparent calc(110.8% + 0.75px) calc(114.8% - 0.75px),
-      var(--ring-line) calc(114.8% - 0.75px) calc(114.8% + 0.75px),
-      transparent calc(114.8% + 0.75px) calc(118.8% - 0.75px),
-      var(--ring-line) calc(118.8% - 0.75px) calc(118.8% + 0.75px),
-      transparent calc(118.8% + 0.75px) calc(122.8% - 0.75px),
-      var(--ring-line) calc(122.8% - 0.75px) calc(122.8% + 0.75px),
-      transparent calc(122.8% + 0.75px) calc(126.8% - 0.75px),
-      var(--ring-line) calc(126.8% - 0.75px) calc(126.8% + 0.75px),
-      transparent calc(126.8% + 0.75px) calc(130.8% - 0.75px),
-      var(--ring-line) calc(130.8% - 0.75px) calc(130.8% + 0.75px),
-      transparent calc(130.8% + 0.75px) calc(134.8% - 0.75px),
-      var(--ring-line) calc(134.8% - 0.75px) calc(134.8% + 0.75px),
-      transparent calc(134.8% + 0.75px) calc(138.8% - 0.75px),
-      var(--ring-line) calc(138.8% - 0.75px) calc(138.8% + 0.75px),
-      transparent calc(138.8% + 0.75px) calc(142.8% - 0.75px),
-      var(--ring-line) calc(142.8% - 0.75px) calc(142.8% + 0.75px),
-      transparent calc(142.8% + 0.75px) calc(146.8% - 0.75px),
-      var(--ring-line) calc(146.8% - 0.75px) calc(146.8% + 0.75px),
-      transparent calc(146.8% + 0.75px) calc(150.8% - 0.75px),
-      var(--ring-line) calc(150.8% - 0.75px) calc(150.8% + 0.75px),
-      transparent calc(150.8% + 0.75px) calc(154.8% - 0.75px),
-      var(--ring-line) calc(154.8% - 0.75px) calc(154.8% + 0.75px),
-      transparent calc(154.8% + 0.75px) calc(158.8% - 0.75px),
-      var(--ring-line) calc(158.8% - 0.75px) calc(158.8% + 0.75px),
-      transparent calc(158.8% + 0.75px) calc(162.8% - 0.75px),
-      var(--ring-line) calc(162.8% - 0.75px) calc(162.8% + 0.75px),
-      transparent calc(162.8% + 0.75px) calc(166.8% - 0.75px),
-      var(--ring-line) calc(166.8% - 0.75px) calc(166.8% + 0.75px),
-      transparent calc(166.8% + 0.75px) calc(170.8% - 0.75px),
-      var(--ring-line) calc(170.8% - 0.75px) calc(170.8% + 0.75px),
-      transparent calc(170.8% + 0.75px) calc(174.8% - 0.75px),
-      var(--ring-line) calc(174.8% - 0.75px) calc(174.8% + 0.75px),
-      transparent calc(174.8% + 0.75px) calc(178.8% - 0.75px),
-      var(--ring-line) calc(178.8% - 0.75px) calc(178.8% + 0.75px),
-      transparent calc(178.8% + 0.75px) calc(182.8% - 0.75px),
-      var(--ring-line) calc(182.8% - 0.75px) calc(182.8% + 0.75px),
-      transparent calc(182.8% + 0.75px) calc(186.8% - 0.75px),
-      var(--ring-line) calc(186.8% - 0.75px) calc(186.8% + 0.75px),
-      transparent calc(186.8% + 0.75px) calc(190.8% - 0.75px),
-      var(--ring-line) calc(190.8% - 0.75px) calc(190.8% + 0.75px),
-      transparent calc(190.8% + 0.75px) calc(194.8% - 0.75px),
-      var(--ring-line) calc(194.8% - 0.75px) calc(194.8% + 0.75px),
-      transparent calc(194.8% + 0.75px) calc(198.8% - 0.75px),
-      var(--ring-line) calc(198.8% - 0.75px) calc(198.8% + 0.75px),
-      transparent calc(198.8% + 0.75px)
+      130% 130% at calc(var(--px) - 14%) calc(var(--py) - 14%),
+      rgba(250, 190, 146, 0.83) 0%,
+      rgba(255, 211, 92, 0) 45%,
+      rgba(255, 111, 174, 0.4) 100%
     ),
     radial-gradient(
       circle at var(--px) var(--py),
-      color-mix(in srgb, #ffffff calc(35% + var(--glow)), var(--accent)) 0%,
-      color-mix(in srgb, #ffffff calc(10% + var(--glow)), var(--accent)) calc(7% + var(--pulse)),
-      var(--accent) calc(26% + var(--pulse)),
-      color-mix(in srgb, #000000 26%, var(--accent)) 95%
+      color-mix(in srgb, #ffc7c7c4 50%, var(--accent)) 0%,
+      color-mix(in srgb, #000 14%, var(--accent)) calc(26% + var(--pulse)),
+      var(--accent) calc(58% + var(--pulse)),
+      color-mix(in srgb, #fff 60%, var(--accent)) 100%
     );
   animation: sphere-pulse 2.4s ease-in-out infinite;
   transition: --px 0.15s ease-out, --py 0.15s ease-out;
 }
 
+/* Dark theme keeps the softer gradient (periwinkle sheen, gentler ramp). */
+[data-theme="dark"] button.tile--empty {
+  background:
+    radial-gradient(
+      135% 135% at calc(var(--px) - 14%) calc(var(--py) - 14%),
+      rgba(184, 197, 248, 0.55) 0%,
+      rgba(184, 197, 248, 0) 60%,
+      rgba(255, 111, 174, 0.35) 100%
+    ),
+    radial-gradient(
+      circle at var(--px) var(--py),
+      color-mix(in srgb, #ffc7c7 45%, var(--accent)) 0%,
+      color-mix(in srgb, #000 12%, var(--accent)) calc(32% + var(--pulse)),
+      var(--accent) calc(66% + var(--pulse)),
+      color-mix(in srgb, #fff 35%, var(--accent)) 85%,
+      color-mix(in srgb, #fff 58%, var(--accent)) 100%
+    );
+}
+
 @keyframes sphere-pulse {
-  0%, 100% { --pulse: 0%; --glow: 0%; --ringR: 50%; }
-  50%      { --pulse: 24%; --glow: 20%; --ringR: 54%; }
+  0%, 100% { --pulse: 0%; }
+  50%      { --pulse: 14%; }
 }
 
 /* The boing squash runs via the Web Animations API (see main.js) — a
@@ -494,8 +422,10 @@ button.tile--empty {
    104 from the card's left edge and 73 from its top. */
 
 .overlay-card {
-  width: min(1262px, 65.73vw);    /* 1262/1920 */
-  height: min(700px, 64.815dvh);  /* 700/1080 */
+  /* Same footprint as the masonry content area: 1520×768 @ 1920×1080,
+     i.e. it opens exactly over the grid (200, 156). */
+  width: min(1520px, 79.167vw);
+  height: min(768px, 71.111dvh);
   /* % padding on a <dialog> resolves against the viewport, so these are
      viewport units mirroring the card's own scale: 73/1080, 104/1920 */
   padding: min(73px, 6.759dvh) min(104px, 5.417vw);
@@ -516,7 +446,10 @@ button.tile--empty {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* only the gallery scrolls — see .gallery */
+  /* visible so the up arrow can sit in the heading band above the body;
+     galleries/typo/viz each clip-and-scroll within their own element, so
+     nothing else spills. */
+  overflow: visible;
 }
 
 .contact-stack {
@@ -565,56 +498,6 @@ button.tile--empty {
   );
 }
 
-/* Carousel (Vizuální identita, Typografie) */
-
-.carousel {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-}
-
-.carousel-track {
-  height: 100%;
-  display: flex;
-  column-gap: clamp(16px, 1.25vw, 24px);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--line) 40%, transparent) transparent;
-}
-
-.carousel-slide {
-  flex: none;
-  height: calc(100% - 12px); /* room for the slim scrollbar */
-  aspect-ratio: 3 / 2;
-  scroll-snap-align: start;
-}
-
-.carousel-btn {
-  position: absolute;
-  top: 50%;
-  translate: 0 -50%;
-  z-index: 1;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: var(--bg);
-  color: var(--line);
-}
-
-.carousel-btn--prev { left: clamp(8px, 0.83vw, 16px); }
-.carousel-btn--next { right: clamp(8px, 0.83vw, 16px); }
-
-.carousel-btn--prev svg { rotate: 90deg; }
-.carousel-btn--next svg { rotate: -90deg; }
-
-.carousel-btn:hover {
-  background: color-mix(in srgb, var(--line) 8%, var(--bg));
-}
-
 /* Three-column media gallery (Produkt, Profilovky, Videa) */
 
 .gallery {
@@ -652,12 +535,467 @@ a.gallery-thumb:focus-visible {
   line-height: 1.45;
 }
 
+/* --- Vertical "screens" scaffold (Typografie, Vizuální identita) ---
+   Full-card panels paged with scroll-snap plus a down arrow, like the
+   main page. Each .vscreen is the positioning context for its content. */
+
+.vscreens {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.vscreens-track {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none; /* the arrow is the affordance */
+}
+
+.vscreens-track::-webkit-scrollbar {
+  display: none;
+}
+
+.vscreen {
+  position: relative;
+  height: 100%;
+  scroll-snap-align: start;
+  overflow: hidden;
+}
+
+/* Vertical screens (Typografie, Vizuální identita): arrows top/bottom centre. */
+.vscreens-arrow {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  color: var(--line);
+}
+
+.vscreens-arrow--up {
+  top: 0;
+}
+
+.vscreens-arrow--up svg {
+  rotate: 180deg;
+}
+
+.vscreens-arrow--down {
+  bottom: 0;
+}
+
+.vscreens-arrow[hidden] {
+  display: none;
+}
+
+.vscreens-arrow:hover {
+  opacity: 0.6;
+}
+
+/* Typografie content: text at the card's left inset, image centred
+   (image centre = card centre, so it stays centred despite the
+   symmetric padding). */
+
+.typo-text {
+  position: absolute;
+  left: 0;
+  top: 24%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 1.667vw, 32px); /* 32 @ 1920 — the "empty line" */
+  max-width: 25%;
+}
+
+.typo-book-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.typo-book,
+.typo-activity {
+  font-weight: 700;
+  font-size: clamp(1rem, 1.719vw, 2.0625rem); /* 33/1920 */
+  line-height: 1.1515;                        /* 38/33 */
+}
+
+.typo-author {
+  font-weight: 400;
+  font-size: clamp(1rem, 1.719vw, 2.0625rem);
+  line-height: 1.1515;
+}
+
+.typo-image {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 84%; /* clears the top/bottom arrows */
+  max-width: 50%;
+  width: auto;
+  height: auto;
+  object-fit: contain; /* landscape mockups letterbox; portraits fill height */
+  border-radius: 8.87px;
+  cursor: inherit;
+  transition: scale 0.25s ease;
+}
+
+/* keep the centred translate while adding a hover scale */
+.typo-image:hover {
+  scale: 1.02;
+}
+
+/* Vizuální identita screen 1: three iPads in a row, middle one bigger.
+   Each is a button (opens the lightbox); kept small enough to clear the
+   up/down arrows when centred. */
+
+.viz-devices {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.viz-pad {
+  height: 62%;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: inherit;
+  transition: transform 0.2s ease;
+}
+
+.viz-pad img {
+  display: block;
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+.viz-pad--mid {
+  height: 78%;
+}
+
+.viz-pad:hover {
+  transform: scale(1.03);
+}
+
+/* Vizuální identita screen 2: BMM label top-left, a wide image below it,
+   a detail image on the right. Positions mirror the design proportions. */
+
+.viz-detail-text {
+  position: absolute;
+  left: 0;
+  top: 20%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.042vw, 20px); /* 20 @ 1920 */
+}
+
+.viz-detail-title {
+  font-weight: 700;
+  font-size: clamp(1rem, 1.719vw, 2.0625rem);
+  line-height: 1.1515;
+}
+
+.viz-detail-caption {
+  font-weight: 400;
+  font-size: clamp(1rem, 1.719vw, 2.0625rem);
+  line-height: 1.1515;
+}
+
+.viz-detail-wide {
+  position: absolute;
+  left: 0;
+  top: 41%;
+  width: 40%;    /* 515/1262 */
+  height: auto;
+}
+
+.viz-detail-side {
+  position: absolute;
+  right: 0;
+  top: 33%;
+  width: 32%;    /* 409.7/1262 */
+  height: auto;
+}
+
+/* Produktové fotky: scrolls HORIZONTALLY between the two sets (side
+   arrows), so each set's masonry uses the full card height. Each screen
+   has a label + description on the left and the masonry on the right. */
+
+.produkt {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.produkt-track {
+  height: 100%;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.produkt-track::-webkit-scrollbar {
+  display: none;
+}
+
+.produkt-screen {
+  position: relative;
+  flex: 0 0 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  padding-inline: clamp(40px, 4vw, 56px); /* gutter for the side arrows */
+}
+
+.produkt-arrow {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  color: var(--line);
+}
+
+.produkt-arrow--prev { left: 0; }
+.produkt-arrow--next { right: 0; }
+.produkt-arrow--prev svg { rotate: 90deg; }
+.produkt-arrow--next svg { rotate: -90deg; }
+.produkt-arrow[hidden] { display: none; }
+.produkt-arrow:hover { opacity: 0.6; }
+
+.produkt-text {
+  position: absolute;
+  left: clamp(40px, 4vw, 56px);
+  top: 22%;
+  width: 28%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.042vw, 20px);
+}
+
+.produkt-title {
+  font-weight: 700;
+  font-size: clamp(1rem, 1.719vw, 2.0625rem);
+  line-height: 1.1515;
+}
+
+.produkt-desc {
+  font-weight: 400;
+  font-size: clamp(1rem, 1.719vw, 2.0625rem);
+  line-height: 1.1515;
+}
+
+/* Masonry on the right, vertically centred, natural height — the photos
+   are exported to fit, so they show at their native aspect (no crop). */
+.produkt-grid,
+.produkt-rows {
+  position: absolute;
+  right: clamp(40px, 4vw, 56px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 58%;
+}
+
+/* Set 1 — 2×2 grid (photos are ~equal aspect). */
+.produkt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(12px, 1.25vw, 20px);
+}
+
+/* Set 2 — two rows (2 + 3); each tile flex-grows by its aspect ratio, so
+   widths are proportional and the row heights come out equal (no crop). */
+.produkt-rows {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.25vw, 20px);
+}
+
+.produkt-row {
+  display: flex;
+  gap: clamp(12px, 1.25vw, 20px);
+}
+
+.produkt-row .produkt-tile {
+  min-width: 0; /* flex-grow set inline ∝ aspect */
+}
+
+.produkt-tile {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  cursor: inherit;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.25s ease;
+}
+
+.produkt-tile img {
+  display: block;
+  width: 100%;
+  height: auto; /* natural aspect — no crop */
+}
+
+.produkt-tile:hover {
+  transform: scale(1.02);
+}
+
+/* Horizontal carousel (Profilové fotky): one photo per view, prev/next. */
+
+.carousel {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.carousel-track {
+  height: 100%;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden; /* never scroll vertically — content is sized to fit */
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* arrows are the affordance */
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  height: 100%;
+  min-height: 0; /* pin to track height so a tall photo can't grow it */
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* modest top/bottom margin — photo stays large, caption sits low; sides
+     leave room for the arrows */
+  padding: clamp(16px, 4vh, 40px) clamp(40px, 4vw, 64px);
+  gap: clamp(12px, 2vh, 20px);
+}
+
+.carousel-photo {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-photo img {
+  max-width: 100%;
+  max-height: 100%; /* fills the space but never taller than the card */
+  object-fit: contain;
+  border-radius: 15px;
+}
+
+.carousel-caption {
+  flex: none;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.carousel-caption-title {
+  font-weight: 700;
+  font-size: clamp(1rem, 1.04vw, 1.25rem);
+  line-height: 1.2;
+}
+
+.carousel-caption-desc {
+  font-weight: 400;
+  font-size: clamp(1rem, 1.04vw, 1.25rem);
+  line-height: 1.2;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  color: var(--line);
+}
+
+.carousel-btn--prev { left: 0; }
+.carousel-btn--next { right: 0; }
+.carousel-btn--prev svg { rotate: 90deg; }
+.carousel-btn--next svg { rotate: -90deg; }
+.carousel-btn:hover { opacity: 0.6; }
+
+/* Lightbox: a top-layer dialog (above the overlay) for an enlarged image. */
+
+.lightbox {
+  margin: auto;
+  max-width: 100vw;
+  max-height: 100dvh;
+  border: 0;
+  padding: clamp(16px, 4vw, 64px);
+  background: none;
+}
+
+/* Soft expand-in so opening a photo isn't abrupt. */
+.lightbox[open] {
+  animation: lightbox-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.lightbox[open]::backdrop {
+  animation: lightbox-fade 0.28s ease both;
+}
+
+@keyframes lightbox-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lightbox-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lightbox::backdrop {
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+}
+
+.lightbox-img {
+  display: block;
+  max-width: 90vw;
+  max-height: 90dvh;
+  border-radius: 8.87px;
+}
+
 .overlay-card::backdrop {
   background: var(--bg); /* solid — the page disappears behind the card */
 }
 
 .overlay-heading {
   margin: 0;
+  align-self: flex-start; /* shrink to text width so it doesn't cover the up arrow */
   font-weight: 700;
   font-size: clamp(1.25rem, 2.344vw, 2.8125rem); /* 45/1920 */
   line-height: 1.4889;                           /* 67/45 */
@@ -774,6 +1112,82 @@ a.gallery-thumb:focus-visible {
   .gallery {
     grid-template-columns: 1fr 1fr;
   }
+
+  /* Vertical screens stack their content (no absolute layout) on mobile */
+  .vscreen {
+    height: auto;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 4vw, 28px);
+    padding: 24px 0;
+  }
+
+  .typo-text,
+  .viz-detail-text {
+    position: static;
+    max-width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .typo-image {
+    position: static;
+    transform: none;
+    max-width: 100%;
+    max-height: 56vh;
+  }
+
+  /* iPads stack vertically; the detail images go full width in flow */
+  .viz-devices {
+    flex-direction: column;
+  }
+
+  .viz-pad,
+  .viz-pad--mid {
+    height: auto;
+  }
+
+  .viz-pad img {
+    max-width: 62%;
+    max-height: 40vh;
+    margin: 0 auto;
+  }
+
+  .viz-detail-wide,
+  .viz-detail-side {
+    position: static;
+    width: 86%;
+    max-height: 40vh;
+    object-fit: contain;
+  }
+
+  /* Produkt: label/description on top, masonry full width below */
+  .produkt-text {
+    position: static;
+    width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .produkt-grid,
+  .produkt-rows {
+    position: static;
+    transform: none;
+    width: 100%;
+    height: auto;
+  }
+
+  .produkt-grid {
+    grid-template-rows: auto auto;
+  }
+
+  /* rows: let each row keep its height from the photos */
+  .produkt-row {
+    flex: none;
+  }
 }
 
 /* --- Reduced motion --- */
@@ -792,5 +1206,10 @@ a.gallery-thumb:focus-visible {
 
   button.tile--empty {
     animation: none; /* no pulse */
+  }
+
+  .lightbox[open],
+  .lightbox[open]::backdrop {
+    animation: none;
   }
 }

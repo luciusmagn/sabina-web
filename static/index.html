@@ -58,7 +58,7 @@
         <div class="tiles">
           <div class="card card--hero">
             <h1>Sabina<br>Mácha</h1>
-            <p class="tagline">Graphic &amp; Visual Media Designer</p>
+            <p class="tagline" data-i18n="tagline">Vizuální média &amp; grafický design</p>
           </div>
           <button class="card tile tile--empty" type="button" aria-label="Boing"></button>
           <button class="card tile tile--kontakt" type="button" data-overlay="kontakt"><span data-i18n="kontakt">Kontakt</span></button>
@@ -94,6 +94,10 @@
     <h2 class="overlay-heading" id="overlay-heading"></h2>
     <button class="overlay-close" type="button" aria-label="Zavřít" data-i18n-aria="ariaClose">&times;</button>
     <div class="overlay-body"></div>
+  </dialog>
+
+  <dialog class="lightbox" aria-label="Náhled">
+    <img class="lightbox-img" alt="">
   </dialog>
 
   <template id="overlay-kontakt">
