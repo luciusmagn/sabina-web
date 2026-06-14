@@ -49,8 +49,8 @@
 
   "visualIdentity": {
     "detail": {
-      "label":     { "cs": "BMM 101", "en": "BMM 101" },
-      "caption":   { "cs": "Popisek", "en": "Caption" },
+      "label":     { "cs": "Zahradnictví Krulichovi", "en": "Horticulture Krulichovi" },
+      "caption":   { "cs": "Koncept značky vzniklý jako designový experiment zaměřený na vizuální identitu.", "en": "Brand concept developed as a design experiment focused on visual identity." },
       "wideImage": "/vizualni-identita/group-25.png",
       "sideImage": "/vizualni-identita/group-16.png"
     },
@@ -64,7 +64,7 @@
   "productSets": [
     {
       "label":   { "cs": "BMM 100", "en": "BMM 100" },
-      "caption": { "cs": "Foto", "en": "Photo" },
+      "caption": { "cs": "/Foto/", "en": "/Photo/" },
       "layout": "grid",
       "images": [
         ["/produktove-fotky/set-1/web-1.png", 1.5],
@@ -93,10 +93,10 @@
 
   "profilePhotos": {
     "photos": [
-      { "src": "/profilove-fotky/web-1.jpg", "title": { "cs": "BMM 101", "en": "BMM 101" }, "text": { "cs": "Popisek", "en": "Caption" } },
-      { "src": "/profilove-fotky/web-2.jpg", "title": { "cs": "BMM 101", "en": "BMM 101" }, "text": { "cs": "Popisek", "en": "Caption" } },
-      { "src": "/profilove-fotky/web-3.jpg", "title": { "cs": "BMM 101", "en": "BMM 101" }, "text": { "cs": "Popisek", "en": "Caption" } },
-      { "src": "/profilove-fotky/web-4.jpg", "title": { "cs": "BMM 101", "en": "BMM 101" }, "text": { "cs": "Popisek", "en": "Caption" } }
+      { "src": "/profilove-fotky/web-1.jpg", "title": { "cs": "Kristián", "en": "Kristián" }, "text": { "cs": "/Foto, postprodukce/", "en": "/Photo, postproduction/" } },
+      { "src": "/profilove-fotky/web-2.jpg", "title": { "cs": "Lukáš", "en": "Lukáš" }, "text": { "cs": "/Foto, postprodukce/", "en": "/Photo, postproduction/" } },
+      { "src": "/profilove-fotky/web-3.jpg", "title": { "cs": "Jája", "en": "Jája" }, "text": { "cs": "/Foto, postprodukce/", "en": "/Photo, postproduction/" } },
+      { "src": "/profilove-fotky/web-4.jpg", "title": { "cs": "Tomáš", "en": "Tomáš" }, "text": { "cs": "/Foto/", "en": "/Photo/" } }
     ]
   },
 
