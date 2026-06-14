@@ -100,7 +100,7 @@ function setupWaterOrb() {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  const W = 600, H = 600, CX = 300, CY = 300, R = 298;
+  const W = 600, H = 600, CX = 300, CY = 300, R = 296;
   const lerp = (a, b, t) => a + (b - a) * t;
   const getAccent = () => getComputedStyle(root).getPropertyValue("--accent").trim() || "#ff87b1";
   const getWater = () => (root.getAttribute("data-theme") === "dark" ? "#ffffff" : "#0065f9");
@@ -126,7 +126,8 @@ function setupWaterOrb() {
   function frame() {
     ctx.clearRect(0, 0, W, H);
     pulseT += 0.025;
-    const scale = 1 + (reduceMotion.matches ? 0 : Math.sin(pulseT) * 0.018);
+    // breathe inward only — the biggest state is 1.0 so it never overruns the canvas
+    const scale = 1 - (reduceMotion.matches ? 0 : (1 - Math.cos(pulseT)) * 0.018);
     fillLevel = lerp(fillLevel, targetFill, 0.06);
 
     ctx.save();
@@ -191,32 +192,14 @@ function setupWaterOrb() {
     }
     ctx.restore();
 
-    // raised triangular gnomon (a blade pointing to 12/north), shaded so the
-    // face toward the sun is lit and the other is in shade → reads as 3D.
-    const gH = R * 0.27, gW = R * 0.085;
-    const apexX = CX, apexY = CY - gH;
-    const sunRight = sundialBody ? Math.sin((sundialBody.az * Math.PI) / 180) >= 0 : false;
-    const litFill = "rgba(248,248,248,0.96)";
-    const shadeFill = "rgba(108,108,114,0.96)";
-    // left face
+    // gnomon — a plain solid-colour line standing up from the centre
     ctx.beginPath();
-    ctx.moveTo(apexX, apexY); ctx.lineTo(CX - gW, CY); ctx.lineTo(CX, CY); ctx.closePath();
-    ctx.fillStyle = sunRight ? shadeFill : litFill;
-    ctx.fill();
-    // right face
-    ctx.beginPath();
-    ctx.moveTo(apexX, apexY); ctx.lineTo(CX + gW, CY); ctx.lineTo(CX, CY); ctx.closePath();
-    ctx.fillStyle = sunRight ? litFill : shadeFill;
-    ctx.fill();
-    // ridge highlight + base/edge outline
-    ctx.beginPath(); ctx.moveTo(apexX, apexY); ctx.lineTo(CX, CY);
-    ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = Math.max(1, R * 0.006); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(CX - gW, CY); ctx.lineTo(apexX, apexY); ctx.lineTo(CX + gW, CY);
-    ctx.strokeStyle = "rgba(0,0,0,0.28)"; ctx.lineWidth = Math.max(1, R * 0.004); ctx.stroke();
-    // small base nub for grounding
-    ctx.beginPath(); ctx.ellipse(CX, CY, gW * 1.1, gW * 0.42, 0, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(60,60,66,0.92)"; ctx.fill();
+    ctx.moveTo(CX, CY);
+    ctx.lineTo(CX, CY - R * 0.3);
+    ctx.strokeStyle = "rgba(34,34,38,0.9)";
+    ctx.lineWidth = R * 0.04;
+    ctx.lineCap = "round";
+    ctx.stroke();
 
     /*
     const gloss = ctx.createRadialGradient(CX - R * 0.284, CY - R * 0.351, R * 0.027, CX - R * 0.203, CY - R * 0.27, R * 0.486);
