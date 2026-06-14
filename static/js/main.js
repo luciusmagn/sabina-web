@@ -8,6 +8,8 @@ const root = document.documentElement;
 const themeToggle = document.querySelector(".theme-toggle");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+let orbUpdateAccent = () => {}; // the water-fill orb assigns this; re-reads --accent on theme change
+
 let lang = "cs";
 try {
   const saved = localStorage.getItem("lang");
@@ -25,6 +27,7 @@ try {
 function applyTheme(theme) {
   root.setAttribute("data-theme", theme);
   themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+  orbUpdateAccent(); // recolour the orb base for the new theme
   try {
     localStorage.setItem("theme", theme);
   } catch (e) {
@@ -78,6 +81,111 @@ boingTile.addEventListener("click", (event) => {
   }
   spawnBoingLabel(x, y);
 });
+
+/* --- Water-fill orb ---
+   A <canvas> inside the orb tile draws the accent sphere (pink light / orange
+   dark) and fills with blue water up to the cursor's height while hovered,
+   with a wavy surface, gentle pulse, rim and gloss. Paused when off-screen. */
+function setupWaterOrb() {
+  const btn = boingTile;
+  if (!btn || typeof requestAnimationFrame !== "function") return;
+  const canvas = document.createElement("canvas");
+  canvas.width = 600;
+  canvas.height = 600;
+  canvas.setAttribute("aria-hidden", "true");
+  btn.append(canvas);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const W = 600, H = 600, CX = 300, CY = 300, R = 298;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const getAccent = () => getComputedStyle(root).getPropertyValue("--accent").trim() || "#ff87b1";
+  const getWater = () => (root.getAttribute("data-theme") === "dark" ? "#ffffff" : "#0065f9");
+
+  let accent = getAccent();
+  let water = getWater();
+  orbUpdateAccent = () => { accent = getAccent(); water = getWater(); };
+
+  let fillLevel = 0, targetFill = 0, pulseT = 0, hovering = false, running = false, raf = 0;
+
+  btn.addEventListener("mouseenter", () => { hovering = true; });
+  btn.addEventListener("mouseleave", () => { hovering = false; targetFill = 0; });
+  btn.addEventListener("mousemove", (event) => {
+    if (!hovering) return;
+    const rect = btn.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const my = ((event.clientY - rect.top) / rect.height) * H;
+    const mx = ((event.clientX - rect.left) / rect.width) * W;
+    if ((mx - CX) ** 2 + (my - CY) ** 2 > R * R) return; // ignore the transparent corners
+    targetFill = Math.max(0, Math.min(1, 1 - my / H));
+  });
+
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    pulseT += 0.025;
+    const scale = 1 + (reduceMotion.matches ? 0 : Math.sin(pulseT) * 0.018);
+    fillLevel = lerp(fillLevel, targetFill, 0.06);
+
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.scale(scale, scale);
+    ctx.translate(-CX, -CY);
+
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx.fillStyle = accent;
+    ctx.fill();
+
+    if (fillLevel > 0.002) {
+      const waterTop = CY + R - fillLevel * R * 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(CX, CY, R, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.beginPath();
+      const x0 = CX - R - 8, x1 = CX + R + 8;
+      ctx.moveTo(x0, waterTop);
+      ctx.lineTo(x1, waterTop); // flat, solid water line (no wave)
+      ctx.lineTo(x1, CY + R + 8);
+      ctx.lineTo(x0, CY + R + 8);
+      ctx.closePath();
+      ctx.fillStyle = water;
+      ctx.globalAlpha = 0.92;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = Math.max(2, R * 0.014);
+    ctx.stroke();
+
+    /*
+    const gloss = ctx.createRadialGradient(CX - R * 0.284, CY - R * 0.351, R * 0.027, CX - R * 0.203, CY - R * 0.27, R * 0.486);
+    gloss.addColorStop(0, "rgba(255,255,255,0.38)");
+    gloss.addColorStop(0.45, "rgba(255,255,255,0.08)");
+    gloss.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx.fillStyle = gloss;
+    ctx.fill();
+    */
+    ctx.restore();
+    if (running) raf = requestAnimationFrame(frame);
+  }
+
+  function start() { if (!running) { running = true; raf = requestAnimationFrame(frame); } }
+  function stop() { running = false; cancelAnimationFrame(raf); }
+
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver((entries) => (entries[0].isIntersecting ? start() : stop())).observe(btn);
+  } else {
+    start();
+  }
+}
+setupWaterOrb();
 
 /* --- Overlay + lightbox refs --- */
 
@@ -174,6 +282,7 @@ function setupPager(pager) {
     const max = scroller.scrollHeight - scroller.clientHeight;
     if (up) up.disabled = scroller.scrollTop <= 2;
     if (down) down.disabled = scroller.scrollTop >= max - 2;
+    alignProduktNav(); // re-align arrows to the now-visible set (no-op elsewhere)
   };
   scroller.addEventListener("scroll", sync);
   sync();
@@ -241,7 +350,34 @@ function fitMasonries() {
       masonry.style.flex = "0 0 auto";
       masonry.style.width = `${availH * (natW / natH)}px`;
     }
+    // Align this set's label top with its (vertically-centred) masonry top.
+    // Measured live, so it tracks the window instead of a brittle fixed/vw value.
+    const text = screen.querySelector(".produkt-text");
+    if (text) {
+      text.style.marginTop = "0px";
+      const delta = masonry.getBoundingClientRect().top - text.getBoundingClientRect().top;
+      text.style.marginTop = `${Math.max(0, Math.round(delta))}px`;
+    }
   }
+  alignProduktNav();
+}
+
+/* Sit the produkt pager arrows at the bottom of the visible set's masonry —
+   the same centring offset the label uses at the top. */
+function alignProduktNav() {
+  const pager = overlay.querySelector(".vpager");
+  const scroller = pager && pager.querySelector(".vscroll");
+  const nav = pager && pager.querySelector(".vnav");
+  if (!pager || !scroller || !nav) return;
+  const screens = [...scroller.querySelectorAll(".produkt-screen")];
+  if (!screens.length) return; // only the produkt overlay has photo rows
+  const ch = scroller.clientHeight || 1; // avoid /0 → NaN before the dialog has a size
+  const idx = Math.min(screens.length - 1, Math.max(0, Math.round(scroller.scrollTop / ch)));
+  const screen = screens[idx];
+  if (!screen) return;
+  const masonry = screen.querySelector(".produkt-grid, .produkt-rows");
+  if (!masonry) return;
+  nav.style.bottom = `${Math.max(0, Math.round((pager.clientHeight - masonry.offsetHeight) / 2))}px`;
 }
 
 /* The close cross is pinned to the right edge of the rightmost photo in the
