@@ -227,6 +227,27 @@ function setupWaterOrb() {
 }
 setupWaterOrb();
 
+/* --- Hero card water fill ---
+   On hover the "Sabina Mácha" card fills with the water colour from the bottom
+   up to the cursor; an accent-coloured copy of the text is revealed inside the
+   fill (pink-on-blue in light, orange-on-light in dark). Past 80% the whole
+   card fills, like the orb. CSS handles the transition; we just feed the level. */
+function setupHeroFill() {
+  const hero = document.querySelector(".card--hero");
+  if (!hero) return;
+  const set = (px) => hero.style.setProperty("--hero-fill", px + "px");
+  hero.addEventListener("mousemove", (event) => {
+    const r = hero.getBoundingClientRect();
+    if (!r.height) return;
+    let fill = r.bottom - event.clientY;           // height from the bottom to the cursor
+    fill = Math.max(0, Math.min(r.height, fill));
+    if (fill > r.height * 0.8) fill = r.height;     // top ~20% → fill the whole card
+    set(fill);
+  });
+  hero.addEventListener("mouseleave", () => set(0));
+}
+setupHeroFill();
+
 /* --- Sundial card shadows ---
    The cards cast a shadow opposite the real sun over Prague, so it sweeps
    "under" the cards through the day like a sun-clock; after sunset the moon

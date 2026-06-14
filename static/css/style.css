@@ -209,11 +209,46 @@ button.card:not(.tile--empty):hover {
 
 .card--hero {
   grid-row: 1 / 3;
+  display: grid;
+  grid-template: 1fr / 1fr;  /* the two text copies + the water share one cell */
+  position: relative;
+  overflow: hidden;          /* clip the water fill to the rounded card */
+  container-type: inline-size;
+  --hero-water: #0065f9;     /* fill colour — light theme */
+}
+
+[data-theme="dark"] .card--hero {
+  --hero-water: #f4f4f4;     /* a light fill in dark theme */
+}
+
+.card--hero .hero-layer {
+  grid-area: 1 / 1;          /* stack both copies exactly */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 9.26%; /* 105/1134 — title indent in the frame */
-  container-type: inline-size;
+  padding: 9.26%;            /* 105/1134 — title indent in the frame */
+}
+
+.card--hero .hero-layer:not(.hero-layer--fill) { z-index: 1; }
+
+/* the water rising from the bottom up to where the cursor is */
+.card--hero .hero-fill {
+  grid-area: 1 / 1;
+  align-self: end;           /* anchored to the card's bottom edge */
+  z-index: 0;
+  height: var(--hero-fill, 0px);
+  background: var(--hero-water);
+  pointer-events: none;
+  transition: height 0.2s ease;
+}
+
+/* an accent-coloured copy of the text, revealed only where the water has risen */
+.card--hero .hero-layer--fill {
+  z-index: 2;
+  color: var(--accent);
+  pointer-events: none;
+  clip-path: inset(calc(100% - var(--hero-fill, 0px)) 0 0 0);
+  transition: clip-path 0.2s ease;
 }
 
 .card--hero h1 {
@@ -419,11 +454,21 @@ button.tile--empty canvas {
 }
 
 .contact-stack {
-  margin-top: auto; /* contact links sit at the card's bottom */
+  margin-top: auto; /* bio + contact links sit at the card's bottom */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   row-gap: clamp(16px, 1.25vw, 24px);
+}
+
+/* Bio paragraph above the contact links — wraps to a readable couple of lines. */
+.contact-bio {
+  margin: 0 0 clamp(4px, 0.6vw, 12px);
+  max-width: min(52ch, 100%);
+  font-weight: 400;
+  font-size: clamp(1rem, 1.3vw, 1.6rem);
+  line-height: 1.5;
+  color: var(--text);
 }
 
 .contact-link {
@@ -617,7 +662,7 @@ button.tile--empty canvas {
 }
 
 .typo-text {
-  flex: 0 0 20%;
+  flex: 0 0 30%; /* wider so the book title wraps later */
   display: flex;
   flex-direction: column;
   gap: clamp(2px, 0.3vw, 6px); /* tight, like the video labels */
@@ -629,9 +674,14 @@ button.tile--empty canvas {
   gap: clamp(2px, 0.3vw, 6px);
 }
 
-.typo-book,
-.typo-activity {
+.typo-book {
   font-weight: 700;
+  font-size: clamp(1rem, 1.15vw, 1.375rem);
+  line-height: 1.25;
+}
+
+.typo-activity {
+  font-weight: 400;
   font-size: clamp(1rem, 1.15vw, 1.375rem);
   line-height: 1.25;
 }
@@ -1087,8 +1137,8 @@ button.tile--empty canvas {
   .card--hero {
     grid-row: auto;
     grid-column: 1 / -1;
-    padding-block: 14%;
   }
+  .card--hero .hero-layer { padding-block: 14%; }
 
   /* Work masonry restacks: tall tile + the two squares keep their
      desktop relationship, the wide tiles go full width below. */
