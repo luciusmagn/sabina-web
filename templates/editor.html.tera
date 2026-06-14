@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor — Sabina Mácha</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap">
+  <style>
+    :root { --pink: #ff87b1; --line: #161616; --muted: #8a8a8a; --ok: #1a9d5a; --err: #d23; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      color: #111;
+      background: #f6f6f7;
+      line-height: 1.4;
+    }
+    .editor { max-width: 760px; margin: 0 auto; padding: 32px 20px 140px; }
+    h1 { font-size: 1.9rem; margin: 0 0 4px; }
+    .sub { color: var(--muted); margin: 0 0 28px; }
+
+    .login { background: #fff; border: 1px solid #e4e4e7; border-radius: 16px; padding: 24px; max-width: 420px; }
+    .login p { margin: 0 0 14px; }
+    #login-form { display: flex; gap: 10px; }
+    input[type="password"] { flex: 1; }
+
+    input, textarea {
+      font: inherit;
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid #d6d6db;
+      border-radius: 9px;
+      background: #fff;
+      color: #111;
+    }
+    input:focus, textarea:focus { outline: 2px solid var(--pink); outline-offset: 1px; border-color: var(--pink); }
+    textarea { resize: vertical; min-height: 42px; }
+
+    button {
+      font: inherit; font-weight: 700;
+      padding: 9px 18px; border: 0; border-radius: 9px;
+      background: var(--line); color: #fff; cursor: pointer;
+    }
+    button:hover { opacity: 0.88; }
+
+    .note {
+      background: #fff7fa; border: 1px solid #ffd7e4; border-radius: 12px;
+      padding: 14px 16px; margin: 0 0 24px; font-size: 0.92rem; color: #6b3a4c;
+    }
+    .note ul { margin: 8px 0 0; padding-left: 18px; }
+
+    section.group { background: #fff; border: 1px solid #e4e4e7; border-radius: 14px; padding: 18px 18px 6px; margin: 0 0 18px; }
+    section.group > .legend { font-weight: 700; font-size: 1.1rem; margin: 0 0 12px; }
+
+    .sub-group { border: 1px solid #ededf0; border-radius: 11px; padding: 12px 14px 2px; margin: 0 0 14px; }
+    .sub-group > .legend { font-weight: 700; margin: 0 0 10px; color: #333; }
+
+    .field { margin: 0 0 14px; }
+    .field > label { display: block; font-weight: 700; font-size: 0.82rem; margin: 0 0 5px; color: #444; }
+    .pair { display: flex; gap: 10px; }
+    .pair > div { flex: 1; }
+    .pair .lang { font-size: 0.72rem; color: var(--muted); margin: 0 0 3px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* technical paths / numbers — shown but de-emphasised */
+    .field--tech > label { color: var(--muted); font-weight: 400; }
+    .field--tech input { color: var(--muted); background: #fafafa; font-size: 0.86rem; }
+
+    .savebar {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      background: #fff; border-top: 1px solid #e4e4e7;
+      padding: 14px 20px; display: flex; align-items: center; gap: 16px;
+      justify-content: center;
+    }
+    .savebar .inner { width: 100%; max-width: 760px; display: flex; align-items: center; gap: 16px; }
+    .status { font-weight: 700; }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--err); }
+    .error { color: var(--err); font-weight: 700; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="editor">
+    <h1>Obsah webu</h1>
+    <p class="sub">Site content editor</p>
+
+    <section id="login" class="login">
+      <p>Zadej heslo pro úpravu textů.<br><span style="color:var(--muted)">Enter the password to edit the site texts.</span></p>
+      <form id="login-form">
+        <input id="password" type="password" autocomplete="current-password" placeholder="Heslo / Password" required>
+        <button type="submit">Odemknout</button>
+      </form>
+      <p id="login-error" class="error" hidden>Špatné heslo / Wrong password.</p>
+    </section>
+
+    <section id="editor-pane" hidden>
+      <div id="fields"></div>
+    </section>
+  </main>
+
+  <div id="savebar" class="savebar" hidden>
+    <div class="inner">
+      <button id="save" type="button">Uložit změny / Save</button>
+      <span id="status" class="status"></span>
+    </div>
+  </div>
+
+  <script src="/js/editor.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><style>
+  #orb-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+    user-select: none;
+  }
+  #orb-canvas {
+    cursor: crosshair;
+  }
+</style>
+
+</head><body><div id="orb-wrap">
+  <canvas id="orb-canvas" width="320" height="320" aria-label="Pink orb that fills with blue water as you hover"></canvas>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('orb-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 320, H = 320, CX = W / 2, CY = H / 2, R = 148;
+
+  let fillLevel = 0;       // 0 = empty, 1 = full
+  let targetFill = 0;
+  let waveOffset = 0;
+  let pulseT = 0;
+  let hovering = false;
+  let animFrame;
+
+  const PINK = '#FF87B1';
+  const BLUE = '#0065F9';
+  const WAVE_AMP = 5;
+  const WAVE_FREQ = 2.2;
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  canvas.addEventListener('mouseenter', () => { hovering = true; });
+  canvas.addEventListener('mouseleave', () => { hovering = false; targetFill = 0; });
+  canvas.addEventListener('mousemove', (e) => {
+    if (!hovering) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleY = H / rect.height;
+    const my = (e.clientY - rect.top) * scaleY;
+    const mx = (e.clientX - rect.left) * (W / rect.width);
+    const dx = mx - CX, dy = my - CY;
+    if (dx * dx + dy * dy > R * R) return;
+    targetFill = 1 - (my / H);
+    targetFill = Math.max(0, Math.min(1, targetFill));
+  });
+
+  function drawFrame() {
+    ctx.clearRect(0, 0, W, H);
+
+    pulseT += 0.025;
+    const pulse = Math.sin(pulseT) * 0.018;
+    const scale = 1 + pulse;
+
+    fillLevel = lerp(fillLevel, targetFill, 0.06);
+    waveOffset += 0.055;
+
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.scale(scale, scale);
+    ctx.translate(-CX, -CY);
+
+    // --- Pink orb base ---
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx.fillStyle = PINK;
+    ctx.fill();
+
+    // --- Blue water fill ---
+    if (fillLevel > 0.002) {
+      const waterTop = CY + R - fillLevel * R * 2;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(CX, CY, R, 0, Math.PI * 2);
+      ctx.clip();
+
+      ctx.beginPath();
+      // wave path from left edge to right edge
+      const x0 = CX - R - 4;
+      const x1 = CX + R + 4;
+      ctx.moveTo(x0, waterTop);
+      const steps = 60;
+      for (let i = 0; i <= steps; i++) {
+        const x = x0 + (x1 - x0) * (i / steps);
+        const rel = (x - CX) / R;
+        const wavey = Math.sin(rel * Math.PI * WAVE_FREQ + waveOffset) * WAVE_AMP * Math.min(1, fillLevel * 6);
+        ctx.lineTo(x, waterTop + wavey);
+      }
+      ctx.lineTo(x1, CY + R + 4);
+      ctx.lineTo(x0, CY + R + 4);
+      ctx.closePath();
+      ctx.fillStyle = BLUE;
+      ctx.globalAlpha = 0.92;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    // --- Rim / edge highlight ---
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // --- Specular gloss ---
+    const gloss = ctx.createRadialGradient(CX - 42, CY - 52, 4, CX - 30, CY - 40, 72);
+    gloss.addColorStop(0, 'rgba(255,255,255,0.38)');
+    gloss.addColorStop(0.45, 'rgba(255,255,255,0.08)');
+    gloss.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx.fillStyle = gloss;
+    ctx.fill();
+
+    ctx.restore();
+
+    animFrame = requestAnimationFrame(drawFrame);
+  }
+
+  drawFrame();
+})();
+</script>
+</body></html>
