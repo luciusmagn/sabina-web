@@ -468,11 +468,11 @@ button.tile--empty canvas {
 
 /* Bio paragraph above the contact links — wraps to a readable couple of lines. */
 .contact-bio {
-  margin: 0 0 clamp(4px, 0.6vw, 12px);
+  margin: 0 0 clamp(20px, 2.2vw, 42px); /* extra gap below → sits a little higher above the contacts */
   max-width: min(52ch, 100%);
   font-weight: 400;
-  font-size: clamp(1rem, 1.3vw, 1.6rem);
-  line-height: 1.5;
+  font-size: clamp(1rem, 1.719vw, 2.0625rem); /* same size as the e-mail / links */
+  line-height: 1.4;
   color: var(--text);
 }
 
