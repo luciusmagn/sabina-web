@@ -157,79 +157,97 @@
   </template>
 
   <template id="overlay-typografie">
-    <div class="vscroll">
-      {% for b in content.books %}
-      <div class="typo-screen vsection">
-        <div class="typo-text">
-          <div class="typo-book-group">
-            <strong class="typo-book">{{ b.title }}</strong>
-            <span class="typo-author">{{ b.author }}</span>
+    <div class="vpager">
+      <div class="vscroll">
+        {% for b in content.books %}
+        <div class="typo-screen vsection">
+          <div class="typo-text">
+            <div class="typo-book-group">
+              <strong class="typo-book">{{ b.title }}</strong>
+              <span class="typo-author">{{ b.author }}</span>
+            </div>
+            <strong class="typo-activity" data-cs="/{{ b.activity.cs }}/" data-en="/{{ b.activity.en }}/">/{{ b.activity.cs }}/</strong>
           </div>
-          <strong class="typo-activity" data-cs="/{{ b.activity.cs }}/" data-en="/{{ b.activity.en }}/">/{{ b.activity.cs }}/</strong>
+          <img class="typo-image" src="{{ b.image }}" alt="{{ b.title }} — {{ b.author }}" loading="lazy"
+               tabindex="0" role="button"
+               data-aria-cs="{{ b.title }} — {{ content.ui.enlarge.cs }}" data-aria-en="{{ b.title }} — {{ content.ui.enlarge.en }}"
+               aria-label="{{ b.title }} — {{ content.ui.enlarge.cs }}">
         </div>
-        <img class="typo-image" src="{{ b.image }}" alt="{{ b.title }} — {{ b.author }}" loading="lazy"
-             tabindex="0" role="button"
-             data-aria-cs="{{ b.title }} — {{ content.ui.enlarge.cs }}" data-aria-en="{{ b.title }} — {{ content.ui.enlarge.en }}"
-             aria-label="{{ b.title }} — {{ content.ui.enlarge.cs }}">
+        {% endfor %}
       </div>
-      {% endfor %}
+      <div class="vnav vnav--left">
+        <button class="vnav-btn vnav-up" type="button" data-aria-cs="{{ content.ui.previous.cs }}" data-aria-en="{{ content.ui.previous.en }}" aria-label="{{ content.ui.previous.cs }}"><svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2L12 13L23 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="vnav-btn vnav-down" type="button" data-aria-cs="{{ content.ui.next.cs }}" data-aria-en="{{ content.ui.next.en }}" aria-label="{{ content.ui.next.cs }}"><svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2L12 13L23 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </div>
     </div>
   </template>
 
   <template id="overlay-viz">
-    <div class="vscroll">
-      <div class="viz-detail vsection">
-        <div class="viz-detail-text">
-          <strong class="viz-detail-title" data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</strong>
-          <span class="viz-detail-caption" data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</span>
+    <div class="vpager">
+      <div class="vscroll">
+        <div class="viz-detail vsection">
+          <div class="viz-detail-text">
+            <strong class="viz-detail-title" data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</strong>
+            <span class="viz-detail-caption" data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</span>
+          </div>
+          <img class="viz-detail-wide" src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
+          <img class="viz-detail-side" src="{{ content.visualIdentity.detail.sideImage }}" alt="" loading="lazy">
         </div>
-        <img class="viz-detail-wide" src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
-        <img class="viz-detail-side" src="{{ content.visualIdentity.detail.sideImage }}" alt="" loading="lazy">
+        <div class="viz-devices vsection">
+          {% for d in content.visualIdentity.devices %}
+          <button class="viz-pad{% if loop.index0 == 1 %} viz-pad--mid{% endif %}" type="button"
+                  data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+            <img src="{{ d }}" alt="" loading="lazy">
+          </button>
+          {% endfor %}
+        </div>
       </div>
-      <div class="viz-devices vsection">
-        {% for d in content.visualIdentity.devices %}
-        <button class="viz-pad{% if loop.index0 == 1 %} viz-pad--mid{% endif %}" type="button"
-                data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-          <img src="{{ d }}" alt="" loading="lazy">
-        </button>
-        {% endfor %}
+      <div class="vnav vnav--right">
+        <button class="vnav-btn vnav-up" type="button" data-aria-cs="{{ content.ui.previous.cs }}" data-aria-en="{{ content.ui.previous.en }}" aria-label="{{ content.ui.previous.cs }}"><svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2L12 13L23 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="vnav-btn vnav-down" type="button" data-aria-cs="{{ content.ui.next.cs }}" data-aria-en="{{ content.ui.next.en }}" aria-label="{{ content.ui.next.cs }}"><svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2L12 13L23 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       </div>
     </div>
   </template>
 
   <template id="overlay-produkt">
-    <div class="vscroll">
-      {% for set in content.productSets %}
-      <div class="produkt-screen vsection">
-        <div class="produkt-text">
-          <strong class="produkt-title" data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</strong>
-          <span class="produkt-desc" data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
-        </div>
-        {% if set.layout == "rows" %}
-        <div class="produkt-rows">
-          {% for row in set.rows %}
-          <div class="produkt-row">
-            {% for img in row %}
-            <button class="produkt-tile" type="button" style="flex: {{ img.1 }} 1 0"
+    <div class="vpager">
+      <div class="vscroll">
+        {% for set in content.productSets %}
+        <div class="produkt-screen vsection">
+          <div class="produkt-text">
+            <strong class="produkt-title" data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</strong>
+            <span class="produkt-desc" data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
+          </div>
+          {% if set.layout == "rows" %}
+          <div class="produkt-rows">
+            {% for row in set.rows %}
+            <div class="produkt-row">
+              {% for img in row %}
+              <button class="produkt-tile" type="button" style="flex: {{ img.1 }} 1 0"
+                      data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                <img src="{{ img.0 }}" alt="" loading="lazy" style="aspect-ratio: {{ img.1 }}">
+              </button>
+              {% endfor %}
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="produkt-grid">
+            {% for img in set.images %}
+            <button class="produkt-tile" type="button"
                     data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
               <img src="{{ img.0 }}" alt="" loading="lazy" style="aspect-ratio: {{ img.1 }}">
             </button>
             {% endfor %}
           </div>
-          {% endfor %}
+          {% endif %}
         </div>
-        {% else %}
-        <div class="produkt-grid">
-          {% for img in set.images %}
-          <button class="produkt-tile" type="button"
-                  data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-            <img src="{{ img.0 }}" alt="" loading="lazy" style="aspect-ratio: {{ img.1 }}">
-          </button>
-          {% endfor %}
-        </div>
-        {% endif %}
+        {% endfor %}
       </div>
-      {% endfor %}
+      <div class="vnav vnav--left">
+        <button class="vnav-btn vnav-up" type="button" data-aria-cs="{{ content.ui.previous.cs }}" data-aria-en="{{ content.ui.previous.en }}" aria-label="{{ content.ui.previous.cs }}"><svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2L12 13L23 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="vnav-btn vnav-down" type="button" data-aria-cs="{{ content.ui.next.cs }}" data-aria-en="{{ content.ui.next.en }}" aria-label="{{ content.ui.next.cs }}"><svg viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 2L12 13L23 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </div>
     </div>
   </template>
 

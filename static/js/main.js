@@ -155,6 +155,28 @@ function wireOverlay(scope, key) {
   });
   const carousel = scope.querySelector(".carousel");
   if (carousel) setupCarousel(carousel);
+  const pager = scope.querySelector(".vpager");
+  if (pager) setupPager(pager);
+}
+
+/* Up/down pager: the arrows scroll the panel by one card-height; they dim at
+   the ends. (Replaces the scrollbar on the vertical overlays.) */
+function setupPager(pager) {
+  const scroller = pager.querySelector(".vscroll");
+  if (!scroller) return;
+  const up = pager.querySelector(".vnav-up");
+  const down = pager.querySelector(".vnav-down");
+  const page = (dir) =>
+    scroller.scrollBy({ top: dir * scroller.clientHeight, behavior: reduceMotion.matches ? "instant" : "smooth" });
+  if (up) up.addEventListener("click", () => page(-1));
+  if (down) down.addEventListener("click", () => page(1));
+  const sync = () => {
+    const max = scroller.scrollHeight - scroller.clientHeight;
+    if (up) up.disabled = scroller.scrollTop <= 2;
+    if (down) down.disabled = scroller.scrollTop >= max - 2;
+  };
+  scroller.addEventListener("scroll", sync);
+  sync();
 }
 
 /* Profilové fotky carousel: clones of the first/last slide bracket the real
@@ -232,7 +254,7 @@ function closeAnchor(key) {
   // these are SVGs/photos whose visible edge IS their box edge.
   if (key === "produkt") return overlay.querySelector(".produkt-grid, .produkt-rows"); // set 1
   // typografie: book image is centred, so leave the cross at its default spot
-  if (key === "viz") return overlay.querySelector(".viz-detail-side"); // first screen, not the iPads
+  if (key === "viz") return overlay.querySelector(".vnav--right .vnav-down svg"); // line up with the right-side pager arrows
   if (key === "profilovky") return overlay.querySelector(".carousel-btn--next svg"); // the chevron, not its button
   if (key === "videa") {
     const thumbs = overlay.querySelectorAll(".videa-thumb");
@@ -290,6 +312,10 @@ function layoutOverlay() {
     fitMasonries();
     positionCarousel();
     positionClose();
+    // The pager's disabled state was computed before the dialog had a size;
+    // recompute now that it's laid out.
+    const scroller = overlay.querySelector(".vscroll");
+    if (scroller) scroller.dispatchEvent(new Event("scroll"));
   });
 }
 
