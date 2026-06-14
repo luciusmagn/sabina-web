@@ -9,6 +9,8 @@ const themeToggle = document.querySelector(".theme-toggle");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let orbUpdateAccent = () => {}; // the water-fill orb assigns this; re-reads --accent on theme change
+let sundialUpdate = () => {}; // the sundial assigns this; recolours card shadows on theme change
+let sundialBody = null;       // { alt, az, isMoon } of the sun (or the moon at night) — shared with the orb gnomon
 
 let lang = "cs";
 try {
@@ -28,6 +30,7 @@ function applyTheme(theme) {
   root.setAttribute("data-theme", theme);
   themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
   orbUpdateAccent(); // recolour the orb base for the new theme
+  sundialUpdate(); // recolour the card shadows for the new theme
   try {
     localStorage.setItem("theme", theme);
   } catch (e) {
@@ -162,6 +165,59 @@ function setupWaterOrb() {
     ctx.lineWidth = Math.max(2, R * 0.014);
     ctx.stroke();
 
+    // --- Sundial: a raised triangular gnomon casting a shadow that sweeps with
+    // the real sun (the moon at night). No hour marks — a sundial's shadow
+    // tracks the sun's azimuth, not clock hours. ---
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx.clip(); // shadow stays inside the orb
+
+    // gnomon shadow — opposite the body
+    if (sundialBody && sundialBody.alt > 0) {
+      const elev = Math.min(sundialBody.alt / 90, 1);
+      const len = R * (0.82 - elev * 0.55); // long near the horizon, short at zenith
+      const opp = ((sundialBody.az + 180) * Math.PI) / 180;
+      const dx = Math.sin(opp), dy = -Math.cos(opp); // east → right, north → up
+      const px = -dy, py = dx;
+      const baseW = R * 0.05;
+      ctx.beginPath();
+      ctx.moveTo(CX + px * baseW, CY + py * baseW);
+      ctx.lineTo(CX - px * baseW, CY - py * baseW);
+      ctx.lineTo(CX + dx * len, CY + dy * len);
+      ctx.closePath();
+      ctx.fillStyle = sundialBody.isMoon ? "rgba(0,0,0,0.16)" : "rgba(0,0,0,0.32)";
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // raised triangular gnomon (a blade pointing to 12/north), shaded so the
+    // face toward the sun is lit and the other is in shade → reads as 3D.
+    const gH = R * 0.27, gW = R * 0.085;
+    const apexX = CX, apexY = CY - gH;
+    const sunRight = sundialBody ? Math.sin((sundialBody.az * Math.PI) / 180) >= 0 : false;
+    const litFill = "rgba(248,248,248,0.96)";
+    const shadeFill = "rgba(108,108,114,0.96)";
+    // left face
+    ctx.beginPath();
+    ctx.moveTo(apexX, apexY); ctx.lineTo(CX - gW, CY); ctx.lineTo(CX, CY); ctx.closePath();
+    ctx.fillStyle = sunRight ? shadeFill : litFill;
+    ctx.fill();
+    // right face
+    ctx.beginPath();
+    ctx.moveTo(apexX, apexY); ctx.lineTo(CX + gW, CY); ctx.lineTo(CX, CY); ctx.closePath();
+    ctx.fillStyle = sunRight ? litFill : shadeFill;
+    ctx.fill();
+    // ridge highlight + base/edge outline
+    ctx.beginPath(); ctx.moveTo(apexX, apexY); ctx.lineTo(CX, CY);
+    ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = Math.max(1, R * 0.006); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(CX - gW, CY); ctx.lineTo(apexX, apexY); ctx.lineTo(CX + gW, CY);
+    ctx.strokeStyle = "rgba(0,0,0,0.28)"; ctx.lineWidth = Math.max(1, R * 0.004); ctx.stroke();
+    // small base nub for grounding
+    ctx.beginPath(); ctx.ellipse(CX, CY, gW * 1.1, gW * 0.42, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(60,60,66,0.92)"; ctx.fill();
+
     /*
     const gloss = ctx.createRadialGradient(CX - R * 0.284, CY - R * 0.351, R * 0.027, CX - R * 0.203, CY - R * 0.27, R * 0.486);
     gloss.addColorStop(0, "rgba(255,255,255,0.38)");
@@ -186,6 +242,92 @@ function setupWaterOrb() {
   }
 }
 setupWaterOrb();
+
+/* --- Sundial card shadows ---
+   The cards cast a shadow opposite the real sun over Prague, so it sweeps
+   "under" the cards through the day like a sun-clock; after sunset the moon
+   takes over. The active body is shared with the orb's gnomon. Recomputed each
+   minute (the drift is sub-pixel between ticks) and on theme change (light = a
+   dark cast shadow, dark = a faint directional glow on the black cards). --- */
+function setupSundial() {
+  const cards = document.querySelectorAll(".card:not(.tile--empty):not(.overlay-card)");
+  if (!cards.length) return;
+
+  const LAT = 50.08, LON = 14.44; // Prague (her sky — no geolocation prompt for visitors)
+  const rad = Math.PI / 180;
+  const J1970 = 2440588, J2000 = 2451545, dayMs = 86400000;
+  const obl = rad * 23.4397;
+  const toDays = (date) => date.valueOf() / dayMs - 0.5 + J1970 - J2000;
+  const ra = (l, b) => Math.atan2(Math.sin(l) * Math.cos(obl) - Math.tan(b) * Math.sin(obl), Math.cos(l));
+  const dec = (l, b) => Math.asin(Math.sin(b) * Math.cos(obl) + Math.cos(b) * Math.sin(obl) * Math.sin(l));
+  const sidereal = (d, lw) => rad * (280.16 + 360.9856235 * d) - lw;
+
+  const sunCoords = (d) => {
+    const M = rad * (357.5291 + 0.98560028 * d);
+    const L = M + rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + rad * 102.9372 + Math.PI;
+    return { ra: ra(L, 0), dec: dec(L, 0) };
+  };
+  const moonCoords = (d) => {
+    const L = rad * (218.316 + 13.176396 * d);
+    const M = rad * (134.963 + 13.064993 * d);
+    const F = rad * (93.272 + 13.22935 * d);
+    const l = L + rad * 6.289 * Math.sin(M);
+    const b = rad * 5.128 * Math.sin(F);
+    return { ra: ra(l, b), dec: dec(l, b) };
+  };
+  function position(date, coords, refract) {
+    const lw = rad * -LON, phi = rad * LAT, d = toDays(date), c = coords(d);
+    const H = sidereal(d, lw) - c.ra;
+    let alt = Math.asin(Math.sin(phi) * Math.sin(c.dec) + Math.cos(phi) * Math.cos(c.dec) * Math.cos(H));
+    if (refract && alt > -0.05) alt += (rad * 0.017) / Math.tan(alt + (rad * 10.26) / (alt / rad + 5.10));
+    const azS = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(c.dec) * Math.cos(phi));
+    return { alt: alt / rad, az: (azS / rad + 180 + 360) % 360 }; // azimuth from north
+  }
+
+  function shadow() {
+    const now = new Date();
+    const sun = position(now, sunCoords, false);
+    if (sun.alt > 0) sundialBody = { alt: sun.alt, az: sun.az, isMoon: false };
+    else {
+      const moon = position(now, moonCoords, true);
+      sundialBody = moon.alt > 0 ? { alt: moon.alt, az: moon.az, isMoon: true } : null;
+    }
+
+    const dark = root.getAttribute("data-theme") === "dark";
+    if (!sundialBody) {
+      return dark ? "0 2px 12px 0 rgba(244,244,244,0.05)" : "0 4px 12px 0 rgba(20,16,8,0.10)";
+    }
+
+    const { alt, az, isMoon } = sundialBody;
+    const elev = Math.min(alt / 90, 1);
+    const mag = 15 * (1 - elev * 0.78); // long near the horizon, short at zenith
+    const opp = (az + 180) * rad;
+    const x = Math.sin(opp) * mag; // east → right
+    const y = Math.cos(opp) * mag; // north → down (keeps it "under" the card)
+    const blur = 6 + (1 - elev) * 18;
+    const spread = (1 - elev) * 3;
+    let op = Math.min(0.3, 0.07 + Math.sin(Math.min(alt, 90) * rad) * 0.2);
+    if (isMoon) op *= 0.6;
+
+    let col;
+    if (dark) {
+      col = isMoon ? "230,238,255" : "255,247,234"; // faint directional glow on black cards
+      op = Math.min(op, isMoon ? 0.1 : 0.14);
+    } else {
+      col = isMoon ? "26,30,52" : alt < 18 ? "84,44,14" : "44,32,16"; // warm low sun, cool moon
+    }
+    return `${x.toFixed(1)}px ${y.toFixed(1)}px ${blur.toFixed(1)}px ${spread.toFixed(1)}px rgba(${col},${op.toFixed(3)})`;
+  }
+
+  function apply() {
+    const s = shadow();
+    cards.forEach((card) => { card.style.boxShadow = s; });
+  }
+  sundialUpdate = apply;
+  apply();
+  setInterval(apply, 60000);
+}
+setupSundial();
 
 /* --- Overlay + lightbox refs --- */
 
