@@ -250,6 +250,9 @@ function positionClose() {
   overlayClose.style.right = "";
   overlayHeading.style.marginLeft = "";
   if (!overlay.open) return;
+  // Mobile stacks everything in one column; the cross stays in the header
+  // (positioned by CSS) rather than chasing a full-width photo's edge.
+  if (window.matchMedia("(max-width: 860px)").matches) return;
   const key = sourceTile && sourceTile.dataset.overlay;
   const anchor = closeAnchor(key);
   if (!anchor) return; // kontakt → CSS defaults (no media to align to)

@@ -520,6 +520,7 @@ button.tile--empty {
   .videa {
     grid-template-columns: 1fr;
     overflow-y: auto;
+    align-content: start; /* flow from the top — don't centre-crop the first card */
   }
 }
 
@@ -1061,23 +1062,43 @@ button.tile--empty {
 
   .overlay-card {
     width: calc(100vw - 32px);
-    height: min(700px, 75dvh);
+    height: calc(100dvh - 32px); /* near full-screen, 16px margin all round */
     padding: 28px 24px;
   }
+
+  /* Cross sits in the header row, clear of the content below it. */
+  .overlay-close {
+    top: 24px;
+    right: 24px;
+  }
+
+  /* Carousel arrows: smaller and pinned to the card edges so they clear the
+     photo (the landscape shots fill nearly the whole slide width). */
+  .carousel-btn { width: 32px; height: 32px; }
+  .carousel-btn--prev { left: 0; }
+  .carousel-btn--next { right: 0; }
 
   .gallery {
     grid-template-columns: 1fr 1fr;
   }
 
-  /* Overlay sections stack vertically on mobile */
+  /* Overlay sections stack vertically and are sized by their content, so the
+     card scrolls through them instead of forcing each to full height (which
+     made tall content overflow — overlapping the next screen / cropping the
+     top labels). Snapping is off so you can scroll a tall section freely. */
+  .vscroll {
+    scroll-snap-type: none;
+  }
+
   .typo-screen,
   .produkt-screen,
   .viz-detail,
   .viz-devices {
+    height: auto;
     min-height: 0;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: clamp(16px, 4vw, 28px);
     padding: 24px 0;
   }
