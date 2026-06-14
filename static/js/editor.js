@@ -27,7 +27,7 @@ const NICE_LABELS = {
   images: "Images (files)", rows: "Rows (files)", profilePhotos: "Profile photos",
   photos: "Photos (files)", text: "Text", books: "Books", author: "Author",
   activity: "Activity", image: "Image (file)", videos: "Videos", name: "Name",
-  work: "Work done", link: "Link (URL)", poster: "Poster (file)", src: "Video (file)",
+  work: "Work done", link: "Link (URL)", poster: "Poster (file)", src: "File",
   kontakt: "Contact", viz: "Visual identity", produkt: "Product photos",
   profilovky: "Profile photos", videa: "Videos", typografie: "Typography",
   themeToggle: "Theme toggle", languageToggle: "Language toggle", languageButton: "Language button",
@@ -48,14 +48,17 @@ const isCsEn = (v) =>
 
 const isFilePath = (s) => typeof s === "string" && /^\/.+\.(png|jpe?g|mp4|svg|ico|webm)$/i.test(s);
 
-function itemLabel(item, index) {
+function pickLabel(v) {
+  if (typeof v === "string") return v;
+  if (v && typeof v === "object") return v.cs || v.en || null; // {cs,en}
+  return null;
+}
+
+function itemLabel(item) {
   if (item && typeof item === "object") {
-    const meaningful =
-      item.title || (item.name && (item.name.cs || item.name.en)) ||
-      (item.label && (item.label.cs || item.label.en));
-    if (meaningful) return meaningful;
+    return pickLabel(item.title) || pickLabel(item.name) || pickLabel(item.label) || null;
   }
-  return `#${index + 1}`;
+  return null;
 }
 
 /* --- form building --- */
@@ -129,7 +132,8 @@ function renderNode(key, value, pathArr, depth) {
       sub.className = "sub-group";
       const sl = document.createElement("div");
       sl.className = "legend";
-      sl.textContent = itemLabel(item, i);
+      const lbl = itemLabel(item);
+      sl.textContent = lbl ? `${i + 1}. ${lbl}` : `#${i + 1}`;
       sub.append(sl);
       let subAny = false;
       for (const k of Object.keys(item)) {

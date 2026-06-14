@@ -23,8 +23,8 @@
   "tiles": {
     "kontakt":    { "cs": "Kontakt",                "en": "Contact" },
     "viz":        { "cs": "Vizuální<br>identita",   "en": "Visual<br>identity" },
-    "produkt":    { "cs": "Produktové<br>fotky",    "en": "Product<br>photos" },
-    "profilovky": { "cs": "Profilové<br>fotky",     "en": "Profile<br>photos" },
+    "produkt":    { "cs": "Produktové<br>foto",     "en": "Product<br>photos" },
+    "profilovky": { "cs": "Profilové<br>foto",      "en": "Profile<br>photos" },
     "videa":      { "cs": "Videa",                  "en": "Videos" },
     "typografie": { "cs": "Typografie",             "en": "Typography" }
   },
@@ -62,8 +62,8 @@
 
   "productSets": [
     {
-      "label":   { "cs": "Sada 01", "en": "Set 01" },
-      "caption": { "cs": "Popisek", "en": "Caption" },
+      "label":   { "cs": "BMM 100", "en": "BMM 100" },
+      "caption": { "cs": "Foto", "en": "Photo" },
       "layout": "grid",
       "images": [
         ["/produktove-fotky/set-1/web-1.png", 1.5],
@@ -73,8 +73,8 @@
       ]
     },
     {
-      "label":   { "cs": "Sada 02", "en": "Set 02" },
-      "caption": { "cs": "Popisek", "en": "Caption" },
+      "label":   { "cs": "Braiins merch", "en": "Braiins merch" },
+      "caption": { "cs": "/Foto, postprodukce/", "en": "/Photo, postproduction/" },
       "layout": "rows",
       "rows": [
         [
@@ -91,15 +91,11 @@
   ],
 
   "profilePhotos": {
-    "caption": {
-      "title": { "cs": "BMM 101", "en": "BMM 101" },
-      "text":  { "cs": "Popisek", "en": "Caption" }
-    },
     "photos": [
-      "/profilove-fotky/web-1.jpg",
-      "/profilove-fotky/web-2.jpg",
-      "/profilove-fotky/web-3.jpg",
-      "/profilove-fotky/web-4.jpg"
+      { "src": "/profilove-fotky/web-1.jpg", "title": { "cs": "BMM 101", "en": "BMM 101" }, "text": { "cs": "Popisek", "en": "Caption" } },
+      { "src": "/profilove-fotky/web-2.jpg", "title": { "cs": "BMM 101", "en": "BMM 101" }, "text": { "cs": "Popisek", "en": "Caption" } },
+      { "src": "/profilove-fotky/web-3.jpg", "title": { "cs": "BMM 101", "en": "BMM 101" }, "text": { "cs": "Popisek", "en": "Caption" } },
+      { "src": "/profilove-fotky/web-4.jpg", "title": { "cs": "BMM 101", "en": "BMM 101" }, "text": { "cs": "Popisek", "en": "Caption" } }
     ]
   },
 
@@ -111,14 +107,14 @@
 
   "videos": [
     {
-      "name":   { "cs": "We Stopped Selling Bitcoin, Here's How", "en": "We Stopped Selling Bitcoin, Here's How" },
+      "name":   { "cs": "Firefish", "en": "Firefish" },
       "work":   { "cs": "Střih, color grading", "en": "Editing, color grading" },
       "link":   "https://www.youtube.com/watch?v=IcKUAGvzCBw",
       "poster": "/videa/video-1-poster.jpg",
       "src":    "/videa/video-1.mp4"
     },
     {
-      "name":   { "cs": "Braiins na X", "en": "Braiins on X" },
+      "name":   { "cs": "Braiins OS release", "en": "Braiins OS release" },
       "work":   { "cs": "Natáčení, střih, color grading", "en": "Shooting, editing, color grading" },
       "link":   "https://x.com/Braiins/status/2062182676161814540",
       "poster": "/videa/video-2-poster.jpg",

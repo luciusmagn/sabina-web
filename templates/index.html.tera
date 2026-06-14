@@ -264,10 +264,10 @@
       <div class="carousel-track">
         {% for p in content.profilePhotos.photos %}
         <div class="carousel-slide">
-          <div class="carousel-photo"><img src="{{ p }}" alt="" loading="lazy"></div>
+          <div class="carousel-photo"><img src="{{ p.src }}" alt="" loading="lazy"></div>
           <div class="carousel-caption">
-            <strong class="carousel-caption-title" data-cs="{{ content.profilePhotos.caption.title.cs }}" data-en="{{ content.profilePhotos.caption.title.en }}">{{ content.profilePhotos.caption.title.cs }}</strong>
-            <span class="carousel-caption-desc" data-cs="{{ content.profilePhotos.caption.text.cs }}" data-en="{{ content.profilePhotos.caption.text.en }}">{{ content.profilePhotos.caption.text.cs }}</span>
+            <strong class="carousel-caption-title" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</strong>
+            <span class="carousel-caption-desc" data-cs="{{ p.text.cs }}" data-en="{{ p.text.en }}">{{ p.text.cs }}</span>
           </div>
         </div>
         {% endfor %}
