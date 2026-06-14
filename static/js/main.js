@@ -178,7 +178,7 @@ function setupWaterOrb() {
       const elev = Math.min(sundialBody.alt / 90, 1);
       const len = R * (0.82 - elev * 0.55); // long near the horizon, short at zenith
       const opp = ((sundialBody.az + 180) * Math.PI) / 180;
-      const dx = Math.sin(opp), dy = -Math.cos(opp); // east → right, north → up
+      const dx = Math.sin(opp), dy = Math.cos(opp); // east → right, north → down (matches the cards)
       const px = -dy, py = dx;
       const baseW = R * 0.05;
       ctx.beginPath();
