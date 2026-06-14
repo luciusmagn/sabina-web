@@ -251,6 +251,11 @@ button.card:not(.tile--empty):hover {
   transition: clip-path 0.2s ease;
 }
 
+/* The tagline reads in the card's own colour on the fill (white on the blue in
+   light theme, black on the light fill in dark theme); the name stays accent. */
+.card--hero .hero-layer--fill .tagline { color: #fff; }
+[data-theme="dark"] .card--hero .hero-layer--fill .tagline { color: #000; }
+
 .card--hero h1 {
   margin: 0;
   font-weight: 700;
@@ -932,9 +937,10 @@ button.tile--empty canvas {
   flex: none;
   margin-top: clamp(10px, 2.5vh, 28px); /* sit a little lower, below the photo */
   display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 20px;
+  flex-direction: column;     /* title and description stack on two lines */
+  align-items: center;
+  gap: clamp(2px, 0.3vw, 6px);
+  text-align: center;
 }
 
 .carousel-caption-title {

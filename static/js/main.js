@@ -130,7 +130,7 @@ function setupWaterOrb() {
     ctx.clearRect(0, 0, W, H);
     pulseT += 0.025;
     // breathe inward only — the biggest state is 1.0 so it never overruns the canvas
-    const scale = 1 - (reduceMotion.matches ? 0 : (1 - Math.cos(pulseT)) * 0.018);
+    const scale = 1 - (reduceMotion.matches ? 0 : (1 - Math.cos(pulseT)) * 0.03);
     fillLevel = lerp(fillLevel, targetFill, 0.06);
 
     ctx.save();
