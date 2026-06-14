@@ -120,7 +120,10 @@ function setupWaterOrb() {
     const my = ((event.clientY - rect.top) / rect.height) * H;
     const mx = ((event.clientX - rect.left) / rect.width) * W;
     if ((mx - CX) ** 2 + (my - CY) ** 2 > R * R) return; // ignore the transparent corners
-    targetFill = Math.max(0, Math.min(1, 1 - my / H));
+    // fill up to the cursor, measured within the sphere; the top ~10% fills it fully
+    let f = (CY + R - my) / (2 * R);
+    if (f > 0.9) f = 1;
+    targetFill = Math.max(0, Math.min(1, f));
   });
 
   function frame() {
@@ -180,15 +183,13 @@ function setupWaterOrb() {
       const len = R * (0.82 - elev * 0.55); // long near the horizon, short at zenith
       const opp = ((sundialBody.az + 180) * Math.PI) / 180;
       const dx = Math.sin(opp), dy = Math.cos(opp); // east → right, north → down (matches the cards)
-      const px = -dy, py = dx;
-      const baseW = R * 0.05;
       ctx.beginPath();
-      ctx.moveTo(CX + px * baseW, CY + py * baseW);
-      ctx.lineTo(CX - px * baseW, CY - py * baseW);
+      ctx.moveTo(CX, CY);
       ctx.lineTo(CX + dx * len, CY + dy * len);
-      ctx.closePath();
-      ctx.fillStyle = sundialBody.isMoon ? "rgba(0,0,0,0.16)" : "rgba(0,0,0,0.32)";
-      ctx.fill();
+      ctx.strokeStyle = sundialBody.isMoon ? "rgba(0,0,0,0.16)" : "rgba(0,0,0,0.32)";
+      ctx.lineWidth = R * 0.04; // a line the same width as the pole
+      ctx.lineCap = "round";
+      ctx.stroke();
     }
     ctx.restore();
 
