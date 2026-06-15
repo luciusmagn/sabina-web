@@ -16,6 +16,13 @@
   --gap-col: clamp(12px, 1.25vw, 24px);   /* 24 @ 1920 */
   --gap-row: clamp(20px, 2.292vw, 44px);  /* 44 @ 1920 */
 
+  /* Every section label (videos / product / profile / typography / visual
+     identity) shares ONE title style and ONE description style — defined here
+     so the sizes and colours can never drift apart again. */
+  --label-title-size: clamp(1rem, 1.15vw, 1.375rem);
+  --label-desc-size: clamp(0.85rem, 0.95vw, 1.125rem);
+  --label-desc-color: color-mix(in srgb, var(--text) 65%, transparent);
+
   color-scheme: light;
 }
 
@@ -558,7 +565,7 @@ button.tile--empty canvas {
 .videa-name {
   margin: clamp(10px, 0.83vw, 16px) 0 0;
   font-weight: 700;
-  font-size: clamp(1rem, 1.15vw, 1.375rem);
+  font-size: var(--label-title-size);
   line-height: 1.25;
 }
 
@@ -576,9 +583,9 @@ button.tile--empty canvas {
 .videa-work {
   margin: clamp(2px, 0.3vw, 6px) 0 0;
   font-weight: 400;
-  font-size: clamp(0.85rem, 0.95vw, 1.125rem);
+  font-size: var(--label-desc-size);
   line-height: 1.4;
-  color: color-mix(in srgb, var(--text) 65%, transparent);
+  color: var(--label-desc-color);
 }
 
 /* Mobile: stack the video cards */
@@ -681,21 +688,22 @@ button.tile--empty canvas {
 
 .typo-book {
   font-weight: 700;
-  font-size: clamp(1rem, 1.15vw, 1.375rem);
+  font-size: var(--label-title-size);
   line-height: 1.25;
 }
 
 .typo-activity {
   font-weight: 400;
-  font-size: clamp(1rem, 1.15vw, 1.375rem);
-  line-height: 1.25;
+  font-size: var(--label-desc-size); /* match the author (description style) */
+  line-height: 1.4;
+  color: var(--label-desc-color);
 }
 
 .typo-author {
   font-weight: 400;
-  font-size: clamp(0.85rem, 0.95vw, 1.125rem);
+  font-size: var(--label-desc-size);
   line-height: 1.4;
-  color: color-mix(in srgb, var(--text) 65%, transparent);
+  color: var(--label-desc-color);
 }
 
 .typo-image {
@@ -765,15 +773,15 @@ button.tile--empty canvas {
 
 .viz-detail-title {
   font-weight: 700;
-  font-size: clamp(1rem, 1.15vw, 1.375rem);
+  font-size: var(--label-title-size);
   line-height: 1.25;
 }
 
 .viz-detail-caption {
   font-weight: 400;
-  font-size: clamp(0.85rem, 0.95vw, 1.125rem);
+  font-size: var(--label-desc-size);
   line-height: 1.4;
-  color: color-mix(in srgb, var(--text) 65%, transparent);
+  color: var(--label-desc-color);
 }
 
 .viz-detail-wide {
@@ -815,15 +823,15 @@ button.tile--empty canvas {
 
 .produkt-title {
   font-weight: 700;
-  font-size: clamp(1rem, 1.15vw, 1.375rem);
+  font-size: var(--label-title-size);
   line-height: 1.25;
 }
 
 .produkt-desc {
   font-weight: 400;
-  font-size: clamp(0.85rem, 0.95vw, 1.125rem);
+  font-size: var(--label-desc-size);
   line-height: 1.4;
-  color: color-mix(in srgb, var(--text) 65%, transparent);
+  color: var(--label-desc-color);
 }
 
 /* Masonry on the right (~60%); photos at natural aspect (no crop). */
@@ -945,15 +953,15 @@ button.tile--empty canvas {
 
 .carousel-caption-title {
   font-weight: 700;
-  font-size: clamp(1rem, 1.15vw, 1.375rem);
+  font-size: var(--label-title-size);
   line-height: 1.25;
 }
 
 .carousel-caption-desc {
   font-weight: 400;
-  font-size: clamp(0.85rem, 0.95vw, 1.125rem);
+  font-size: var(--label-desc-size);
   line-height: 1.4;
-  color: color-mix(in srgb, var(--text) 65%, transparent);
+  color: var(--label-desc-color);
 }
 
 .carousel-btn {
