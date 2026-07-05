@@ -317,7 +317,7 @@ html.has-cursor * { cursor: none !important; }
   top: 50%;
   width: min(48vw, 860px);
   height: 100%;
-  transform: translate(-50%, -50%) translateX(var(--tx, 0px)) rotateY(var(--ry, 0deg)) scale(var(--sc, 1));
+  transform: translate(-50%, -50%) translateX(var(--tx, 0px)) translateZ(var(--tz, 0px)) rotateY(var(--ry, 0deg)) scale(var(--sc, 1));
   transform-style: preserve-3d;
   transition: transform 0.65s cubic-bezier(0.3, 0.7, 0.2, 1);
 }
@@ -341,7 +341,9 @@ html.has-cursor * { cursor: none !important; }
   overflow: hidden;
 }
 
-/* front — a flat colour cover with the category name + open pill */
+/* front — a photo cover from inside the category, the big name + open pill.
+   The face itself doesn't clip (overflow visible) so the label can float
+   ABOVE the card and drop onto it; the cover layer does the clipping. */
 
 .rcard-front {
   display: flex;
@@ -349,24 +351,43 @@ html.has-cursor * { cursor: none !important; }
   align-items: center;
   justify-content: center;
   gap: clamp(18px, 3vh, 30px);
-  background: var(--main-b);
+  background: none;
   color: #ffffff;
   text-align: center;
   padding: 6%;
+  overflow: visible;
 }
 
-[data-theme="dark"] .rcard-front { background: var(--main-a); }
+.rcard-cover {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--main-b); /* pink behind the photo (and through book pngs) */
+}
+
+[data-theme="dark"] .rcard-cover { background: var(--main-a); }
+
+.rcard-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .rcard:not(.is-center) .rcard-front { cursor: pointer; }
 
 .rcard-title {
-  font-size: clamp(34px, 4.6vw, 78px);
+  position: relative;
+  z-index: 1;
+  font-size: clamp(40px, 5.6vw, 100px);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1;
 }
 
 .rcard-open {
+  position: relative;
+  z-index: 1;
   padding: 12px 28px;
   border-radius: 999px;
   background: var(--bg);
@@ -375,14 +396,23 @@ html.has-cursor * { cursor: none !important; }
   font-weight: 700;
 }
 
-/* the landing animation — retriggered whenever a card becomes the centre */
+/* the pixel move: the label starts high above the card and drops onto it
+   as it arrives; when the ring turns, the old label flies up and away */
 
-.rcard-front.land .rcard-title { animation: land-in 0.55s 0.14s both; }
-.rcard-front.land .rcard-open  { animation: land-in 0.55s 0.3s both; }
+.rcard-front.land .rcard-title { animation: land-in 0.75s cubic-bezier(0.2, 0.75, 0.25, 1) 0.05s both; }
+.rcard-front.land .rcard-open  { animation: land-in 0.75s cubic-bezier(0.2, 0.75, 0.25, 1) 0.18s both; }
+
+.rcard-front.leave .rcard-title,
+.rcard-front.leave .rcard-open { animation: leave-up 0.35s ease-in both; }
 
 @keyframes land-in {
-  from { opacity: 0; transform: translateY(30px) scale(0.95); }
-  to   { opacity: 1; transform: none; }
+  from { transform: translateY(-46svh); }
+  to   { transform: none; }
+}
+
+@keyframes leave-up {
+  from { transform: none; opacity: 1; }
+  to   { transform: translateY(-46svh); opacity: 0; }
 }
 
 /* back — a vertical scroll of the category's projects */
@@ -732,7 +762,9 @@ html.has-cursor * { cursor: none !important; }
   .trace--arrow, .walker, .w-limb { animation: none; }
   .rcard, .rcard-inner, .proj-zoom img, .proj-play img { transition: none; }
   .rcard-front.land .rcard-title,
-  .rcard-front.land .rcard-open { animation: none; }
+  .rcard-front.land .rcard-open,
+  .rcard-front.leave .rcard-title,
+  .rcard-front.leave .rcard-open { animation: none; }
   .walker { left: var(--pad-x); }
   .rv { opacity: 1; transform: none; }
   .kontakt-mail:hover .trace--ring path { animation: none; stroke-dashoffset: 0; }

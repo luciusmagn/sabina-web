@@ -179,17 +179,23 @@ function setupRing() {
   }
 
   function layout() {
-    // step > card width leaves a clear gap, so the field shows between cards
-    const step = wide.matches ? 50 : 80; // vw between card centres
-    // positive = outer edges recede, like a big ball behind pushing them out
-    const turn = wide.matches ? 30 : 22;
+    // a deep ring: ±1 flanks the centre with a gap, ±2 peeks in that gap
+    // from further back (larger x than the centre, smaller than ±1, pushed
+    // away on Z). Positive rotation = outer edges recede, like a big ball
+    // behind pushing the cards out.
+    const X    = wide.matches ? [0, 54, 40]   : [0, 84, 60];   // vw from centre
+    const RY   = wide.matches ? [0, 32, 52]   : [0, 24, 46];   // deg
+    const Z    = [0, -170, -430];                              // px into the screen
+    const SC   = [1, 0.88, 0.74];
     cards.forEach((card, i) => {
       let off = (i - cur + n) % n;
       if (off > n / 2) off -= n;
-      const a = Math.abs(off);
-      card.style.setProperty("--tx", (off * step) + "vw");
-      card.style.setProperty("--ry", (off * turn) + "deg");
-      card.style.setProperty("--sc", String(1 - Math.min(a, 2) * 0.12));
+      const a = Math.min(Math.abs(off), 2);
+      const sign = Math.sign(off);
+      card.style.setProperty("--tx", (sign * X[a]) + "vw");
+      card.style.setProperty("--ry", (sign * RY[a]) + "deg");
+      card.style.setProperty("--tz", Z[a] + "px");
+      card.style.setProperty("--sc", String(SC[a]));
       card.style.zIndex = String(10 - a);
       card.classList.toggle("is-center", off === 0);
       card.querySelector(".rcard-front").tabIndex = off === 0 ? 0 : -1;
@@ -199,9 +205,14 @@ function setupRing() {
 
   function go(dir) {
     if (ring.classList.contains("has-flip")) return;
+    // the outgoing label flies up and away…
+    const old = cards[cur].querySelector(".rcard-front");
+    old.classList.remove("land");
+    old.classList.add("leave");
+    setTimeout(() => old.classList.remove("leave"), 400);
     cur = (cur + dir + n) % n;
     layout();
-    land();
+    land(); // …and the incoming one drops onto its card
   }
 
   function flip(card) {
