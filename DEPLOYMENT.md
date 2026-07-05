@@ -4,59 +4,87 @@ The site runs on **`root@sabinamacha.com`** (Artix Linux, s6 init).
 
 | Fact | Value |
 |------|-------|
-| Host | `root@sabinamacha.com` |
+| Host | `root@sabinamacha.com` (hostname `velho`) |
 | OS / init | Artix Linux, s6 |
 | Repo on server | `/root/sabina-web` |
-| Process runner | GNU `screen` session named **`portfolium`** |
+| Process runner | GNU `screen` session named **`portfolium`** (login shell is **fish**) |
 | SSH access | The developer's local SSH key is authorized for `root@sabinamacha.com` |
+
+## Architecture
+
+```
+Internet → Caddy (:443/:80)  ──reverse_proxy──▶  127.0.0.1:60007  →  sabina-web
+```
+
+- **Caddy** terminates TLS and reverse-proxies `sabinamacha.com` to `localhost:60007`
+  (see `/etc/caddy/Caddyfile`: `https://sabinamacha.com { reverse_proxy localhost:60007 }`).
+- The app therefore **must listen on `127.0.0.1:60007`**, not Rocket's default 8000.
+- The server process is `target/debug/sabina-web`, launched inside the `portfolium`
+  screen from `/root/sabina-web`.
+
+## ⚠️ Port pinning — read before rebuilding
+
+The running binary listens on **60007**, but **the current source does not configure
+that port anywhere** (no `Rocket.toml`, no `ROCKET_PORT`, no `.configure()` in
+`src/main.rs`). Rocket's default is **8000**. The deployed binary was built from an
+older `main.rs` that pinned 60007; that config was later removed from source.
+
+**Consequence:** a plain `cargo run` / `cargo build` from the current tree will bind
+**8000**, which Caddy does **not** proxy — the public site would go down.
+
+Before redeploying any real code change, pin the port with **one** of:
+
+- launch with `ROCKET_PORT=60007` in the environment (simplest), or
+- add a `Rocket.toml` with `[default]\nport = 60007`, or
+- restore `.configure(...)` with `port: 60007` in `src/main.rs`.
+
+## Content vs. code changes
+
+- **`content.json` and `templates/*.tera` are read per request** (Rocket debug mode),
+  so editing them needs **no rebuild or restart** — this is why the stale binary still
+  serves fresh content. On the server, `content.json` has **uncommitted live edits**
+  (edited via `/editor`). **Never** `git checkout`/`reset` it — you'd wipe live content.
+- **Rust changes** require a rebuild + relaunch (see below), with the port pinned.
 
 ## Getting in
 
 ```sh
 ssh root@sabinamacha.com
+screen -r portfolium          # attach; use `screen -d -r portfolium` to steal a stale attach
 ```
 
-The running server lives inside a detached `screen` session called `portfolium`.
+## Deploying
+
+**Docs / content / template change (no restart needed):**
 
 ```sh
-screen -r portfolium
+cd /root/sabina-web && git pull        # fast-forward; leaves uncommitted content.json intact
 ```
 
-If the session is "already attached" (e.g. a stale attach from a dropped
-connection), force-detach it elsewhere and reattach here:
+**Rust code change (rebuild + relaunch):** attach to the `portfolium` screen, stop the
+running server (Ctrl-C), then relaunch **with the port pinned** and the runtime lib path
+the toolchain needs (the deployed process uses the nightly toolchain and sets
+`LD_LIBRARY_PATH` to its lib dirs):
 
 ```sh
-screen -d -r portfolium      # detach from wherever it's attached, then attach here
+cd /root/sabina-web
+git pull
+ROCKET_PORT=60007 EDITOR_PASSWORD=<prod-password> cargo run --release
+# then detach without stopping: Ctrl-A then D
 ```
 
-If `screen -r` fails outright and no `portfolium` session exists, start a fresh
-one:
+Verify after any restart:
 
 ```sh
-screen -S portfolium
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:60007/   # expect 200
+curl -s -o /dev/null -w '%{http_code}\n' https://sabinamacha.com/  # expect 200
 ```
-
-## Deploying a change
-
-1. SSH in and attach to the `portfolium` screen (see above).
-2. Pull the latest code:
-   ```sh
-   cd /root/sabina-web
-   git pull
-   ```
-3. Stop the running server (Ctrl-C inside the screen), then rebuild and relaunch:
-   ```sh
-   cargo run --release
-   ```
-   Rocket serves on port **8000** by default.
-4. Detach from the screen **without stopping the server**: press `Ctrl-A` then `D`.
 
 ### Notes
 
-- Editing only `content.json` or the `templates/*.tera` files does **not** require
-  a rebuild or restart — they are read per-request in Rocket's debug mode. A
-  release build bakes templates in, so restart after template changes when running
-  `--release`.
-- The editor at `/editor` is gated by the `EDITOR_PASSWORD` env var. Set it in the
-  environment the screen session launches under; if unset, a random password is
-  generated and printed to the server log at startup.
+- `EDITOR_PASSWORD` is set in the running process's environment (gates `/editor`). The
+  real value is **not** stored in this repo; read it from the running process if needed
+  (`tr '\0' '\n' < /proc/$(pgrep -f target/.*/sabina-web)/environ | grep EDITOR_PASSWORD`).
+- If unset at launch, the app generates a random password and prints it to the log.
+- The machine hosts many unrelated services/screens — only touch `portfolium` and
+  `/root/sabina-web`.
