@@ -1,0 +1,7 @@
+# Pins the bind address/port so any rebuild matches what Caddy proxies to
+# (sabinamacha.com -> reverse_proxy localhost:60007). Without this, Rocket would
+# fall back to its default port 8000 and the reverse proxy would break.
+# See DEPLOYMENT.md.
+[default]
+address = "127.0.0.1"
+port = 60007

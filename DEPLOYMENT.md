@@ -22,21 +22,23 @@ Internet → Caddy (:443/:80)  ──reverse_proxy──▶  127.0.0.1:60007  �
 - The server process is `target/debug/sabina-web`, launched inside the `portfolium`
   screen from `/root/sabina-web`.
 
-## ⚠️ Port pinning — read before rebuilding
+## Port pinning
 
-The running binary listens on **60007**, but **the current source does not configure
-that port anywhere** (no `Rocket.toml`, no `ROCKET_PORT`, no `.configure()` in
-`src/main.rs`). Rocket's default is **8000**. The deployed binary was built from an
-older `main.rs` that pinned 60007; that config was later removed from source.
+The port is pinned in **`Rocket.toml`** so any rebuild binds what Caddy proxies to:
 
-**Consequence:** a plain `cargo run` / `cargo build` from the current tree will bind
-**8000**, which Caddy does **not** proxy — the public site would go down.
+```toml
+[default]
+address = "127.0.0.1"
+port = 60007
+```
 
-Before redeploying any real code change, pin the port with **one** of:
+This binds localhost-only (correct behind Caddy) in both debug and release builds.
 
-- launch with `ROCKET_PORT=60007` in the environment (simplest), or
-- add a `Rocket.toml` with `[default]\nport = 60007`, or
-- restore `.configure(...)` with `port: 60007` in `src/main.rs`.
+_History:_ the live binary was built from an older `main.rs` that hard-coded 60007;
+that config was later dropped from source, so for a while a rebuild would have fallen
+back to Rocket's default **8000** and broken the proxy. `Rocket.toml` removes that
+hazard. **Note:** the currently running process is still that old binary — it keeps
+serving on 60007; `Rocket.toml` only takes effect on the **next rebuild/restart**.
 
 ## Content vs. code changes
 
@@ -69,7 +71,7 @@ the toolchain needs (the deployed process uses the nightly toolchain and sets
 ```sh
 cd /root/sabina-web
 git pull
-ROCKET_PORT=60007 EDITOR_PASSWORD=<prod-password> cargo run --release
+EDITOR_PASSWORD=<prod-password> cargo run --release   # port comes from Rocket.toml (60007)
 # then detach without stopping: Ctrl-A then D
 ```
 
