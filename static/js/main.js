@@ -187,23 +187,26 @@ function setupChrome() {
 }
 setupChrome();
 
-/* ---------------- wireframe mesh covers ----------------
-   Each ring cover is resampled and redrawn as a displacement mesh: a fine
-   grid whose lattice lifts where the source image is bright, so the subject
-   reads as a wireframe relief — flat ground, thin lines, no gradients
-   (pink + blue in light, orange + black in dark). The source <img> stays in
-   the DOM as the no-JS fallback and is hidden once its mesh is drawn. */
+/* ---------------- wireframe covers ----------------
+   Each ring cover is redrawn as a form-following wireframe: the image's
+   luminance becomes a smooth height field, and iso-contour lines (plus a
+   sparse warped vertical family and the silhouette) wrap around the subject
+   like a 3D mesh. Strokes are split across three depth layers so the
+   subject can parallax under the cursor. Flat ground, thin lines, no
+   gradients — pink + blue in light, orange + black in dark. The source
+   <img> stays as the no-JS fallback. */
 
 function setupCoverArt() {
   const covers = [...document.querySelectorAll(".rcard-cover img")];
   if (!covers.length) return;
 
-  const CELL = 8;          // lattice pitch in canvas px
-  const AMP = 30;          // how far bright areas lift the mesh
-  const W = 760;           // logical canvas size (stretched over the card)
-  const COLS = Math.floor(W / CELL);
-  const ROWS = 66;
-  const H = ROWS * CELL + AMP;
+  const CELL = 6;                          // lattice pitch in canvas px
+  const W = 762;
+  const COLS = Math.floor(W / CELL) + 1;   // sample points, not cells
+  const ROWS = 91;
+  const H = (ROWS - 1) * CELL;
+  const LEVELS = [0.14, 0.24, 0.34, 0.44, 0.54, 0.64, 0.74, 0.84];
+  const AMP = 26;                          // vertical-line warp
 
   const palette = () =>
     root.getAttribute("data-theme") === "dark"
@@ -212,22 +215,27 @@ function setupCoverArt() {
 
   const renderers = covers.map((img) => {
     const holder = img.parentElement;
-    let canvas = null;
+    let layers = null;
+
+    function ensureLayers() {
+      if (layers) return;
+      layers = [0, 1, 2].map((i) => {
+        const c = document.createElement("canvas");
+        c.className = "cover-mesh cover-mesh--l" + i;
+        c.width = W;
+        c.height = H;
+        c.setAttribute("aria-hidden", "true");
+        holder.append(c);
+        return c;
+      });
+      holder.classList.add("has-mesh");
+    }
 
     function render() {
       if (!img.naturalWidth) return;
-      if (!canvas) {
-        canvas = document.createElement("canvas");
-        canvas.className = "cover-mesh";
-        canvas.width = W;
-        canvas.height = H;
-        canvas.setAttribute("aria-hidden", "true");
-        holder.append(canvas);
-        holder.classList.add("has-mesh");
-      }
+      ensureLayers();
 
-      // luminance grid — sampled from data-crop="x,y,w,h" (% of the source)
-      // when given, else a centre crop matching the mesh aspect
+      /* --- sample luminance + alpha on the lattice --- */
       const sample = document.createElement("canvas");
       sample.width = COLS;
       sample.height = ROWS;
@@ -240,7 +248,7 @@ function setupCoverArt() {
         sw = (cw / 100) * img.naturalWidth;
         sh = (ch / 100) * img.naturalHeight;
       } else {
-        const targetRatio = W / (ROWS * CELL);
+        const targetRatio = W / H;
         const srcRatio = sw / sh;
         if (srcRatio > targetRatio) { sw = sh * targetRatio; sx = (img.naturalWidth - sw) / 2; }
         else { sh = sw / targetRatio; sy = (img.naturalHeight - sh) / 2; }
@@ -248,79 +256,139 @@ function setupCoverArt() {
       sctx.drawImage(img, sx, sy, sw, sh, 0, 0, COLS, ROWS);
       const px = sctx.getImageData(0, 0, COLS, ROWS).data;
       const N = COLS * ROWS;
-      const lum = new Float32Array(N);
+      let lum = new Float32Array(N);
+      const alpha = new Float32Array(N);
       for (let i = 0; i < N; i++) {
         lum[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255;
+        alpha[i] = px[i * 4 + 3] / 255;
       }
 
-      /* --- keep only the main thing ---
-         The ground stays flat: a cell joins the mesh when it differs from
-         the background tone (the median of the border cells) or sits on an
-         edge. One dilation closes pinholes; lone specks are dropped. */
-      const border = [];
-      for (let c = 0; c < COLS; c++) border.push(lum[c], lum[(ROWS - 1) * COLS + c]);
-      for (let r = 0; r < ROWS; r++) border.push(lum[r * COLS], lum[r * COLS + COLS - 1]);
-      border.sort();
-      const bgLum = border[Math.floor(border.length / 2)];
-
-      const at = (c, r) => lum[Math.max(0, Math.min(ROWS - 1, r)) * COLS + Math.max(0, Math.min(COLS - 1, c))];
-      const raw = new Uint8Array(N);
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          const v = at(c, r);
+      /* --- the subject mask ---
+         Cut-out sources (transparent background) give it directly; opaque
+         photos fall back to "differs from the border tone or sits on an
+         edge", closed with one dilation. */
+      const at = (arr, c, r) =>
+        arr[Math.max(0, Math.min(ROWS - 1, r)) * COLS + Math.max(0, Math.min(COLS - 1, c))];
+      let mask = new Float32Array(N);
+      const transparent = alpha.some((a) => a < 0.5);
+      if (transparent) {
+        for (let i = 0; i < N; i++) mask[i] = alpha[i] > 0.5 ? 1 : 0;
+      } else {
+        const border = [];
+        for (let c = 0; c < COLS; c++) border.push(lum[c], lum[(ROWS - 1) * COLS + c]);
+        for (let r = 0; r < ROWS; r++) border.push(lum[r * COLS], lum[r * COLS + COLS - 1]);
+        border.sort();
+        const bgLum = border[Math.floor(border.length / 2)];
+        const raw = new Uint8Array(N);
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          const v = at(lum, c, r);
           const grad = Math.max(
-            Math.abs(v - at(c + 1, r)), Math.abs(v - at(c - 1, r)),
-            Math.abs(v - at(c, r + 1)), Math.abs(v - at(c, r - 1))
+            Math.abs(v - at(lum, c + 1, r)), Math.abs(v - at(lum, c - 1, r)),
+            Math.abs(v - at(lum, c, r + 1)), Math.abs(v - at(lum, c, r - 1))
           );
           raw[r * COLS + c] = (Math.abs(v - bgLum) > 0.14 || grad > 0.075) ? 1 : 0;
         }
-      }
-      const on = (m, c, r) => (c >= 0 && r >= 0 && c < COLS && r < ROWS) ? m[r * COLS + c] : 0;
-      const dilated = new Uint8Array(N);
-      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-        dilated[r * COLS + c] =
-          on(raw, c, r) || on(raw, c - 1, r) || on(raw, c + 1, r) || on(raw, c, r - 1) || on(raw, c, r + 1) ? 1 : 0;
-      }
-      const active = new Uint8Array(N);
-      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-        const neighbours = on(dilated, c - 1, r) + on(dilated, c + 1, r) + on(dilated, c, r - 1) + on(dilated, c, r + 1);
-        active[r * COLS + c] = on(dilated, c, r) && neighbours >= 2 ? 1 : 0;
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          mask[r * COLS + c] =
+            at(raw, c, r) || at(raw, c - 1, r) || at(raw, c + 1, r) || at(raw, c, r - 1) || at(raw, c, r + 1) ? 1 : 0;
+        }
       }
 
-      // stretch the relief across the subject's own tonal range
+      /* --- smooth the height field so contours follow FORM, not noise --- */
+      for (let pass = 0; pass < 2; pass++) {
+        const out = new Float32Array(N);
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          let s = 0, w = 0;
+          for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+            if (at(mask, c + dc, r + dr)) { s += at(lum, c + dc, r + dr); w++; }
+          }
+          out[r * COLS + c] = w ? s / w : at(lum, c, r);
+        }
+        lum = out;
+      }
+
+      // spread the LEVELS across the subject's own range instead of
+      // stretching the field — stretching amplifies invisible vignettes
+      // into level-crossing ramps (long straight artifact lines)
       let lo = 1, hi = 0;
-      for (let i = 0; i < N; i++) if (active[i]) { if (lum[i] < lo) lo = lum[i]; if (lum[i] > hi) hi = lum[i]; }
-      const span = Math.max(0.08, hi - lo);
-      const yAt = (c, r) => AMP + r * CELL - ((at(c, r) - lo) / span) * AMP;
+      for (let i = 0; i < N; i++) if (mask[i]) { if (lum[i] < lo) lo = lum[i]; if (lum[i] > hi) hi = lum[i]; }
+      const span = Math.max(0.1, hi - lo);
+      const tOf = (v) => (v - lo) / span;
 
+      /* --- draw: layer 0 = ground + low contours, 1 = mid, 2 = high + edge --- */
       const { bg, line } = palette();
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, W, H);
-      ctx.strokeStyle = line;
-      ctx.lineWidth = 1.2;
-      ctx.lineJoin = "round";
+      const ctxs = layers.map((c) => c.getContext("2d"));
+      ctxs.forEach((ctx, i) => {
+        ctx.clearRect(0, 0, W, H);
+        if (i === 0) { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
+        ctx.strokeStyle = line;
+        ctx.lineWidth = i === 2 ? 1.5 : 1.2;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.beginPath();
+      });
+      const bandFor = (t) => (t < 0.34 ? 0 : t < 0.68 ? 1 : 2);
 
-      ctx.beginPath();
-      for (let r = 0; r < ROWS; r++) {          // warp lines along the weft…
-        let run = false;
-        for (let c = 0; c < COLS; c++) {
-          if (active[r * COLS + c]) {
-            if (!run) { ctx.moveTo(c * CELL, yAt(c, r)); run = true; }
-            else ctx.lineTo(c * CELL, yAt(c, r));
-          } else run = false;
+      // marching squares over a field: draws the iso-line field=level
+      function iso(field, level, ctx) {
+        for (let r = 0; r < ROWS - 1; r++) {
+          for (let c = 0; c < COLS - 1; c++) {
+            const v0 = at(field, c, r), v1 = at(field, c + 1, r);
+            const v2 = at(field, c + 1, r + 1), v3 = at(field, c, r + 1);
+            if (field === lum) {
+              if (!(at(mask, c, r) && at(mask, c + 1, r) && at(mask, c + 1, r + 1) && at(mask, c, r + 1))) continue;
+              // near-flat ramps cross levels in long straight chains — skip them
+              if (Math.max(v0, v1, v2, v3) - Math.min(v0, v1, v2, v3) < 0.02) continue;
+            }
+            let idx = 0;
+            if (v0 > level) idx |= 1;
+            if (v1 > level) idx |= 2;
+            if (v2 > level) idx |= 4;
+            if (v3 > level) idx |= 8;
+            if (idx === 0 || idx === 15) continue;
+            const x = c * CELL, y = r * CELL;
+            // clamped lerp — equal corners would otherwise explode the
+            // division and shoot a line across the whole canvas
+            const t = (a, b) => Math.max(0, Math.min(1, (level - a) / ((b - a) || 1)));
+            const top    = [x + CELL * t(v0, v1), y];
+            const right  = [x + CELL, y + CELL * t(v1, v2)];
+            const bottom = [x + CELL * t(v3, v2), y + CELL];
+            const left   = [x, y + CELL * t(v0, v3)];
+            const SEGS = {
+              1: [left, top], 2: [top, right], 3: [left, right], 4: [right, bottom],
+              5: [left, top, right, bottom], 6: [top, bottom], 7: [left, bottom],
+              8: [bottom, left], 9: [top, bottom], 10: [top, right, bottom, left],
+              11: [right, bottom], 12: [right, left], 13: [top, right], 14: [left, top],
+            }[idx];
+            for (let s = 0; s < SEGS.length; s += 2) {
+              ctx.moveTo(SEGS[s][0], SEGS[s][1]);
+              ctx.lineTo(SEGS[s + 1][0], SEGS[s + 1][1]);
+            }
+          }
         }
       }
-      for (let c = 0; c < COLS; c += 3) {       // …and a sparser warp the other way
-        let run = false;
+
+      LEVELS.forEach((level) => iso(lum, lo + level * span, ctxs[bandFor(level)]));
+      iso(mask, 0.5, ctxs[2]); // the silhouette rides the top layer
+
+      // the sparse vertical family ties the contours into a mesh.
+      // A run must restart whenever it hops to another depth layer —
+      // continuing a path on a different canvas draws a stray line from
+      // wherever that layer's path last ended.
+      for (let c = 0; c < COLS; c += 4) {
+        let run = false, lastBand = -1;
         for (let r = 0; r < ROWS; r++) {
-          if (active[r * COLS + c]) {
-            if (!run) { ctx.moveTo(c * CELL, yAt(c, r)); run = true; }
-            else ctx.lineTo(c * CELL, yAt(c, r));
+          if (at(mask, c, r)) {
+            const t = tOf(at(lum, c, r));
+            const band = bandFor(t);
+            const px2 = c * CELL, py = r * CELL - t * AMP + AMP / 2;
+            if (!run || band !== lastBand) { ctxs[band].moveTo(px2, py); run = true; lastBand = band; }
+            else ctxs[band].lineTo(px2, py);
           } else run = false;
         }
       }
-      ctx.stroke();
+
+      ctxs.forEach((ctx) => ctx.stroke());
     }
 
     if (img.complete) render();
@@ -331,6 +399,46 @@ function setupCoverArt() {
   coverArtApply = () => renderers.forEach((r) => r());
 }
 setupCoverArt();
+
+/* ---------------- hover look-around ----------------
+   Moving the mouse over the centre card tilts it a touch and shifts the
+   wireframe's depth layers at different rates — the subject appears to
+   turn under the cursor (the razorpay hero move, in 2.5D). */
+
+function setupCoverParallax() {
+  if (!finePointer.matches || reduceMotion.matches) return;
+  const ring = document.querySelector(".ring");
+  if (!ring) return;
+  const RATES = [4, 10, 17]; // px of travel per layer, back to front
+
+  ring.querySelectorAll(".rcard").forEach((card) => {
+    const front = card.querySelector(".rcard-front");
+    const inner = card.querySelector(".rcard-inner");
+    let raf = 0, nx = 0, ny = 0;
+
+    function apply() {
+      raf = 0;
+      front.style.transform = `rotateY(${(nx * 3).toFixed(2)}deg) rotateX(${(-ny * 2.2).toFixed(2)}deg)`;
+      card.querySelectorAll(".cover-mesh").forEach((c, i) => {
+        c.style.transform = `translate(${(-nx * RATES[i]).toFixed(1)}px, ${(-ny * RATES[i] * 0.6).toFixed(1)}px)`;
+      });
+    }
+
+    inner.addEventListener("pointermove", (e) => {
+      if (!card.classList.contains("is-center") || card.classList.contains("is-flipped")) return;
+      const r = inner.getBoundingClientRect();
+      nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      ny = ((e.clientY - r.top) / r.height) * 2 - 1;
+      if (!raf) raf = requestAnimationFrame(apply);
+    });
+
+    inner.addEventListener("pointerleave", () => {
+      nx = 0; ny = 0;
+      if (!raf) raf = requestAnimationFrame(apply);
+    });
+  });
+}
+setupCoverParallax();
 
 /* ---------------- work: the ring of category cards ----------------
    A circular 3D carousel. The centre card faces the viewer; the others
