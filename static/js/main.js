@@ -404,17 +404,25 @@ function setupCoverArt() {
       LEVELS.forEach((q) => iso(field, qLevel(q), ctxs[bandFor(q)], true));
       iso(mask, 0.5, ctxs[2], false); // the silhouette rides the top layer
 
-      // the sparse vertical family ties the contours into a mesh.
-      // A run must restart whenever it hops to another depth layer —
-      // continuing a path on a different canvas draws a stray line from
-      // wherever that layer's path last ended.
-      for (let c = 0; c < COLS; c += 4) {
+      // the vertical family ties the contours into a mesh. Instead of
+      // dropping straight down, each line bows around the forms — pushed
+      // sideways off the field's horizontal gradient, like longitude lines
+      // wrapping a bulge. (A run also restarts whenever it hops to another
+      // depth layer — continuing a path on a different canvas would drag a
+      // stray line from wherever that layer's path last ended.)
+      const gx = new Float32Array(N);
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        if (at(mask, c, r)) gx[r * COLS + c] = (at(field, c + 1, r) - at(field, c - 1, r)) / 2;
+      }
+      const BOW = 130, MAXBOW = CELL * 2.2;
+      for (let c = 0; c < COLS; c += 3) {
         let run = false, lastBand = -1;
         for (let r = 0; r < ROWS; r++) {
           if (at(mask, c, r)) {
             const t = tOf(at(field, c, r));
             const band = bandFor(t);
-            const px2 = c * CELL, py = r * CELL - t * AMP + AMP / 2;
+            const bow = Math.max(-MAXBOW, Math.min(MAXBOW, -at(gx, c, r) * BOW));
+            const px2 = c * CELL + bow, py = r * CELL - t * AMP + AMP / 2;
             if (!run || band !== lastBand) { ctxs[band].moveTo(px2, py); run = true; lastBand = band; }
             else ctxs[band].lineTo(px2, py);
           } else run = false;
