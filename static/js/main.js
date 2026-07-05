@@ -179,8 +179,9 @@ function setupRing() {
   }
 
   function layout() {
-    const step = wide.matches ? 33 : 74;   // vw between cards
-    const turn = wide.matches ? -30 : -24; // deg per offset
+    const step = wide.matches ? 33 : 74; // vw between cards
+    // positive = outer edges recede, like a big ball behind pushing them out
+    const turn = wide.matches ? 30 : 22;
     cards.forEach((card, i) => {
       let off = (i - cur + n) % n;
       if (off > n / 2) off -= n;
@@ -205,7 +206,9 @@ function setupRing() {
   function flip(card) {
     card.classList.add("is-flipped");
     ring.classList.add("has-flip");
-    card.querySelector(".rback-close").focus();
+    const deck = card.querySelector(".rback-scroll");
+    deck.scrollTop = 0;
+    deck.focus({ preventScroll: true });
   }
 
   function unflip() {
@@ -224,7 +227,12 @@ function setupRing() {
       if (card.classList.contains("is-center")) flip(card);
       else if (!ring.classList.contains("has-flip")) { cur = i; layout(); land(); }
     });
-    card.querySelector(".rback-close").addEventListener("click", unflip);
+  });
+
+  // with no close button, a click anywhere outside the open card closes it
+  ring.addEventListener("click", (e) => {
+    const open = ring.querySelector(".rcard.is-flipped");
+    if (open && !open.contains(e.target)) unflip();
   });
 
   window.addEventListener("keydown", (e) => {
@@ -237,6 +245,29 @@ function setupRing() {
     if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
     if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
   });
+
+  // the mouse wheel rotates the ring too (both directions) while the section
+  // fills the view. After a full loop in one direction it releases, so the
+  // page can always be scrolled past; a flipped card keeps native scrolling.
+  let wheelLock = 0, runDir = 0, runCount = 0, released = false;
+  window.addEventListener("wheel", (e) => {
+    if (reduceMotion.matches) return;
+    if (ring.classList.contains("has-flip")) return; // the deck scrolls natively
+    const r = ring.getBoundingClientRect();
+    const covering = r.top < window.innerHeight * 0.25 && r.bottom > window.innerHeight * 0.75;
+    if (!covering) { runCount = 0; released = false; return; }
+    const dir = e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0;
+    if (!dir) return;
+    if (dir !== runDir) { runDir = dir; runCount = 0; released = false; }
+    if (released) return; // seen the whole ring — let the page move on
+    e.preventDefault();
+    const now = Date.now();
+    if (now - wheelLock < 450 || Math.abs(e.deltaY) < 8) return;
+    wheelLock = now;
+    runCount += 1;
+    if (runCount >= n) released = true;
+    go(dir);
+  }, { passive: false });
 
   // swipe rotates the ring
   let swipeX = null;

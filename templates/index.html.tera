@@ -99,21 +99,12 @@
               <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
             </button>
             <div class="rcard-back">
-              <div class="rback-head">
-                <h3 class="rback-title" data-cs="{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.viz.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}</h3>
-                <button class="rback-close" type="button"
-                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
-                        aria-label="{{ content.ui.close.cs }}">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-                </button>
-              </div>
-              <div class="rback-scroll">
+              <div class="rback-scroll" tabindex="0">
                 <article class="proj">
                   <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
                     <img src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
                   </button>
                   <p class="proj-cap">
-                    <strong data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</strong>
                     <span data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</span>
                   </p>
                 </article>
@@ -142,15 +133,7 @@
               <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
             </button>
             <div class="rcard-back">
-              <div class="rback-head">
-                <h3 class="rback-title" data-cs="{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.produkt.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }}</h3>
-                <button class="rback-close" type="button"
-                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
-                        aria-label="{{ content.ui.close.cs }}">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-                </button>
-              </div>
-              <div class="rback-scroll">
+              <div class="rback-scroll" tabindex="0">
                 {% for set in content.productSets %}
                   {% if set.layout == "rows" %}
                     {% for row in set.rows %}{% for img in row %}
@@ -159,7 +142,6 @@
                         <img src="{{ img.0 }}" alt="" loading="lazy">
                       </button>
                       <p class="proj-cap">
-                        <strong data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</strong>
                         <span data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
                       </p>
                     </article>
@@ -171,7 +153,6 @@
                         <img src="{{ img.0 }}" alt="" loading="lazy">
                       </button>
                       <p class="proj-cap">
-                        <strong data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</strong>
                         <span data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
                       </p>
                     </article>
@@ -191,22 +172,13 @@
               <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
             </button>
             <div class="rcard-back">
-              <div class="rback-head">
-                <h3 class="rback-title" data-cs="{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.profilovky.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}</h3>
-                <button class="rback-close" type="button"
-                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
-                        aria-label="{{ content.ui.close.cs }}">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-                </button>
-              </div>
-              <div class="rback-scroll">
+              <div class="rback-scroll" tabindex="0">
                 {% for p in content.profilePhotos.photos %}
                 <article class="proj">
                   <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
                     <img src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
                   </button>
                   <p class="proj-cap">
-                    <strong data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</strong>
                     <span data-cs="{{ p.text.cs }}" data-en="{{ p.text.en }}">{{ p.text.cs }}</span>
                   </p>
                 </article>
@@ -224,15 +196,7 @@
               <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
             </button>
             <div class="rcard-back">
-              <div class="rback-head">
-                <h3 class="rback-title" data-cs="{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.videa.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }}</h3>
-                <button class="rback-close" type="button"
-                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
-                        aria-label="{{ content.ui.close.cs }}">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-                </button>
-              </div>
-              <div class="rback-scroll">
+              <div class="rback-scroll" tabindex="0">
                 {% for v in content.videos %}
                 <article class="proj proj--video">
                   <button class="proj-play" type="button" data-video-src="{{ v.src }}"
@@ -244,7 +208,6 @@
                     </svg>
                   </button>
                   <p class="proj-cap">
-                    {% if v.link %}<a href="{{ v.link }}" target="_blank" rel="noopener"><strong data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</strong></a>{% else %}<strong data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</strong>{% endif %}
                     <span data-cs="/{{ v.work.cs }}/" data-en="/{{ v.work.en }}/">/{{ v.work.cs }}/</span>
                   </p>
                 </article>
@@ -262,22 +225,13 @@
               <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
             </button>
             <div class="rcard-back">
-              <div class="rback-head">
-                <h3 class="rback-title" data-cs="{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.typografie.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}</h3>
-                <button class="rback-close" type="button"
-                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
-                        aria-label="{{ content.ui.close.cs }}">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-                </button>
-              </div>
-              <div class="rback-scroll">
+              <div class="rback-scroll" tabindex="0">
                 {% for b in content.books %}
                 <article class="proj proj--kniha">
                   <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
                     <img src="{{ b.image }}" alt="{{ b.title }} — {{ b.author }}" loading="lazy">
                   </button>
                   <p class="proj-cap">
-                    <strong>{{ b.title }}</strong>
                     <span data-cs="{{ b.author }} · /{{ b.activity.cs }}/" data-en="{{ b.author }} · /{{ b.activity.en }}/">{{ b.author }} · /{{ b.activity.cs }}/</span>
                   </p>
                 </article>
