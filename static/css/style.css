@@ -58,6 +58,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* one section per viewport: hero / work / kontakt each snap into place */
+  scroll-snap-type: y mandatory;
 }
 
 body {
@@ -170,7 +172,8 @@ html.has-cursor * { cursor: none !important; }
 
 .hero {
   position: relative;
-  min-height: 100svh;
+  height: 100svh;
+  scroll-snap-align: start;
   background: var(--hero-bg);
   color: var(--hero-ink);
   overflow: hidden;
@@ -290,8 +293,9 @@ html.has-cursor * { cursor: none !important; }
 
 .ring {
   position: relative;
-  min-height: 100svh;
-  background: var(--ring-bg, var(--main-a));
+  height: 100svh;
+  scroll-snap-align: start;
+  background: var(--bg);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -300,15 +304,10 @@ html.has-cursor * { cursor: none !important; }
   transition: background-color 0.25s ease;
 }
 
-[data-theme="dark"] .ring { --ring-bg: #000000; }
-
-/* the blue field swallows the default blue focus ring — use white here */
-.ring :focus-visible { outline-color: #ffffff; }
-
 .ring-stage {
   position: relative;
   width: 100%;
-  height: min(74svh, 700px);
+  height: min(64svh, 620px);
   perspective: 1700px;
 }
 
@@ -316,7 +315,7 @@ html.has-cursor * { cursor: none !important; }
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(58vw, 940px);
+  width: min(48vw, 860px);
   height: 100%;
   transform: translate(-50%, -50%) translateX(var(--tx, 0px)) rotateY(var(--ry, 0deg)) scale(var(--sc, 1));
   transform-style: preserve-3d;
@@ -484,8 +483,8 @@ html.has-cursor * { cursor: none !important; }
   width: 76px;
   height: 46px;
   border-radius: 999px;
-  background: #ffffff;
-  color: var(--main-a); /* blue arrows in light, orange in dark */
+  background: var(--main-a); /* blue pills in light, orange in dark */
+  color: #ffffff;
   display: grid;
   place-items: center;
   transition: transform 0.2s ease;
@@ -501,7 +500,9 @@ html.has-cursor * { cursor: none !important; }
 
 .kontakt {
   position: relative;
-  min-height: 92svh;
+  height: 100svh;
+  scroll-snap-align: start;
+  overflow: hidden;
   background: var(--kontakt-bg);
   color: var(--kontakt-ink);
   display: flex;

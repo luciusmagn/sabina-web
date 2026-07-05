@@ -179,7 +179,8 @@ function setupRing() {
   }
 
   function layout() {
-    const step = wide.matches ? 33 : 74; // vw between cards
+    // step > card width leaves a clear gap, so the field shows between cards
+    const step = wide.matches ? 50 : 80; // vw between card centres
     // positive = outer edges recede, like a big ball behind pushing them out
     const turn = wide.matches ? 30 : 22;
     cards.forEach((card, i) => {
