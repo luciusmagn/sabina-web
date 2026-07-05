@@ -13,16 +13,15 @@
   --main-a: #0065f9;            /* blue  — first main  */
   --main-b: #ff87b1;            /* pink  — second main */
 
-  --hero-bg: var(--main-a);
+  --hero-bg: var(--main-b);     /* pink field */
   --hero-ink: #ffffff;
-  --hero-accent: var(--main-b); /* the name's flat sun-shadow, spark, sun disc */
+  --hero-accent: var(--main-a); /* blue — the name's flat sun-shadow */
 
   --card-a-bg: var(--main-a);  --card-a-ink: #ffffff;  --card-a-line: transparent;
   --card-b-bg: var(--main-b);  --card-b-ink: #000000;  --card-b-line: transparent;
 
   --kontakt-bg: var(--main-b);
-  --kontakt-ink: #ffffff;
-  --kontakt-shadow: #0065f9;
+  --kontakt-ink: #000000;
 
   --cursor-c: #0065f9;
 
@@ -40,16 +39,15 @@
   --main-a: #fe5d40;            /* orange — first main */
   --main-b: #000000;            /* black  — second main */
 
-  --hero-bg: #000000;
+  --hero-bg: #fe5d40;           /* orange field */
   --hero-ink: #ffffff;
-  --hero-accent: #fe5d40;
+  --hero-accent: #000000;       /* black flat sun-shadow */
 
   --card-a-bg: #fe5d40;  --card-a-ink: #000000;  --card-a-line: transparent;
   --card-b-bg: #000000;  --card-b-ink: #ffffff;  --card-b-line: #f4f4f4;
 
   --kontakt-bg: #fe5d40;
-  --kontakt-ink: #ffffff;
-  --kontakt-shadow: #000000;
+  --kontakt-ink: #000000;
 
   --cursor-c: #fe5d40;
 
@@ -537,8 +535,6 @@ html.has-cursor * { cursor: none !important; }
   line-height: 1.06;
   letter-spacing: -0.02em;
   max-width: 16ch;
-  /* same real-sun offset as the hero name, in the theme's other main */
-  text-shadow: var(--sun-dx, 0.05em) var(--sun-dy, 0.045em) 0 var(--kontakt-shadow);
 }
 
 .kontakt-mail {
@@ -550,7 +546,6 @@ html.has-cursor * { cursor: none !important; }
   letter-spacing: -0.01em;
   text-decoration: none;
   word-break: break-all;
-  text-shadow: var(--sun-dx, 0.05em) var(--sun-dy, 0.045em) 0 var(--kontakt-shadow);
 }
 
 .trace--ring {
