@@ -165,6 +165,28 @@ function setupSky() {
 }
 setupSky();
 
+/* ---------------- fixed chrome vs sections ----------------
+   The lang/theme chips float over every section; they only keep their
+   border while the plain middle section is under them. */
+
+function setupChrome() {
+  const controls = document.querySelector(".top-controls");
+  const ringSection = document.querySelector(".ring");
+  if (!controls || !ringSection) return;
+  let raf = 0;
+  function tick() {
+    raf = 0;
+    const r = ringSection.getBoundingClientRect();
+    const y = 40; // the chips' line
+    controls.classList.toggle("plain", !(r.top <= y && r.bottom >= y));
+  }
+  const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  tick();
+}
+setupChrome();
+
 /* ---------------- wireframe mesh covers ----------------
    Each ring cover is resampled and redrawn as a displacement mesh: a fine
    grid whose lattice lifts where the source image is bright, so the subject
@@ -327,7 +349,7 @@ function setupRing() {
 
   function land() {
     const front = cards[cur].querySelector(".rcard-front");
-    front.classList.remove("land");
+    front.classList.remove("land", "settle");
     void front.offsetWidth; // restart the animation
     front.classList.add("land");
   }
@@ -376,7 +398,7 @@ function setupRing() {
 
     // 1 · the outgoing label travels down and disappears completely…
     const old = cards[cur].querySelector(".rcard-front");
-    old.classList.remove("land");
+    old.classList.remove("land", "settle");
     old.classList.add("leave");
 
     // 2 · …only then does the ring turn and the next label drop in
@@ -384,11 +406,15 @@ function setupRing() {
       cur = (cur + dir + n) % n;
       layout();
       land();
-      // the old card is a side card by now — let its resting label return
-      setTimeout(() => old.classList.remove("leave"), 700);
-    }, 870);
+      // the old card is a side card by now — fade its resting label back
+      setTimeout(() => {
+        old.classList.remove("leave");
+        old.classList.add("settle");
+        setTimeout(() => old.classList.remove("settle"), 600);
+      }, 650);
+    }, 630);
 
-    setTimeout(() => { busy = false; }, 2900);
+    setTimeout(() => { busy = false; }, 2650);
     return true;
   }
 

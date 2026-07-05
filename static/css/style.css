@@ -157,8 +157,14 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   place-items: center;
   font-weight: 700;
   font-size: 14px;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease,
+              border-color 0.2s ease, transform 0.2s ease;
 }
+
+/* over the hero / kontakt colour fields the chips go borderless;
+   the border only shows over the plain middle section (JS toggles it) */
+.top-controls.plain .lang-toggle,
+.top-controls.plain .theme-toggle { border-color: transparent; }
 
 .lang-toggle:hover,
 .theme-toggle:hover {
@@ -441,8 +447,14 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
    at the centre, and on the next turn continues down until it has left the
    card (and the section) completely */
 
-.rcard-front.land .rcard-label  { animation: land-in 1.9s cubic-bezier(0.4, 0.08, 0.16, 1) both; }
-.rcard-front.leave .rcard-label { animation: leave-down 0.85s cubic-bezier(0.5, 0.06, 0.5, 0.94) both; }
+.rcard-front.land .rcard-label   { animation: land-in 1.9s cubic-bezier(0.4, 0.08, 0.16, 1) both; }
+.rcard-front.leave .rcard-label  { animation: leave-down 0.6s cubic-bezier(0.5, 0.06, 0.5, 0.94) both; }
+.rcard-front.settle .rcard-label { animation: settle-in 0.5s ease both; } /* the side card's resting label fades back */
+
+@keyframes settle-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
 @keyframes land-in {
   from { transform: translateY(-52svh); }
@@ -573,8 +585,7 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 .ring-jump {
   position: absolute;
   right: clamp(14px, 2.6vw, 30px);
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: clamp(20px, 5vh, 46px); /* bottoms level with the prev/next pills */
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -624,7 +635,8 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 }
 
 .kontakt-bio {
-  margin: 0;
+  /* nudged down, with extra air before the contact lines */
+  margin: clamp(20px, 7vh, 72px) 0 clamp(10px, 3vh, 30px);
   font-size: clamp(17px, 3.1vw, 44px);
   font-weight: 800;
   line-height: 1.06;
@@ -774,7 +786,8 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   .trace--arrow, .walker, .w-limb { animation: none; }
   .rcard, .rcard-inner, .proj-zoom img, .proj-play img { transition: none; }
   .rcard-front.land .rcard-label,
-  .rcard-front.leave .rcard-label { animation: none; }
+  .rcard-front.leave .rcard-label,
+  .rcard-front.settle .rcard-label { animation: none; }
   .walker { left: var(--pad-x); }
   .rv { opacity: 1; transform: none; }
 }
