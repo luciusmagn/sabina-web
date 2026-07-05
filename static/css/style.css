@@ -376,9 +376,18 @@ html.has-cursor * { cursor: none !important; }
 
 .rcard:not(.is-center) .rcard-front { cursor: pointer; }
 
-.rcard-title {
+/* the name + pill are one locked unit — they always travel together */
+
+.rcard-label {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(18px, 3vh, 30px);
+}
+
+.rcard-title {
   font-size: clamp(40px, 5.6vw, 100px);
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -386,8 +395,6 @@ html.has-cursor * { cursor: none !important; }
 }
 
 .rcard-open {
-  position: relative;
-  z-index: 1;
   padding: 12px 28px;
   border-radius: 999px;
   background: var(--bg);
@@ -396,23 +403,21 @@ html.has-cursor * { cursor: none !important; }
   font-weight: 700;
 }
 
-/* the pixel move: the label starts high above the card and drops onto it
-   as it arrives; when the ring turns, the old label flies up and away */
+/* the pixel conveyor: the label drops in slowly from above the card, rests
+   at the centre, and on the next turn continues down until it has left the
+   card (and the section) completely */
 
-.rcard-front.land .rcard-title { animation: land-in 1.35s cubic-bezier(0.24, 0.7, 0.16, 1) 0.05s both; }
-.rcard-front.land .rcard-open  { animation: land-in 1.35s cubic-bezier(0.24, 0.7, 0.16, 1) 0.3s both; }
-
-.rcard-front.leave .rcard-title,
-.rcard-front.leave .rcard-open { animation: leave-up 0.35s ease-in both; }
+.rcard-front.land .rcard-label  { animation: land-in 1.9s cubic-bezier(0.4, 0.08, 0.16, 1) both; }
+.rcard-front.leave .rcard-label { animation: leave-down 1.9s cubic-bezier(0.4, 0.08, 0.16, 1) both; }
 
 @keyframes land-in {
-  from { transform: translateY(-46svh); }
+  from { transform: translateY(-52svh); }
   to   { transform: none; }
 }
 
-@keyframes leave-up {
-  from { transform: none; opacity: 1; }
-  to   { transform: translateY(-46svh); opacity: 0; }
+@keyframes leave-down {
+  from { transform: none; }
+  to   { transform: translateY(62svh); }
 }
 
 /* back — a vertical scroll of the category's projects */
@@ -761,10 +766,8 @@ html.has-cursor * { cursor: none !important; }
   html { scroll-behavior: auto; }
   .trace--arrow, .walker, .w-limb { animation: none; }
   .rcard, .rcard-inner, .proj-zoom img, .proj-play img { transition: none; }
-  .rcard-front.land .rcard-title,
-  .rcard-front.land .rcard-open,
-  .rcard-front.leave .rcard-title,
-  .rcard-front.leave .rcard-open { animation: none; }
+  .rcard-front.land .rcard-label,
+  .rcard-front.leave .rcard-label { animation: none; }
   .walker { left: var(--pad-x); }
   .rv { opacity: 1; transform: none; }
   .kontakt-mail:hover .trace--ring path { animation: none; stroke-dashoffset: 0; }

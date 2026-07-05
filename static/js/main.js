@@ -209,17 +209,18 @@ function setupRing() {
   let busy = false; // the label must land all the way before the next turn
 
   function go(dir) {
-    if (busy || ring.classList.contains("has-flip")) return;
+    if (busy || ring.classList.contains("has-flip")) return false;
     busy = true;
-    setTimeout(() => { busy = false; }, reduceMotion.matches ? 60 : 1750);
-    // the outgoing label flies up and away…
+    setTimeout(() => { busy = false; }, reduceMotion.matches ? 60 : 2000);
+    // the outgoing label keeps travelling down until it has left the card…
     const old = cards[cur].querySelector(".rcard-front");
     old.classList.remove("land");
     old.classList.add("leave");
-    setTimeout(() => old.classList.remove("leave"), 400);
+    setTimeout(() => old.classList.remove("leave"), 2000);
     cur = (cur + dir + n) % n;
     layout();
-    land(); // …and the incoming one drops onto its card
+    land(); // …while the incoming one drops in from above
+    return true;
   }
 
   function flip(card) {
@@ -283,9 +284,10 @@ function setupRing() {
     const now = Date.now();
     if (now - wheelLock < 450 || Math.abs(e.deltaY) < 8) return;
     wheelLock = now;
-    runCount += 1;
-    if (runCount >= n) released = true;
-    go(dir);
+    if (go(dir)) { // count real turns only — no-ops while a label travels
+      runCount += 1;
+      if (runCount >= n) released = true;
+    }
   }, { passive: false });
 
   // swipe rotates the ring
