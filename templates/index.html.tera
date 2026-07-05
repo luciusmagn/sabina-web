@@ -48,12 +48,6 @@
     </button>
   </div>
 
-  <a class="chip" href="#kontakt"
-     data-aria-cs="{{ content.tiles.kontakt.cs }}" data-aria-en="{{ content.tiles.kontakt.en }}"
-     aria-label="{{ content.tiles.kontakt.cs }}" hidden>
-    <span aria-hidden="true">@</span>
-  </a>
-
   <main>
 
     {# ================= HERO — one big flat field ================= #}
@@ -62,14 +56,12 @@
         <h1 class="hero-name">{{ content.hero | safe }}</h1>
         <p class="hero-tagline" data-cs="{{ content.tagline.cs }}" data-en="{{ content.tagline.en }}">{{ content.tagline.cs }}</p>
 
-        <a class="hero-contact" href="#kontakt">
-        <span class="hero-contact-label" data-cs="{{ content.tiles.kontakt.cs }}" data-en="{{ content.tiles.kontakt.en }}">{{ content.tiles.kontakt.cs }}</span>
+        <div class="hero-contact">
+        <a class="hero-contact-label" href="#kontakt" data-cs="{{ content.tiles.kontakt.cs }}" data-en="{{ content.tiles.kontakt.en }}">{{ content.tiles.kontakt.cs }}</a>
         <span class="hero-contact-reveal">
-          <span>{{ content.contact.email }}</span>
-          <span class="hero-contact-sep" aria-hidden="true">/</span>
-          <span>{{ content.contact.linkedinLabel }}</span>
+          <span class="hero-contact-email">{{ content.contact.email }}</span>
           </span>
-        </a>
+        </div>
       </div>
 
       <a class="scroll-cue" href="#prace"
@@ -278,14 +270,10 @@
 
       <a class="kontakt-mail" href="mailto:{{ content.contact.email }}">
         <span class="kontakt-mail-text">{{ content.contact.email }}</span>
-        <svg class="trace trace--ring" viewBox="0 0 520 110" fill="none" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M262 14C150 10 28 22 20 54c-8 34 96 46 240 44 146-2 246-16 240-46-5-27-104-40-198-38" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
-        </svg>
       </a>
 
       <div class="kontakt-row">
         <a class="kontakt-li" href="{{ content.contact.linkedinUrl }}" target="_blank" rel="noopener">LinkedIn — {{ content.contact.linkedinLabel }}</a>
-        <span class="chip-slot" aria-hidden="true"></span>
       </div>
 
       <div class="walker-track" aria-hidden="true">

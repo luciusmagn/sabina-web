@@ -107,26 +107,34 @@ html.has-cursor,
 html.has-cursor * { cursor: none !important; }
 
 .cursor {
+  --cc: var(--cursor-c);
   position: fixed;
   top: 0; left: 0;
-  width: 22px; height: 22px;
+  width: 28px; height: 28px;
   border-radius: 50%;
-  background: var(--cursor-c);
-  opacity: 0.5;                       /* same translucency as the old svg cursor */
+  /* translucent centre, thin solid border in the same colour */
+  background: color-mix(in srgb, var(--cc) 42%, transparent);
+  border: 1.5px solid var(--cc);
   pointer-events: none;
   z-index: 1000;
   transform: translate(-50%, -50%) scale(1);
-  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease,
+              background-color 0.18s ease, border-color 0.18s ease;
 }
 
+/* dark theme: black over the orange fields, orange inside the black work section */
+[data-theme="dark"] .cursor { --cc: #000000; }
+[data-theme="dark"] .cursor.cursor--work { --cc: #fe5d40; }
+
 .cursor.cursor--hover {
-  transform: translate(-50%, -50%) scale(2);
+  transform: translate(-50%, -50%) scale(1.9);
   background: transparent;
-  box-shadow: inset 0 0 0 2px var(--cursor-c); /* flat ring, no blur */
-  opacity: 0.9;
 }
 
 .cursor.cursor--hidden { opacity: 0; }
+
+/* the email is real text — native caret, no dot */
+html.has-cursor .hero-contact-email { cursor: text !important; }
 
 /* ---- fixed chrome: language + theme ---- */
 
@@ -228,7 +236,17 @@ html.has-cursor * { cursor: none !important; }
   color: var(--hero-bg);
 }
 
-.hero-contact-label { font-weight: 700; white-space: nowrap; }
+.hero-contact-label {
+  font-weight: 700;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+
+.hero-contact-email {
+  user-select: all; /* one click selects the whole address for copying */
+  cursor: text;
+}
 
 .hero-contact-reveal {
   display: inline-flex;
@@ -330,6 +348,11 @@ html.has-cursor * { cursor: none !important; }
 }
 
 .rcard.is-flipped .rcard-inner { transform: rotateY(180deg); }
+
+/* only the face that's showing may catch the pointer — a hidden backface can
+   still hit-test in some engines and would swallow the deck's wheel events */
+.rcard.is-flipped .rcard-front { pointer-events: none; }
+.rcard:not(.is-flipped) .rcard-back { pointer-events: none; }
 
 .rcard-front,
 .rcard-back {
@@ -580,34 +603,7 @@ html.has-cursor * { cursor: none !important; }
   word-break: break-all;
 }
 
-.trace--ring {
-  position: absolute;
-  inset: -42% -5%;
-  width: 110%;
-  height: 184%;
-  color: var(--kontakt-ink);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.trace--ring path {
-  stroke-dasharray: 1160;
-  stroke-dashoffset: 1160;
-}
-
-.kontakt-mail:hover .trace--ring,
-.kontakt-mail:focus-visible .trace--ring {
-  opacity: 1;
-}
-
-.kontakt-mail:hover .trace--ring path,
-.kontakt-mail:focus-visible .trace--ring path {
-  animation: ring-draw 0.7s ease forwards;
-}
-
-@keyframes ring-draw {
-  to { stroke-dashoffset: 0; }
-}
+.kontakt-mail:hover .kontakt-mail-text { border-bottom: 3px solid currentColor; }
 
 .kontakt-row {
   display: flex;
@@ -626,44 +622,11 @@ html.has-cursor * { cursor: none !important; }
 
 .kontakt-li:hover { border-bottom-width: 4px; }
 
-.chip-slot {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 2px solid currentColor;
-  opacity: 0.45;
-}
-
 .kontakt-foot {
   margin: auto 0 0;
   font-size: 13px;
   opacity: 0.65;
 }
-
-/* ---- travelling contact chip ---- */
-
-.chip {
-  position: fixed;
-  right: clamp(16px, 3vw, 34px);
-  bottom: clamp(16px, 3vw, 34px);
-  z-index: 55;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--main-a);
-  color: #ffffff;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-  font-weight: 800;
-  text-decoration: none;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-  will-change: transform;
-}
-
-[data-theme="dark"] .chip { color: #000000; }
-
-.chip[hidden] { display: grid; visibility: hidden; opacity: 0; }
 
 /* ============================================================
    LIGHTBOX
@@ -782,7 +745,6 @@ html.has-cursor * { cursor: none !important; }
   .rcard-front.leave .rcard-label { animation: none; }
   .walker { left: var(--pad-x); }
   .rv { opacity: 1; transform: none; }
-  .kontakt-mail:hover .trace--ring path { animation: none; stroke-dashoffset: 0; }
 }
 
 /* ---- small screens ---- */
@@ -800,5 +762,4 @@ html.has-cursor * { cursor: none !important; }
   .scroll-cue { right: auto; left: var(--pad-x); }
   .rcard { width: 86vw; }
   .ring-stage { height: min(66svh, 560px); }
-  .chip-slot { display: none; }
 }

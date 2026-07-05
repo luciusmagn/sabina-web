@@ -75,11 +75,18 @@ function setupCursor() {
       : 0;
   }
 
+  const ringSection = document.querySelector(".ring");
+
   window.addEventListener("mousemove", (e) => {
     x = e.clientX; y = e.clientY;
-    dot.classList.remove("cursor--hidden");
+    const overEmail = Boolean(e.target.closest(".hero-contact-email"));
+    dot.classList.toggle("cursor--hidden", overEmail); // native caret over the email
     const on = e.target.closest("a, button, [role=button], input, textarea, select, summary");
     dot.classList.toggle("cursor--hover", Boolean(on));
+    if (ringSection) {
+      const r = ringSection.getBoundingClientRect();
+      dot.classList.toggle("cursor--work", e.clientY >= r.top && e.clientY <= r.bottom);
+    }
     if (!raf) raf = requestAnimationFrame(frame);
   }, { passive: true });
 
@@ -419,7 +426,11 @@ function setupRing() {
   let wheelLock = 0, runDir = 0, runCount = 0, released = false;
   window.addEventListener("wheel", (e) => {
     if (reduceMotion.matches) return;
-    if (ring.classList.contains("has-flip")) return; // the deck scrolls natively
+    if (ring.classList.contains("has-flip")) {
+      // the open deck scrolls natively; anywhere else the page must hold still
+      if (!e.target.closest(".rback-scroll")) e.preventDefault();
+      return;
+    }
     const r = ring.getBoundingClientRect();
     const covering = r.top < window.innerHeight * 0.25 && r.bottom > window.innerHeight * 0.75;
     if (!covering) { runCount = 0; released = false; return; }
@@ -466,51 +477,6 @@ function setupRing() {
   window.__ringLand = land; // retriggered when the section scrolls into view
 }
 setupRing();
-
-/* ---------------- travelling contact chip ----------------
-   Hidden over the hero; appears while browsing the work; docks into its
-   outlined slot as the contact section arrives (the AG-chip idea, flat). */
-
-function setupChip() {
-  const chip = document.querySelector(".chip");
-  const slot = document.querySelector(".chip-slot");
-  const hero = document.querySelector(".hero");
-  const kontakt = document.querySelector(".kontakt");
-  if (!chip || !hero || !kontakt) return;
-
-  let raf = 0;
-
-  function tick() {
-    raf = 0;
-    const heroGone = hero.getBoundingClientRect().bottom < window.innerHeight * 0.4;
-    chip.hidden = !heroGone;
-    if (!heroGone) { chip.style.transform = ""; return; }
-
-    if (!slot || getComputedStyle(slot).display === "none") return;
-
-    const k = kontakt.getBoundingClientRect();
-    // 0 → contact off-screen · 1 → contact filling the viewport
-    const p = Math.min(1, Math.max(0, (window.innerHeight - k.top) / Math.min(window.innerHeight, k.height)));
-    if (p <= 0) { chip.style.transform = ""; return; }
-
-    const c = chip.getBoundingClientRect();
-    const s = slot.getBoundingClientRect();
-    const baseX = c.left - parseFloat(chip.style.getPropertyValue("--tx") || 0);
-    const ease = p * p * (3 - 2 * p); // smoothstep
-    const dx = (s.left - c.left) * ease;
-    const dy = (s.top - c.top) * ease;
-    chip.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`;
-  }
-
-  function onScroll() {
-    if (!raf) raf = requestAnimationFrame(tick);
-  }
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll);
-  tick();
-}
-setupChip();
 
 /* ---------------- lightbox ---------------- */
 
