@@ -197,23 +197,72 @@ function setupCoverArt() {
         holder.classList.add("has-mesh");
       }
 
-      // luminance grid, sampled from a centre crop matching the mesh aspect
+      // luminance grid — sampled from data-crop="x,y,w,h" (% of the source)
+      // when given, else a centre crop matching the mesh aspect
       const sample = document.createElement("canvas");
       sample.width = COLS;
       sample.height = ROWS;
       const sctx = sample.getContext("2d", { willReadFrequently: true });
-      const targetRatio = W / (ROWS * CELL);
-      const srcRatio = img.naturalWidth / img.naturalHeight;
-      let sw = img.naturalWidth, sh = img.naturalHeight, sx = 0, sy = 0;
-      if (srcRatio > targetRatio) { sw = sh * targetRatio; sx = (img.naturalWidth - sw) / 2; }
-      else { sh = sw / targetRatio; sy = (img.naturalHeight - sh) / 2; }
+      let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+      if (img.dataset.crop) {
+        const [cx, cy, cw, ch] = img.dataset.crop.split(",").map(Number);
+        sx = (cx / 100) * img.naturalWidth;
+        sy = (cy / 100) * img.naturalHeight;
+        sw = (cw / 100) * img.naturalWidth;
+        sh = (ch / 100) * img.naturalHeight;
+      } else {
+        const targetRatio = W / (ROWS * CELL);
+        const srcRatio = sw / sh;
+        if (srcRatio > targetRatio) { sw = sh * targetRatio; sx = (img.naturalWidth - sw) / 2; }
+        else { sh = sw / targetRatio; sy = (img.naturalHeight - sh) / 2; }
+      }
       sctx.drawImage(img, sx, sy, sw, sh, 0, 0, COLS, ROWS);
       const px = sctx.getImageData(0, 0, COLS, ROWS).data;
-      const lum = new Float32Array(COLS * ROWS);
-      for (let i = 0; i < COLS * ROWS; i++) {
+      const N = COLS * ROWS;
+      const lum = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
         lum[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255;
       }
-      const yAt = (c, r) => AMP + r * CELL - lum[r * COLS + c] * AMP;
+
+      /* --- keep only the main thing ---
+         The ground stays flat: a cell joins the mesh when it differs from
+         the background tone (the median of the border cells) or sits on an
+         edge. One dilation closes pinholes; lone specks are dropped. */
+      const border = [];
+      for (let c = 0; c < COLS; c++) border.push(lum[c], lum[(ROWS - 1) * COLS + c]);
+      for (let r = 0; r < ROWS; r++) border.push(lum[r * COLS], lum[r * COLS + COLS - 1]);
+      border.sort();
+      const bgLum = border[Math.floor(border.length / 2)];
+
+      const at = (c, r) => lum[Math.max(0, Math.min(ROWS - 1, r)) * COLS + Math.max(0, Math.min(COLS - 1, c))];
+      const raw = new Uint8Array(N);
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const v = at(c, r);
+          const grad = Math.max(
+            Math.abs(v - at(c + 1, r)), Math.abs(v - at(c - 1, r)),
+            Math.abs(v - at(c, r + 1)), Math.abs(v - at(c, r - 1))
+          );
+          raw[r * COLS + c] = (Math.abs(v - bgLum) > 0.14 || grad > 0.075) ? 1 : 0;
+        }
+      }
+      const on = (m, c, r) => (c >= 0 && r >= 0 && c < COLS && r < ROWS) ? m[r * COLS + c] : 0;
+      const dilated = new Uint8Array(N);
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        dilated[r * COLS + c] =
+          on(raw, c, r) || on(raw, c - 1, r) || on(raw, c + 1, r) || on(raw, c, r - 1) || on(raw, c, r + 1) ? 1 : 0;
+      }
+      const active = new Uint8Array(N);
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        const neighbours = on(dilated, c - 1, r) + on(dilated, c + 1, r) + on(dilated, c, r - 1) + on(dilated, c, r + 1);
+        active[r * COLS + c] = on(dilated, c, r) && neighbours >= 2 ? 1 : 0;
+      }
+
+      // stretch the relief across the subject's own tonal range
+      let lo = 1, hi = 0;
+      for (let i = 0; i < N; i++) if (active[i]) { if (lum[i] < lo) lo = lum[i]; if (lum[i] > hi) hi = lum[i]; }
+      const span = Math.max(0.08, hi - lo);
+      const yAt = (c, r) => AMP + r * CELL - ((at(c, r) - lo) / span) * AMP;
 
       const { bg, line } = palette();
       const ctx = canvas.getContext("2d");
@@ -225,12 +274,22 @@ function setupCoverArt() {
 
       ctx.beginPath();
       for (let r = 0; r < ROWS; r++) {          // warp lines along the weft…
-        ctx.moveTo(0, yAt(0, r));
-        for (let c = 1; c < COLS; c++) ctx.lineTo(c * CELL, yAt(c, r));
+        let run = false;
+        for (let c = 0; c < COLS; c++) {
+          if (active[r * COLS + c]) {
+            if (!run) { ctx.moveTo(c * CELL, yAt(c, r)); run = true; }
+            else ctx.lineTo(c * CELL, yAt(c, r));
+          } else run = false;
+        }
       }
       for (let c = 0; c < COLS; c += 3) {       // …and a sparser warp the other way
-        ctx.moveTo(c * CELL, yAt(c, 0));
-        for (let r = 1; r < ROWS; r++) ctx.lineTo(c * CELL, yAt(c, r));
+        let run = false;
+        for (let r = 0; r < ROWS; r++) {
+          if (active[r * COLS + c]) {
+            if (!run) { ctx.moveTo(c * CELL, yAt(c, r)); run = true; }
+            else ctx.lineTo(c * CELL, yAt(c, r));
+          } else run = false;
+        }
       }
       ctx.stroke();
     }
