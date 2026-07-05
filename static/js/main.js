@@ -205,7 +205,7 @@ function setupCoverArt() {
   const COLS = Math.floor(W / CELL) + 1;   // sample points, not cells
   const ROWS = 91;
   const H = (ROWS - 1) * CELL;
-  const LEVELS = [0.14, 0.24, 0.34, 0.44, 0.54, 0.64, 0.74, 0.84];
+  const LEVELS = Array.from({ length: 12 }, (_, i) => 0.07 + i * 0.078);
   const AMP = 26;                          // vertical-line warp
 
   const palette = () =>
@@ -216,6 +216,16 @@ function setupCoverArt() {
   const renderers = covers.map((img) => {
     const holder = img.parentElement;
     let layers = null;
+
+    // optional baked depth map (white = near); rendering waits for it
+    let depthImg = null, depthReady = true;
+    if (img.dataset.depth) {
+      depthReady = false;
+      depthImg = new Image();
+      depthImg.onload = () => { depthReady = true; render(); };
+      depthImg.onerror = () => { depthImg = null; depthReady = true; render(); };
+      depthImg.src = img.dataset.depth;
+    }
 
     function ensureLayers() {
       if (layers) return;
@@ -232,7 +242,7 @@ function setupCoverArt() {
     }
 
     function render() {
-      if (!img.naturalWidth) return;
+      if (!img.naturalWidth || !depthReady) return;
       ensureLayers();
 
       /* --- sample luminance + alpha on the lattice --- */
@@ -256,11 +266,27 @@ function setupCoverArt() {
       sctx.drawImage(img, sx, sy, sw, sh, 0, 0, COLS, ROWS);
       const px = sctx.getImageData(0, 0, COLS, ROWS).data;
       const N = COLS * ROWS;
-      let lum = new Float32Array(N);
+      const lum = new Float32Array(N);
       const alpha = new Float32Array(N);
       for (let i = 0; i < N; i++) {
         lum[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255;
         alpha[i] = px[i * 4 + 3] / 255;
+      }
+
+      /* --- the height field: true depth when a map is baked, else luminance.
+         The depth map was generated from the source at the same aspect, so
+         the same crop rectangle applies (scaled to its own pixel size). */
+      let field;
+      if (depthImg) {
+        const kx = depthImg.naturalWidth / img.naturalWidth;
+        const ky = depthImg.naturalHeight / img.naturalHeight;
+        sctx.drawImage(depthImg, sx * kx, sy * ky, sw * kx, sh * ky, 0, 0, COLS, ROWS);
+        const dp = sctx.getImageData(0, 0, COLS, ROWS).data;
+        field = new Float32Array(N);
+        // mostly true depth (macro form), a dash of luminance (surface detail)
+        for (let i = 0; i < N; i++) field[i] = 0.78 * (dp[i * 4] / 255) + 0.22 * lum[i];
+      } else {
+        field = Float32Array.from(lum);
       }
 
       /* --- the subject mask ---
@@ -295,23 +321,24 @@ function setupCoverArt() {
       }
 
       /* --- smooth the height field so contours follow FORM, not noise --- */
-      for (let pass = 0; pass < 2; pass++) {
+      const blurPasses = depthImg ? 1 : 2; // real depth is already smooth
+      for (let pass = 0; pass < blurPasses; pass++) {
         const out = new Float32Array(N);
         for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
           let s = 0, w = 0;
           for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-            if (at(mask, c + dc, r + dr)) { s += at(lum, c + dc, r + dr); w++; }
+            if (at(mask, c + dc, r + dr)) { s += at(field, c + dc, r + dr); w++; }
           }
-          out[r * COLS + c] = w ? s / w : at(lum, c, r);
+          out[r * COLS + c] = w ? s / w : at(field, c, r);
         }
-        lum = out;
+        field = out;
       }
 
       // spread the LEVELS across the subject's own range instead of
       // stretching the field — stretching amplifies invisible vignettes
       // into level-crossing ramps (long straight artifact lines)
       let lo = 1, hi = 0;
-      for (let i = 0; i < N; i++) if (mask[i]) { if (lum[i] < lo) lo = lum[i]; if (lum[i] > hi) hi = lum[i]; }
+      for (let i = 0; i < N; i++) if (mask[i]) { if (field[i] < lo) lo = field[i]; if (field[i] > hi) hi = field[i]; }
       const span = Math.max(0.1, hi - lo);
       const tOf = (v) => (v - lo) / span;
 
@@ -329,13 +356,13 @@ function setupCoverArt() {
       });
       const bandFor = (t) => (t < 0.34 ? 0 : t < 0.68 ? 1 : 2);
 
-      // marching squares over a field: draws the iso-line field=level
-      function iso(field, level, ctx) {
+      // marching squares over a field: draws the iso-line f=level
+      function iso(f, level, ctx, gated) {
         for (let r = 0; r < ROWS - 1; r++) {
           for (let c = 0; c < COLS - 1; c++) {
-            const v0 = at(field, c, r), v1 = at(field, c + 1, r);
-            const v2 = at(field, c + 1, r + 1), v3 = at(field, c, r + 1);
-            if (field === lum) {
+            const v0 = at(f, c, r), v1 = at(f, c + 1, r);
+            const v2 = at(f, c + 1, r + 1), v3 = at(f, c, r + 1);
+            if (gated) {
               if (!(at(mask, c, r) && at(mask, c + 1, r) && at(mask, c + 1, r + 1) && at(mask, c, r + 1))) continue;
               // near-flat ramps cross levels in long straight chains — skip them
               if (Math.max(v0, v1, v2, v3) - Math.min(v0, v1, v2, v3) < 0.02) continue;
@@ -368,8 +395,14 @@ function setupCoverArt() {
         }
       }
 
-      LEVELS.forEach((level) => iso(lum, lo + level * span, ctxs[bandFor(level)]));
-      iso(mask, 0.5, ctxs[2]); // the silhouette rides the top layer
+      // contour levels sit at QUANTILES of the subject's field values, so
+      // the mesh wraps evenly however the depth happens to be distributed
+      const vals = [];
+      for (let i = 0; i < N; i++) if (mask[i]) vals.push(field[i]);
+      vals.sort();
+      const qLevel = (q) => vals[Math.min(vals.length - 1, Math.floor(q * vals.length))] || 0;
+      LEVELS.forEach((q) => iso(field, qLevel(q), ctxs[bandFor(q)], true));
+      iso(mask, 0.5, ctxs[2], false); // the silhouette rides the top layer
 
       // the sparse vertical family ties the contours into a mesh.
       // A run must restart whenever it hops to another depth layer —
@@ -379,7 +412,7 @@ function setupCoverArt() {
         let run = false, lastBand = -1;
         for (let r = 0; r < ROWS; r++) {
           if (at(mask, c, r)) {
-            const t = tOf(at(lum, c, r));
+            const t = tOf(at(field, c, r));
             const band = bandFor(t);
             const px2 = c * CELL, py = r * CELL - t * AMP + AMP / 2;
             if (!run || band !== lastBand) { ctxs[band].moveTo(px2, py); run = true; lastBand = band; }

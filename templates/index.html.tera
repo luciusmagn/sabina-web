@@ -87,7 +87,7 @@
         <div class="rcard">
           <div class="rcard-inner">
             <button class="rcard-front" type="button">
-              <span class="rcard-cover" aria-hidden="true"><img src="/covers/viz.png" alt=""></span>
+              <span class="rcard-cover" aria-hidden="true"><img src="/covers/viz.png" alt="" data-depth="/covers/depth/viz.png"></span>
               <span class="rcard-label">
                 <span class="rcard-title" data-cs="{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.viz.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}</span>
                 <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
@@ -124,7 +124,7 @@
         <div class="rcard">
           <div class="rcard-inner">
             <button class="rcard-front" type="button">
-              <span class="rcard-cover" aria-hidden="true"><img src="/covers/produkt.png" alt=""></span>
+              <span class="rcard-cover" aria-hidden="true"><img src="/covers/produkt.png" alt="" data-depth="/covers/depth/produkt.png"></span>
               <span class="rcard-label">
                 <span class="rcard-title" data-cs="{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.produkt.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }}</span>
                 <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
@@ -166,7 +166,7 @@
         <div class="rcard">
           <div class="rcard-inner">
             <button class="rcard-front" type="button">
-              <span class="rcard-cover" aria-hidden="true"><img src="/covers/portrety.png" alt="" data-crop="14,0,72,100"></span>
+              <span class="rcard-cover" aria-hidden="true"><img src="/covers/portrety.png" alt="" data-depth="/covers/depth/portrety.png" data-crop="14,0,72,100"></span>
               <span class="rcard-label">
                 <span class="rcard-title" data-cs="{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.profilovky.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}</span>
                 <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
@@ -193,7 +193,7 @@
         <div class="rcard">
           <div class="rcard-inner">
             <button class="rcard-front" type="button">
-              <span class="rcard-cover" aria-hidden="true"><img src="/covers/videa.png" alt="" data-crop="0,0,100,80"></span>
+              <span class="rcard-cover" aria-hidden="true"><img src="/covers/videa.png" alt="" data-depth="/covers/depth/videa.png"></span>
               <span class="rcard-label">
                 <span class="rcard-title" data-cs="{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.videa.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }}</span>
                 <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
@@ -225,7 +225,7 @@
         <div class="rcard">
           <div class="rcard-inner">
             <button class="rcard-front" type="button">
-              <span class="rcard-cover" aria-hidden="true"><img src="/covers/typografie.png" alt="" data-crop="5,3,47,94"></span>
+              <span class="rcard-cover" aria-hidden="true"><img src="/covers/typografie.png" alt="" data-depth="/covers/depth/typografie.png" data-crop="5,3,47,94"></span>
               <span class="rcard-label">
                 <span class="rcard-title" data-cs="{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.typografie.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}</span>
                 <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
