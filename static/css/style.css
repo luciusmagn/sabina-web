@@ -21,9 +21,9 @@
   --card-b-bg: var(--main-b);  --card-b-ink: #000000;  --card-b-line: transparent;
 
   --kontakt-bg: var(--main-b);
-  --kontakt-ink: #000000;
+  --kontakt-ink: #ffffff;
+  --kontakt-shadow: #0065f9;
 
-  --sun-gnomon: rgba(0, 0, 0, 0.6);
   --cursor-c: #0065f9;
 
   --radius: clamp(18px, 1.7vw, 28px);
@@ -48,9 +48,9 @@
   --card-b-bg: #000000;  --card-b-ink: #ffffff;  --card-b-line: #f4f4f4;
 
   --kontakt-bg: #fe5d40;
-  --kontakt-ink: #000000;
+  --kontakt-ink: #ffffff;
+  --kontakt-shadow: #000000;
 
-  --sun-gnomon: rgba(0, 0, 0, 0.6);
   --cursor-c: #fe5d40;
 
   color-scheme: dark;
@@ -217,6 +217,14 @@ html.has-cursor * { cursor: none !important; }
   border-radius: 999px;
   font-size: 15px;
   max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.hero-contact:hover {
+  background: var(--hero-ink);
+  color: var(--hero-bg);
 }
 
 .hero-contact-label { font-weight: 700; white-space: nowrap; }
@@ -238,64 +246,7 @@ html.has-cursor * { cursor: none !important; }
   opacity: 1;
 }
 
-.hero-contact-reveal a {
-  text-decoration: none;
-  border-bottom: 1.5px solid currentColor;
-  padding-bottom: 1px;
-}
-
-.hero-contact-reveal a:hover { border-bottom-width: 3px; }
 .hero-contact-sep { opacity: 0.5; }
-
-/* the flat sun (a ring moon at night); position follows the real sky via JS */
-
-.sun {
-  position: absolute;
-  z-index: 1;
-  left: var(--sun-x, 70%);
-  top: var(--sun-y, 16%);
-  width: clamp(92px, 11vw, 168px);
-  height: clamp(92px, 11vw, 168px);
-  border-radius: 50%;
-  background: var(--hero-accent);
-  transition: left 2s ease, top 2s ease, background-color 0.25s ease;
-}
-
-.sun--moon {
-  background: transparent;
-  border: 3px solid var(--hero-accent);
-}
-
-.sun-gnomon {
-  position: absolute;
-  left: 50%;
-  bottom: 50%;
-  width: 3px;
-  height: 34%;
-  background: var(--sun-gnomon);
-  border-radius: 2px;
-  transform-origin: bottom center;
-  transform: translateX(-50%) rotate(var(--gnomon, 20deg));
-  transition: transform 2s ease;
-}
-
-.sun--moon .sun-gnomon { background: var(--hero-accent); }
-
-.trace--spark {
-  position: absolute;
-  z-index: 1;
-  width: clamp(38px, 4vw, 60px);
-  left: calc(var(--sun-x, 70%) - clamp(48px, 5.4vw, 84px));
-  top: calc(var(--sun-y, 16%) + clamp(70px, 9vw, 140px));
-  color: var(--hero-accent);
-  transition: left 2s ease, top 2s ease;
-  animation: spark-float 7s ease-in-out infinite;
-}
-
-@keyframes spark-float {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(-5px, 8px) rotate(-8deg); }
-}
 
 /* scroll cue — hand-drawn arrow, gentle bob */
 
@@ -586,6 +537,8 @@ html.has-cursor * { cursor: none !important; }
   line-height: 1.06;
   letter-spacing: -0.02em;
   max-width: 16ch;
+  /* same real-sun offset as the hero name, in the theme's other main */
+  text-shadow: var(--sun-dx, 0.05em) var(--sun-dy, 0.045em) 0 var(--kontakt-shadow);
 }
 
 .kontakt-mail {
@@ -597,6 +550,7 @@ html.has-cursor * { cursor: none !important; }
   letter-spacing: -0.01em;
   text-decoration: none;
   word-break: break-all;
+  text-shadow: var(--sun-dx, 0.05em) var(--sun-dy, 0.045em) 0 var(--kontakt-shadow);
 }
 
 .trace--ring {
@@ -828,23 +782,51 @@ html.has-cursor * { cursor: none !important; }
 
 .lightbox-close:hover { background: #ffffff; color: #000000; }
 
-/* ---- boing ---- */
+/* ---- the walker — a line figure strolling across the kontakt field ---- */
 
-.boing-label {
-  position: fixed;
-  z-index: 200;
-  font-weight: 800;
-  font-size: 19px;
-  color: var(--hero-ink);
+.walker-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(46px, 8vh, 84px);
+  height: clamp(96px, 11vw, 150px);
   pointer-events: none;
-  transform: translate(-50%, -120%) rotate(var(--rot, 0deg));
-  animation: boing-pop 0.9s ease-out forwards;
+  overflow: hidden;
 }
 
-@keyframes boing-pop {
-  0%   { opacity: 0; transform: translate(-50%, -90%) rotate(var(--rot)) scale(0.6); }
-  25%  { opacity: 1; transform: translate(-50%, -130%) rotate(var(--rot)) scale(1.08); }
-  100% { opacity: 0; transform: translate(-50%, -260%) rotate(var(--rot)) scale(1); }
+.walker {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: auto;
+  color: var(--kontakt-ink);
+  opacity: 0.9;
+  animation: walker-cross 34s linear infinite, walker-bob 0.62s ease-in-out infinite;
+}
+
+@keyframes walker-cross {
+  from { transform: translateX(-16vw); }
+  to   { transform: translateX(108vw); }
+}
+
+@keyframes walker-bob {
+  0%, 100% { margin-bottom: 0; }
+  50% { margin-bottom: 4px; }
+}
+
+.w-limb {
+  transform-origin: 61px 52px; /* the shoulder */
+  animation: limb-swing 0.62s ease-in-out infinite alternate;
+}
+
+.w-leg-a, .w-leg-b { transform-origin: 61.5px 88px; /* the hip */ }
+
+.w-arm-b, .w-leg-a { animation-direction: alternate-reverse; }
+
+@keyframes limb-swing {
+  from { transform: rotate(-17deg); }
+  to   { transform: rotate(17deg); }
 }
 
 /* ---- reveal on scroll ---- */
@@ -864,8 +846,9 @@ html.has-cursor * { cursor: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .trace--arrow, .trace--spark { animation: none; }
-  .pcard, .pcard-media img, .sun, .sun-gnomon, .trace--spark { transition: none; }
+  .trace--arrow, .walker, .w-limb { animation: none; }
+  .pcard, .pcard-media img { transition: none; }
+  .walker { left: var(--pad-x); }
   .rv { opacity: 1; transform: none; }
   .kontakt-mail:hover .trace--ring path { animation: none; stroke-dashoffset: 0; }
 }
@@ -875,10 +858,6 @@ html.has-cursor * { cursor: none !important; }
 @media (max-width: 899px) {
   .hero-inner { padding-bottom: clamp(120px, 20vh, 180px); }
   .hero-name { font-size: clamp(56px, 16.5vw, 120px); }
-  .sun {
-    --sun-x: 66%;
-    --sun-y: 9%;
-  }
   .hero-contact { flex-wrap: wrap; }
   .hero-contact-reveal {
     max-width: none;

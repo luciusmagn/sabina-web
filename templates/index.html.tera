@@ -58,27 +58,18 @@
 
     {# ================= HERO — one big flat field ================= #}
     <section class="hero" id="domu">
-      <button class="sun" type="button" aria-label="Boing">
-        <span class="sun-gnomon" aria-hidden="true"></span>
-      </button>
-
-      <svg class="trace trace--spark" viewBox="0 0 60 60" fill="none" aria-hidden="true">
-        <path d="M30 7C31.2 18 30.4 22.5 49 28.6C31.6 31.8 31 36 30.2 53C28.6 36.4 28 32 10.5 29.4C27.4 25.6 28.6 20.8 30 7Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
-        <path d="M46 10.5C46.3 13.4 46.6 14.4 51 15.6C46.9 16.6 46.5 17.8 46.2 22C45.7 17.9 45.3 16.8 41 15.9C45.2 14.8 45.6 13.7 46 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-      </svg>
-
       <div class="hero-inner">
         <h1 class="hero-name">{{ content.hero | safe }}</h1>
         <p class="hero-tagline" data-cs="{{ content.tagline.cs }}" data-en="{{ content.tagline.en }}">{{ content.tagline.cs }}</p>
 
-        <div class="hero-contact">
+        <a class="hero-contact" href="#kontakt">
         <span class="hero-contact-label" data-cs="{{ content.tiles.kontakt.cs }}" data-en="{{ content.tiles.kontakt.en }}">{{ content.tiles.kontakt.cs }}</span>
         <span class="hero-contact-reveal">
-          <a href="mailto:{{ content.contact.email }}">{{ content.contact.email }}</a>
+          <span>{{ content.contact.email }}</span>
           <span class="hero-contact-sep" aria-hidden="true">/</span>
-          <a href="{{ content.contact.linkedinUrl }}" target="_blank" rel="noopener">{{ content.contact.linkedinLabel }}</a>
+          <span>{{ content.contact.linkedinLabel }}</span>
           </span>
-        </div>
+        </a>
       </div>
 
       <a class="scroll-cue" href="#prace"
@@ -185,13 +176,24 @@
       <a class="kontakt-mail" href="mailto:{{ content.contact.email }}">
         <span class="kontakt-mail-text">{{ content.contact.email }}</span>
         <svg class="trace trace--ring" viewBox="0 0 520 110" fill="none" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M262 14C150 10 28 22 20 54c-8 34 96 46 240 44 146-2 246-16 240-46-5-27-104-40-198-38" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M262 14C150 10 28 22 20 54c-8 34 96 46 240 44 146-2 246-16 240-46-5-27-104-40-198-38" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
         </svg>
       </a>
 
       <div class="kontakt-row">
         <a class="kontakt-li" href="{{ content.contact.linkedinUrl }}" target="_blank" rel="noopener">LinkedIn — {{ content.contact.linkedinLabel }}</a>
         <span class="chip-slot" aria-hidden="true"></span>
+      </div>
+
+      <div class="walker-track" aria-hidden="true">
+        <svg class="walker" viewBox="0 0 120 164" fill="none">
+          <circle cx="62" cy="26" r="13.5" stroke="currentColor" stroke-width="3.6"/>
+          <path d="M61 41C60 55 60.8 68 61.5 88" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+          <path class="w-limb w-arm-a" d="M61 52C54 61 48 69 41.5 78" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+          <path class="w-limb w-arm-b" d="M61 52C68.5 61.5 74 69 80.5 77" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+          <path class="w-limb w-leg-a" d="M61.5 88C55 105 49 119 42.5 135" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+          <path class="w-limb w-leg-b" d="M61.5 88C67.5 105 73 119 79 134" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+        </svg>
       </div>
 
       <p class="kontakt-foot">© <span class="kontakt-year">2026</span> Sabina Mácha</p>

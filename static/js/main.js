@@ -86,16 +86,14 @@ function setupCursor() {
 }
 setupCursor();
 
-/* ---------------- the real sky: flat sun-shadow + drifting disc ----------------
-   Sun/moon position over Prague (her sky — no geolocation prompt). The sun's
-   azimuth/altitude drive (a) the flat offset shadow behind the hero name and
-   (b) where the disc sits in the hero. After sunset the moon takes over and
-   the disc becomes a ring. Recomputed each minute. */
+/* ---------------- the real sky: flat text shadows ----------------
+   Sun/moon position over Prague (her sky — no geolocation prompt). The body's
+   azimuth/altitude drive the flat offset shadow behind the hero name and the
+   kontakt type — cast opposite the sun, long when it hangs low, moon-cast at
+   night. Offsets are em so they scale with each element. Recomputed each
+   minute. */
 
 function setupSky() {
-  const hero = document.querySelector(".hero");
-  const sun = document.querySelector(".sun");
-  if (!hero || !sun) return;
 
   const LAT = 50.08, LON = 14.44;
   const rad = Math.PI / 180;
@@ -134,38 +132,22 @@ function setupSky() {
       else body = null;
     }
 
-    sun.classList.toggle("sun--moon", isMoon);
-
     if (!body) {
-      // both below the horizon — park the ring low and give the name a resting shadow
-      hero.style.setProperty("--sun-dx", "8px");
-      hero.style.setProperty("--sun-dy", "10px");
-      hero.style.setProperty("--sun-x", "78%");
-      hero.style.setProperty("--sun-y", "64%");
-      sun.classList.add("sun--moon");
+      // both below the horizon — a resting shadow
+      root.style.setProperty("--sun-dx", "0.042em");
+      root.style.setProperty("--sun-dy", "0.052em");
       return;
     }
 
     const { alt, az } = body;
     const elev = Math.min(alt / 90, 1);
 
-    // flat offset shadow — cast opposite the body, long when it hangs low.
-    // Set in em so it scales with the name (tuned against ~190px display type).
+    // Set in em so the offset scales with each element's own type size
+    // (magnitudes tuned against ~190px display type).
     const mag = (22 - elev * 14) * (isMoon ? 0.8 : 1);
     const opp = (az + 180) * rad;
-    hero.style.setProperty("--sun-dx", (Math.sin(opp) * mag / 190).toFixed(4) + "em");
-    hero.style.setProperty("--sun-dy", (Math.max(4, Math.cos(opp) * mag * 0.7 + 8) / 190).toFixed(4) + "em");
-
-    // disc position — east (morning) enters right of centre, west leaves left;
-    // altitude lifts it toward the top of the field
-    const t = Math.min(1, Math.max(0, (az - 60) / 240)); // 60°..300° of azimuth → 0..1
-    const xPct = 86 - t * 44;                            // sweeps 86% → 42%
-    const yPct = 34 - elev * 26;                         // higher sun → higher disc
-    hero.style.setProperty("--sun-x", xPct.toFixed(1) + "%");
-    hero.style.setProperty("--sun-y", Math.max(6, yPct).toFixed(1) + "%");
-
-    // gnomon leans opposite the body's azimuth, mirroring the shadow
-    hero.style.setProperty("--gnomon", (Math.sin(opp) * 32).toFixed(1) + "deg");
+    root.style.setProperty("--sun-dx", (Math.sin(opp) * mag / 190).toFixed(4) + "em");
+    root.style.setProperty("--sun-dy", (Math.max(4, Math.cos(opp) * mag * 0.7 + 8) / 190).toFixed(4) + "em");
   }
 
   sundialApply = apply;
@@ -173,45 +155,6 @@ function setupSky() {
   setInterval(apply, 60000);
 }
 setupSky();
-
-/* ---------------- boing (the sun keeps the easter egg) ---------------- */
-
-const BOING_WORDS = ["boing!", "boioioing!", "BOING!", "boing boing!"];
-const sunBtn = document.querySelector(".sun");
-let boingAnimation = null;
-
-if (sunBtn) {
-  sunBtn.addEventListener("click", (event) => {
-    if (reduceMotion.matches) return;
-    if (boingAnimation) boingAnimation.cancel();
-    boingAnimation = sunBtn.animate(
-      [
-        { transform: "scale(1, 1)" },
-        { transform: "scale(0.9, 0.9)", offset: 0.2 },
-        { transform: "scale(1.14, 0.86)", offset: 0.4 },
-        { transform: "scale(0.92, 1.1)", offset: 0.6 },
-        { transform: "scale(1.06, 0.95)", offset: 0.75 },
-        { transform: "scale(0.98, 1.02)", offset: 0.9 },
-        { transform: "scale(1, 1)" },
-      ],
-      { duration: 700, easing: "ease-out" }
-    );
-    let { clientX: x, clientY: y } = event;
-    if (!x && !y) {
-      const r = sunBtn.getBoundingClientRect();
-      x = r.x + r.width / 2;
-      y = r.y + r.height / 2;
-    }
-    const label = document.createElement("span");
-    label.className = "boing-label";
-    label.textContent = BOING_WORDS[Math.floor(Math.random() * BOING_WORDS.length)];
-    label.style.left = `${x}px`;
-    label.style.top = `${y}px`;
-    label.style.setProperty("--rot", `${(Math.random() * 30 - 15).toFixed(1)}deg`);
-    document.body.append(label);
-    label.addEventListener("animationend", () => label.remove());
-  });
-}
 
 /* ---------------- work: horizontal scrub (wide + fine pointer only) ----------------
    The section grows tall; a sticky viewport pins while the track translates
@@ -443,7 +386,7 @@ overlay.addEventListener("click", (event) => {
 /* ---------------- reveal on scroll ---------------- */
 
 function setupReveal() {
-  let targets = [...document.querySelectorAll(".hero-inner, .kontakt > *, .pcard")];
+  let targets = [...document.querySelectorAll(".hero-inner, .kontakt > *:not(.walker-track), .pcard")];
   if (reduceMotion.matches) return;
   targets.forEach((el, i) => {
     el.classList.add("rv");
