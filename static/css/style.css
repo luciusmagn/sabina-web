@@ -374,6 +374,18 @@ html.has-cursor * { cursor: none !important; }
   object-fit: cover;
 }
 
+/* wireframe covers: the drawn mesh replaces the photo (which stays as the
+   no-JS fallback underneath) */
+
+.cover-mesh {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rcard-cover.has-mesh img { visibility: hidden; }
+
 .rcard:not(.is-center) .rcard-front { cursor: pointer; }
 
 /* the name + pill are one locked unit — they always travel together */

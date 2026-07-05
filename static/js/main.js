@@ -10,6 +10,7 @@ const finePointer = window.matchMedia("(pointer: fine)");
 const wide = window.matchMedia("(min-width: 900px)");
 
 let sundialApply = () => {};
+let coverArtApply = () => {};
 
 /* ---------------- language ---------------- */
 
@@ -43,6 +44,7 @@ function applyTheme(theme) {
   root.setAttribute("data-theme", theme);
   themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
   sundialApply();
+  coverArtApply(); // the mesh covers redraw in the new theme's pair
   try { localStorage.setItem("theme", theme); } catch (e) { /* private mode */ }
 }
 
@@ -155,6 +157,92 @@ function setupSky() {
   setInterval(apply, 60000);
 }
 setupSky();
+
+/* ---------------- wireframe mesh covers ----------------
+   Each ring cover is resampled and redrawn as a displacement mesh: a fine
+   grid whose lattice lifts where the source image is bright, so the subject
+   reads as a wireframe relief — flat ground, thin lines, no gradients
+   (pink + blue in light, orange + black in dark). The source <img> stays in
+   the DOM as the no-JS fallback and is hidden once its mesh is drawn. */
+
+function setupCoverArt() {
+  const covers = [...document.querySelectorAll(".rcard-cover img")];
+  if (!covers.length) return;
+
+  const CELL = 8;          // lattice pitch in canvas px
+  const AMP = 30;          // how far bright areas lift the mesh
+  const W = 760;           // logical canvas size (stretched over the card)
+  const COLS = Math.floor(W / CELL);
+  const ROWS = 66;
+  const H = ROWS * CELL + AMP;
+
+  const palette = () =>
+    root.getAttribute("data-theme") === "dark"
+      ? { bg: "#fe5d40", line: "#000000" }
+      : { bg: "#ff87b1", line: "#0065f9" };
+
+  const renderers = covers.map((img) => {
+    const holder = img.parentElement;
+    let canvas = null;
+
+    function render() {
+      if (!img.naturalWidth) return;
+      if (!canvas) {
+        canvas = document.createElement("canvas");
+        canvas.className = "cover-mesh";
+        canvas.width = W;
+        canvas.height = H;
+        canvas.setAttribute("aria-hidden", "true");
+        holder.append(canvas);
+        holder.classList.add("has-mesh");
+      }
+
+      // luminance grid, sampled from a centre crop matching the mesh aspect
+      const sample = document.createElement("canvas");
+      sample.width = COLS;
+      sample.height = ROWS;
+      const sctx = sample.getContext("2d", { willReadFrequently: true });
+      const targetRatio = W / (ROWS * CELL);
+      const srcRatio = img.naturalWidth / img.naturalHeight;
+      let sw = img.naturalWidth, sh = img.naturalHeight, sx = 0, sy = 0;
+      if (srcRatio > targetRatio) { sw = sh * targetRatio; sx = (img.naturalWidth - sw) / 2; }
+      else { sh = sw / targetRatio; sy = (img.naturalHeight - sh) / 2; }
+      sctx.drawImage(img, sx, sy, sw, sh, 0, 0, COLS, ROWS);
+      const px = sctx.getImageData(0, 0, COLS, ROWS).data;
+      const lum = new Float32Array(COLS * ROWS);
+      for (let i = 0; i < COLS * ROWS; i++) {
+        lum[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255;
+      }
+      const yAt = (c, r) => AMP + r * CELL - lum[r * COLS + c] * AMP;
+
+      const { bg, line } = palette();
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = line;
+      ctx.lineWidth = 1.2;
+      ctx.lineJoin = "round";
+
+      ctx.beginPath();
+      for (let r = 0; r < ROWS; r++) {          // warp lines along the weft…
+        ctx.moveTo(0, yAt(0, r));
+        for (let c = 1; c < COLS; c++) ctx.lineTo(c * CELL, yAt(c, r));
+      }
+      for (let c = 0; c < COLS; c += 3) {       // …and a sparser warp the other way
+        ctx.moveTo(c * CELL, yAt(c, 0));
+        for (let r = 1; r < ROWS; r++) ctx.lineTo(c * CELL, yAt(c, r));
+      }
+      ctx.stroke();
+    }
+
+    if (img.complete) render();
+    else img.addEventListener("load", render, { once: true });
+    return render;
+  });
+
+  coverArtApply = () => renderers.forEach((r) => r());
+}
+setupCoverArt();
 
 /* ---------------- work: the ring of category cards ----------------
    A circular 3D carousel. The centre card faces the viewer; the others
