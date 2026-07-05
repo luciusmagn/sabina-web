@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sabina-web",
+      "runtimeExecutable": "cargo",
+      "runtimeArgs": ["run"],
+      "port": 8000,
+      "env": {
+        "EDITOR_PASSWORD": "dev",
+        "ROCKET_PORT": "8000"
+      }
+    }
+  ]
+}

@@ -360,20 +360,35 @@ function setupRing() {
     });
   }
 
-  let busy = false; // the label must land all the way before the next turn
+  let busy = false; // one full sequence at a time
 
   function go(dir) {
     if (busy || ring.classList.contains("has-flip")) return false;
     busy = true;
-    setTimeout(() => { busy = false; }, reduceMotion.matches ? 60 : 2000);
-    // the outgoing label keeps travelling down until it has left the card…
+
+    if (reduceMotion.matches) {
+      cur = (cur + dir + n) % n;
+      layout();
+      land();
+      setTimeout(() => { busy = false; }, 60);
+      return true;
+    }
+
+    // 1 · the outgoing label travels down and disappears completely…
     const old = cards[cur].querySelector(".rcard-front");
     old.classList.remove("land");
     old.classList.add("leave");
-    setTimeout(() => old.classList.remove("leave"), 2000);
-    cur = (cur + dir + n) % n;
-    layout();
-    land(); // …while the incoming one drops in from above
+
+    // 2 · …only then does the ring turn and the next label drop in
+    setTimeout(() => {
+      cur = (cur + dir + n) % n;
+      layout();
+      land();
+      // the old card is a side card by now — let its resting label return
+      setTimeout(() => old.classList.remove("leave"), 700);
+    }, 870);
+
+    setTimeout(() => { busy = false; }, 2900);
     return true;
   }
 

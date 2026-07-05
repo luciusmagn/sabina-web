@@ -21,7 +21,7 @@
   --card-b-bg: var(--main-b);  --card-b-ink: #000000;  --card-b-line: transparent;
 
   --kontakt-bg: var(--main-b);
-  --kontakt-ink: #000000;
+  --kontakt-ink: #ffffff;
 
   --cursor-c: #0065f9;
 
@@ -47,7 +47,7 @@
   --card-b-bg: #000000;  --card-b-ink: #ffffff;  --card-b-line: #f4f4f4;
 
   --kontakt-bg: #fe5d40;
-  --kontakt-ink: #000000;
+  --kontakt-ink: #ffffff;
 
   --cursor-c: #fe5d40;
 
@@ -127,8 +127,7 @@ html.has-cursor * { cursor: none !important; }
 [data-theme="dark"] .cursor.cursor--work { --cc: #fe5d40; }
 
 .cursor.cursor--hover {
-  transform: translate(-50%, -50%) scale(1.9);
-  background: transparent;
+  transform: translate(-50%, -50%) scale(1.9); /* grows, keeps its filled centre */
 }
 
 .cursor.cursor--hidden { opacity: 0; }
@@ -443,7 +442,7 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
    card (and the section) completely */
 
 .rcard-front.land .rcard-label  { animation: land-in 1.9s cubic-bezier(0.4, 0.08, 0.16, 1) both; }
-.rcard-front.leave .rcard-label { animation: leave-down 1.9s cubic-bezier(0.4, 0.08, 0.16, 1) both; }
+.rcard-front.leave .rcard-label { animation: leave-down 0.85s cubic-bezier(0.5, 0.06, 0.5, 0.94) both; }
 
 @keyframes land-in {
   from { transform: translateY(-52svh); }
@@ -553,16 +552,57 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   width: 76px;
   height: 46px;
   border-radius: 999px;
-  background: var(--main-a); /* blue pills in light, orange in dark */
+  background: var(--main-a); /* blue pills with white arrows in light */
   color: #ffffff;
   display: grid;
   place-items: center;
   transition: transform 0.2s ease;
 }
 
+[data-theme="dark"] .ring-btn {
+  background: #ffffff; /* white pills with black arrows in dark */
+  color: #000000;
+}
+
 .ring-btn:hover { transform: translateY(-3px); }
 .ring-btn:active { transform: translateY(0) scale(0.96); }
 .ring-btn svg { width: 30px; height: 17px; }
+
+/* one-click exits up / down, stacked at the right edge */
+
+.ring-jump {
+  position: absolute;
+  right: clamp(14px, 2.6vw, 30px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 20;
+  transition: opacity 0.25s ease;
+}
+
+.ring.has-flip .ring-jump { opacity: 0; pointer-events: none; }
+
+.ring-jump-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--main-a);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease;
+}
+
+[data-theme="dark"] .ring-jump-btn {
+  background: #ffffff;
+  color: #000000;
+}
+
+.ring-jump-btn:hover { transform: translateY(-2px); }
+.ring-jump-btn svg { width: 13px; height: 20px; }
+.ring-jump-btn--up svg { transform: rotate(180deg); }
 
 /* ============================================================
    KONTAKT — the second flat field
@@ -585,42 +625,34 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 
 .kontakt-bio {
   margin: 0;
-  font-size: clamp(30px, 5vw, 64px);
+  font-size: clamp(17px, 3.1vw, 44px);
   font-weight: 800;
   line-height: 1.06;
   letter-spacing: -0.02em;
-  max-width: 16ch;
+  white-space: nowrap; /* one line, always */
 }
 
-.kontakt-mail {
-  position: relative;
-  align-self: flex-start;
-  max-width: 100%;
-  font-size: clamp(20px, 4vw, 58px);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  word-break: break-all;
-}
+/* email + LinkedIn — two matching icon lines, no underline */
 
-.kontakt-mail:hover .kontakt-mail-text { border-bottom: 3px solid currentColor; }
-
-.kontakt-row {
+.kontakt-lines {
   display: flex;
-  align-items: center;
-  gap: 22px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
 }
 
-.kontakt-li {
-  font-size: clamp(15px, 1.4vw, 19px);
+.kontakt-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(15px, 1.25vw, 18px);
   font-weight: 700;
   text-decoration: none;
-  border-bottom: 2px solid currentColor;
-  padding-bottom: 2px;
 }
 
-.kontakt-li:hover { border-bottom-width: 4px; }
+.kontakt-line svg { width: 20px; height: 20px; flex: none; }
+
+.kontakt-line:hover { opacity: 0.75; }
 
 .kontakt-foot {
   margin: auto 0 0;

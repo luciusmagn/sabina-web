@@ -262,18 +262,42 @@
           <svg viewBox="0 0 44 24" fill="none" aria-hidden="true"><path d="M4 12.5C17 11.6 27 11.8 38.5 12.4M38.5 12.4C34.2 9.2 32 7.4 29 4M38.5 12.4C34.6 15.6 32.2 17.6 28.6 20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
         </button>
       </div>
+
+      {# one-click exits: up to the hero, down to the footer #}
+      <div class="ring-jump">
+        <a class="ring-jump-btn ring-jump-btn--up" href="#domu"
+           data-aria-cs="Nahoru" data-aria-en="To the top" aria-label="Nahoru">
+          <svg viewBox="0 0 34 52" fill="none" aria-hidden="true">
+            <path d="M16.2 4C17.4 15 17.8 26 16.9 44.5M16.9 44.5C13.4 40.8 11.2 38.9 6 36.2M16.9 44.5C20.8 41.4 23.6 39 28.4 37" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+        <a class="ring-jump-btn" href="#kontakt"
+           data-aria-cs="{{ content.tiles.kontakt.cs }}" data-aria-en="{{ content.tiles.kontakt.en }}"
+           aria-label="{{ content.tiles.kontakt.cs }}">
+          <svg viewBox="0 0 34 52" fill="none" aria-hidden="true">
+            <path d="M16.2 4C17.4 15 17.8 26 16.9 44.5M16.9 44.5C13.4 40.8 11.2 38.9 6 36.2M16.9 44.5C20.8 41.4 23.6 39 28.4 37" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </div>
     </section>
 
     {# ================= CONTACT — the second flat field ================= #}
     <section class="kontakt" id="kontakt">
       <p class="kontakt-bio" data-cs="{{ content.contact.bio.cs }}" data-en="{{ content.contact.bio.en }}">{{ content.contact.bio.cs }}</p>
 
-      <a class="kontakt-mail" href="mailto:{{ content.contact.email }}">
-        <span class="kontakt-mail-text">{{ content.contact.email }}</span>
-      </a>
-
-      <div class="kontakt-row">
-        <a class="kontakt-li" href="{{ content.contact.linkedinUrl }}" target="_blank" rel="noopener">LinkedIn — {{ content.contact.linkedinLabel }}</a>
+      <div class="kontakt-lines">
+        <a class="kontakt-line" href="mailto:{{ content.contact.email }}">
+          <svg viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M26 0H2C1.46957 0 0.960859 0.210714 0.585786 0.585786C0.210714 0.960859 0 1.46957 0 2V18C0 18.5304 0.210714 19.0391 0.585786 19.4142C0.960859 19.7893 1.46957 20 2 20H26C26.5304 20 27.0391 19.7893 27.4142 19.4142C27.7893 19.0391 28 18.5304 28 18V2C28 1.46957 27.7893 0.960859 27.4142 0.585786C27.0391 0.210714 26.5304 0 26 0ZM23.8 2L14 8.78L4.2 2H23.8ZM2 18V2.91L13.43 10.82C13.5974 10.9361 13.7963 10.9984 14 10.9984C14.2037 10.9984 14.4026 10.9361 14.57 10.82L26 2.91V18H2Z" fill="currentColor"/>
+          </svg>
+          <span>{{ content.contact.email }}</span>
+        </a>
+        <a class="kontakt-line" href="{{ content.contact.linkedinUrl }}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M22.2 0H1.8C0.8 0 0 0.8 0 1.7V22.2C0 23.1 0.8 23.9 1.8 23.9H22.2C23.2 23.9 24 23.1 24 22.2V1.7C24 0.8 23.2 0 22.2 0ZM7.1 20.4H3.6V9H7.1V20.4ZM5.4 7.4C4.3 7.4 3.3 6.5 3.3 5.3C3.3 4.1 4.2 3.2 5.4 3.2C6.5 3.2 7.5 4.1 7.5 5.3C7.5 6.5 6.5 7.4 5.4 7.4ZM20.5 20.3H17V14.7C17 13.4 17 11.6 15.1 11.6C13.2 11.6 13 13.1 13 14.5V20.2H9.5V9H12.8V10.5H12.9C13.4 9.6 14.6 8.6 16.3 8.6C19.9 8.6 20.6 11 20.6 14.1V20.3H20.5Z" fill="currentColor"/>
+          </svg>
+          <span>{{ content.contact.linkedinLabel }}</span>
+        </a>
       </div>
 
       <div class="walker-track" aria-hidden="true">
