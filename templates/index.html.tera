@@ -29,7 +29,7 @@
 </head>
 <body>
 
-  {# ---- Fixed chrome: language + theme, travelling contact chip, cursor ---- #}
+  {# ---- Fixed chrome: language + theme, travelling contact chip ---- #}
   <div class="top-controls">
     <button class="lang-toggle" type="button"
             data-cs="{{ content.ui.languageButton.cs }}" data-en="{{ content.ui.languageButton.en }}"
@@ -82,90 +82,224 @@
       </a>
     </section>
 
-    {# ================= WORK — horizontal gallery ================= #}
-    <section class="work" id="prace">
-      <div class="work-sticky">
-        <h2 class="work-title" aria-hidden="true">
-          <span data-cs="Práce" data-en="Work">Práce</span>
-        </h2>
-        <span class="sr-only" data-cs="Práce" data-en="Work">Práce</span>
+    {# ================= WORK — ring of category cards =================
+       A circular 3D carousel (one card per category). The centre card shows
+       the category name + an open pill that "land" on arrival; clicking it
+       flips the card over to a vertical scroll of that category's projects. #}
+    <section class="ring" id="prace">
+      <h2 class="sr-only" data-cs="Práce" data-en="Work">Práce</h2>
 
-        <div class="track-wrap">
-          <div class="track">
+      <div class="ring-stage">
 
-            {# — visual identity — #}
-            <button class="pcard pcard--viz" type="button" data-overlay="viz">
-              <span class="pcard-media"><img src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy"></span>
-              <span class="pcard-text">
-                <span class="pcard-num" aria-hidden="true"></span>
-                <span class="pcard-title" data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</span>
-                <span class="pcard-tag" data-cs="{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.viz.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}</span>
-              </span>
+        {# ---- 1 · visual identity ---- #}
+        <div class="rcard">
+          <div class="rcard-inner">
+            <button class="rcard-front" type="button">
+              <span class="rcard-title" data-cs="{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.viz.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}</span>
+              <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
             </button>
-
-            {# — product sets — #}
-            {% for set in content.productSets %}
-            <button class="pcard pcard--produkt" type="button" data-overlay="produkt" data-set="{{ loop.index0 }}">
-              <span class="pcard-media">
-                {% if set.layout == "rows" %}<img src="{{ set.rows.0.0.0 }}" alt="" loading="lazy">
-                {% else %}<img src="{{ set.images.0.0 }}" alt="" loading="lazy">{% endif %}
-              </span>
-              <span class="pcard-text">
-                <span class="pcard-num" aria-hidden="true"></span>
-                <span class="pcard-title" data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</span>
-                <span class="pcard-tag" data-cs="{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }} {{ set.caption.cs }}" data-en="{{ content.tiles.produkt.en | replace(from="<br>", to=" ") | striptags }} {{ set.caption.en }}">{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }} {{ set.caption.cs }}</span>
-              </span>
-            </button>
-            {% endfor %}
-
-            {# — portraits — #}
-            <button class="pcard pcard--portret" type="button" data-overlay="profilovky">
-              <span class="pcard-media"><img src="{{ content.profilePhotos.photos.0.src }}" alt="" loading="lazy"></span>
-              <span class="pcard-text">
-                <span class="pcard-num" aria-hidden="true"></span>
-                <span class="pcard-title" data-cs="{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.profilovky.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}</span>
-                <span class="pcard-tag" data-cs="{{ content.profilePhotos.photos | length }} portrétů" data-en="{{ content.profilePhotos.photos | length }} portraits">{{ content.profilePhotos.photos | length }} portrétů</span>
-              </span>
-            </button>
-
-            {# — videos: play in the lightbox directly — #}
-            {% for v in content.videos %}
-            <button class="pcard pcard--video" type="button" data-video-src="{{ v.src }}">
-              <span class="pcard-media">
-                <img src="{{ v.poster }}" alt="" loading="lazy">
-                <svg class="pcard-play" viewBox="0 0 60 60" fill="none" aria-hidden="true">
-                  <path d="M30 4.5C13 6 4.8 14.6 5.6 30.8 6.4 46 15 55.4 30.6 55.5 46 55.6 55 45.8 55.4 30 55.8 13.8 46.6 5.4 30 4.5Z" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
-                  <path d="M24.5 20.5C24.2 27.4 24.3 32.9 24.8 40.2 30.6 36.6 34.9 33.7 40.6 29.6 34.5 25.9 30.5 23.6 24.5 20.5Z" fill="currentColor"/>
-                </svg>
-              </span>
-              <span class="pcard-text">
-                <span class="pcard-num" aria-hidden="true"></span>
-                <span class="pcard-title" data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</span>
-                <span class="pcard-tag" data-cs="{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }} /{{ v.work.cs }}/" data-en="{{ content.tiles.videa.en | replace(from="<br>", to=" ") | striptags }} /{{ v.work.en }}/">{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }} /{{ v.work.cs }}/</span>
-              </span>
-            </button>
-            {% endfor %}
-
-            {# — books: straight into the lightbox — #}
-            {% for b in content.books %}
-            <button class="pcard pcard--kniha" type="button" data-lightbox-src="{{ b.image }}">
-              <span class="pcard-media pcard-media--contain"><img src="{{ b.image }}" alt="{{ b.title }} — {{ b.author }}" loading="lazy"></span>
-              <span class="pcard-text">
-                <span class="pcard-num" aria-hidden="true"></span>
-                <span class="pcard-title">{{ b.title }}</span>
-                <span class="pcard-tag" data-cs="{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }} /{{ b.activity.cs }}/ — {{ b.author }}" data-en="{{ content.tiles.typografie.en | replace(from="<br>", to=" ") | striptags }} /{{ b.activity.en }}/ — {{ b.author }}">{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }} /{{ b.activity.cs }}/ — {{ b.author }}</span>
-              </span>
-            </button>
-            {% endfor %}
-
+            <div class="rcard-back">
+              <div class="rback-head">
+                <h3 class="rback-title" data-cs="{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.viz.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.viz.cs | replace(from="<br>", to=" ") | striptags }}</h3>
+                <button class="rback-close" type="button"
+                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
+                        aria-label="{{ content.ui.close.cs }}">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div class="rback-scroll">
+                <article class="proj">
+                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                    <img src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
+                  </button>
+                  <p class="proj-cap">
+                    <strong data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</strong>
+                    <span data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</span>
+                  </p>
+                </article>
+                <article class="proj">
+                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                    <img src="{{ content.visualIdentity.detail.sideImage }}" alt="" loading="lazy">
+                  </button>
+                </article>
+                {% for d in content.visualIdentity.devices %}
+                <article class="proj">
+                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                    <img src="{{ d }}" alt="" loading="lazy">
+                  </button>
+                </article>
+                {% endfor %}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="work-progress" aria-hidden="true">
-          <span class="work-progress-count">01</span>
-          <span class="work-progress-bar"><span class="work-progress-fill"></span></span>
-          <span class="work-progress-total">10</span>
+        {# ---- 2 · product photo ---- #}
+        <div class="rcard">
+          <div class="rcard-inner">
+            <button class="rcard-front" type="button">
+              <span class="rcard-title" data-cs="{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.produkt.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }}</span>
+              <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
+            </button>
+            <div class="rcard-back">
+              <div class="rback-head">
+                <h3 class="rback-title" data-cs="{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.produkt.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.produkt.cs | replace(from="<br>", to=" ") | striptags }}</h3>
+                <button class="rback-close" type="button"
+                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
+                        aria-label="{{ content.ui.close.cs }}">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div class="rback-scroll">
+                {% for set in content.productSets %}
+                  {% if set.layout == "rows" %}
+                    {% for row in set.rows %}{% for img in row %}
+                    <article class="proj">
+                      <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                        <img src="{{ img.0 }}" alt="" loading="lazy">
+                      </button>
+                      <p class="proj-cap">
+                        <strong data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</strong>
+                        <span data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
+                      </p>
+                    </article>
+                    {% endfor %}{% endfor %}
+                  {% else %}
+                    {% for img in set.images %}
+                    <article class="proj">
+                      <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                        <img src="{{ img.0 }}" alt="" loading="lazy">
+                      </button>
+                      <p class="proj-cap">
+                        <strong data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</strong>
+                        <span data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
+                      </p>
+                    </article>
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
         </div>
+
+        {# ---- 3 · portraits ---- #}
+        <div class="rcard">
+          <div class="rcard-inner">
+            <button class="rcard-front" type="button">
+              <span class="rcard-title" data-cs="{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.profilovky.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}</span>
+              <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
+            </button>
+            <div class="rcard-back">
+              <div class="rback-head">
+                <h3 class="rback-title" data-cs="{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.profilovky.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}</h3>
+                <button class="rback-close" type="button"
+                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
+                        aria-label="{{ content.ui.close.cs }}">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div class="rback-scroll">
+                {% for p in content.profilePhotos.photos %}
+                <article class="proj">
+                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                    <img src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
+                  </button>
+                  <p class="proj-cap">
+                    <strong data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</strong>
+                    <span data-cs="{{ p.text.cs }}" data-en="{{ p.text.en }}">{{ p.text.cs }}</span>
+                  </p>
+                </article>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# ---- 4 · videos ---- #}
+        <div class="rcard">
+          <div class="rcard-inner">
+            <button class="rcard-front" type="button">
+              <span class="rcard-title" data-cs="{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.videa.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }}</span>
+              <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
+            </button>
+            <div class="rcard-back">
+              <div class="rback-head">
+                <h3 class="rback-title" data-cs="{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.videa.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.videa.cs | replace(from="<br>", to=" ") | striptags }}</h3>
+                <button class="rback-close" type="button"
+                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
+                        aria-label="{{ content.ui.close.cs }}">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div class="rback-scroll">
+                {% for v in content.videos %}
+                <article class="proj proj--video">
+                  <button class="proj-play" type="button" data-video-src="{{ v.src }}"
+                          data-aria-cs="{{ v.name.cs }}" data-aria-en="{{ v.name.en }}" aria-label="{{ v.name.cs }}">
+                    <img src="{{ v.poster }}" alt="" loading="lazy">
+                    <svg class="proj-play-mark" viewBox="0 0 60 60" fill="none" aria-hidden="true">
+                      <path d="M30 4.5C13 6 4.8 14.6 5.6 30.8 6.4 46 15 55.4 30.6 55.5 46 55.6 55 45.8 55.4 30 55.8 13.8 46.6 5.4 30 4.5Z" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+                      <path d="M24.5 20.5C24.2 27.4 24.3 32.9 24.8 40.2 30.6 36.6 34.9 33.7 40.6 29.6 34.5 25.9 30.5 23.6 24.5 20.5Z" fill="currentColor"/>
+                    </svg>
+                  </button>
+                  <p class="proj-cap">
+                    {% if v.link %}<a href="{{ v.link }}" target="_blank" rel="noopener"><strong data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</strong></a>{% else %}<strong data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</strong>{% endif %}
+                    <span data-cs="/{{ v.work.cs }}/" data-en="/{{ v.work.en }}/">/{{ v.work.cs }}/</span>
+                  </p>
+                </article>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# ---- 5 · typography ---- #}
+        <div class="rcard">
+          <div class="rcard-inner">
+            <button class="rcard-front" type="button">
+              <span class="rcard-title" data-cs="{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.typografie.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}</span>
+              <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
+            </button>
+            <div class="rcard-back">
+              <div class="rback-head">
+                <h3 class="rback-title" data-cs="{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.typografie.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}</h3>
+                <button class="rback-close" type="button"
+                        data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
+                        aria-label="{{ content.ui.close.cs }}">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div class="rback-scroll">
+                {% for b in content.books %}
+                <article class="proj proj--kniha">
+                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                    <img src="{{ b.image }}" alt="{{ b.title }} — {{ b.author }}" loading="lazy">
+                  </button>
+                  <p class="proj-cap">
+                    <strong>{{ b.title }}</strong>
+                    <span data-cs="{{ b.author }} · /{{ b.activity.cs }}/" data-en="{{ b.author }} · /{{ b.activity.en }}/">{{ b.author }} · /{{ b.activity.cs }}/</span>
+                  </p>
+                </article>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ring-nav">
+        <button class="ring-btn ring-prev" type="button"
+                data-aria-cs="{{ content.ui.previous.cs }}" data-aria-en="{{ content.ui.previous.en }}"
+                aria-label="{{ content.ui.previous.cs }}">
+          <svg viewBox="0 0 44 24" fill="none" aria-hidden="true"><path d="M40 12.5C27 11.6 17 11.8 5.5 12.4M5.5 12.4C9.8 9.2 12 7.4 15 4M5.5 12.4C9.4 15.6 11.8 17.6 15.4 20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </button>
+        <button class="ring-btn ring-next" type="button"
+                data-aria-cs="{{ content.ui.next.cs }}" data-aria-en="{{ content.ui.next.en }}"
+                aria-label="{{ content.ui.next.cs }}">
+          <svg viewBox="0 0 44 24" fill="none" aria-hidden="true"><path d="M4 12.5C17 11.6 27 11.8 38.5 12.4M38.5 12.4C34.2 9.2 32 7.4 29 4M38.5 12.4C34.6 15.6 32.2 17.6 28.6 20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </button>
       </div>
     </section>
 
@@ -201,22 +335,6 @@
 
   </main>
 
-  {# ================= Overlays (server-rendered templates) ================= #}
-
-  <dialog class="overlay" aria-labelledby="overlay-heading">
-    <div class="overlay-head">
-      <h2 class="overlay-heading" id="overlay-heading"></h2>
-      <button class="overlay-close" type="button"
-              data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
-              aria-label="{{ content.ui.close.cs }}">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M3.2 2.8C8 8.4 13 13.6 21.2 21M21 3.4C14 9.8 8.6 15.4 3 21.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-        </svg>
-      </button>
-    </div>
-    <div class="overlay-body"></div>
-  </dialog>
-
   <dialog class="lightbox" aria-label="Náhled">
     <button class="lightbox-close" type="button"
             data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
@@ -227,77 +345,6 @@
     </button>
     <div class="lightbox-media"></div>
   </dialog>
-
-  <template id="overlay-viz">
-    <div class="ov-viz">
-      <p class="ov-lede">
-        <span data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</span>
-      </p>
-      <button class="ov-img ov-img--wide" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-        <img src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
-      </button>
-      <button class="ov-img ov-img--side" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-        <img src="{{ content.visualIdentity.detail.sideImage }}" alt="" loading="lazy">
-      </button>
-      <div class="ov-devices">
-        {% for d in content.visualIdentity.devices %}
-        <button class="ov-img" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-          <img src="{{ d }}" alt="" loading="lazy">
-        </button>
-        {% endfor %}
-      </div>
-    </div>
-  </template>
-
-  <template id="overlay-produkt">
-    <div class="ov-produkt">
-      {% for set in content.productSets %}
-      <section class="ov-set" data-set="{{ loop.index0 }}">
-        <p class="ov-lede">
-          <strong data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</strong>
-          <span data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
-        </p>
-        {% if set.layout == "rows" %}
-        {% for row in set.rows %}
-        <div class="ov-row">
-          {% for img in row %}
-          <button class="ov-img" type="button" style="flex: {{ img.1 }} 1 0"
-                  data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-            <img src="{{ img.0 }}" alt="" loading="lazy" style="aspect-ratio: {{ img.1 }}">
-          </button>
-          {% endfor %}
-        </div>
-        {% endfor %}
-        {% else %}
-        <div class="ov-grid">
-          {% for img in set.images %}
-          <button class="ov-img" type="button"
-                  data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-            <img src="{{ img.0 }}" alt="" loading="lazy" style="aspect-ratio: {{ img.1 }}">
-          </button>
-          {% endfor %}
-        </div>
-        {% endif %}
-      </section>
-      {% endfor %}
-    </div>
-  </template>
-
-  <template id="overlay-profilovky">
-    <div class="ov-portrety">
-      {% for p in content.profilePhotos.photos %}
-      <figure class="ov-portret">
-        <button class="ov-img" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-          <img src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
-        </button>
-        <figcaption>
-          <strong data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</strong>
-          <span data-cs="{{ p.text.cs }}" data-en="{{ p.text.en }}">{{ p.text.cs }}</span>
-        </figcaption>
-      </figure>
-      {% endfor %}
-    </div>
-  </template>
 
   <script src="/js/main.js" defer></script>
 </body>

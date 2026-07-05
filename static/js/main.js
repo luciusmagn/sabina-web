@@ -156,107 +156,117 @@ function setupSky() {
 }
 setupSky();
 
-/* ---------------- work: horizontal scrub (wide + fine pointer only) ----------------
-   The section grows tall; a sticky viewport pins while the track translates
-   horizontally with scroll progress. Cards get a gentle scale as they cross
-   the viewport centre. Elsewhere the track is a native horizontal scroller —
-   no scroll hijacking anywhere, so navigation always lands cleanly. */
+/* ---------------- work: the ring of category cards ----------------
+   A circular 3D carousel. The centre card faces the viewer; the others
+   recede left and right (offsets wrap around, so it cycles forever). The
+   centre card's title + open pill land with a small staggered animation.
+   Clicking the centre card flips it over to a vertical project scroller;
+   clicking a side card rotates it to the centre. No scroll hijacking. */
 
-function setupScrub() {
-  const work = document.querySelector(".work");
-  const track = work && work.querySelector(".track");
-  if (!work || !track) return;
+function setupRing() {
+  const ring = document.querySelector(".ring");
+  if (!ring) return;
+  const stage = ring.querySelector(".ring-stage");
+  const cards = [...ring.querySelectorAll(".rcard")];
+  const n = cards.length;
+  let cur = 0;
 
-  const cards = [...track.querySelectorAll(".pcard")];
-  const count = document.querySelector(".work-progress-count");
-  const total = document.querySelector(".work-progress-total");
-  const fill = document.querySelector(".work-progress-fill");
-  if (total) total.textContent = String(cards.length).padStart(2, "0");
-
-  let active = false, raf = 0, overflow = 0;
-
-  function measure() {
-    if (!active) return;
-    overflow = Math.max(0, track.scrollWidth - window.innerWidth);
-    work.style.height = `${window.innerHeight + overflow}px`;
-    tick();
+  function land() {
+    const front = cards[cur].querySelector(".rcard-front");
+    front.classList.remove("land");
+    void front.offsetWidth; // restart the animation
+    front.classList.add("land");
   }
 
-  function progress() {
-    const top = work.getBoundingClientRect().top + window.scrollY;
-    const p = (window.scrollY - top) / Math.max(1, overflow);
-    return Math.min(1, Math.max(0, p));
-  }
-
-  function tick() {
-    if (!active) return;
-    const p = progress();
-    track.style.transform = `translate3d(${(-p * overflow).toFixed(1)}px, 0, 0)`;
-
-    const mid = window.innerWidth / 2;
-    let current = 0, best = Infinity;
+  function layout() {
+    const step = wide.matches ? 33 : 74;   // vw between cards
+    const turn = wide.matches ? -30 : -24; // deg per offset
     cards.forEach((card, i) => {
-      const r = card.getBoundingClientRect();
-      const c = r.left + r.width / 2;
-      const d = Math.abs(c - mid);
-      if (d < best) { best = d; current = i; }
-      const s = 1 - Math.min(0.06, (d / window.innerWidth) * 0.12);
-      card.style.transform = `scale(${s.toFixed(3)})`;
+      let off = (i - cur + n) % n;
+      if (off > n / 2) off -= n;
+      const a = Math.abs(off);
+      card.style.setProperty("--tx", (off * step) + "vw");
+      card.style.setProperty("--ry", (off * turn) + "deg");
+      card.style.setProperty("--sc", String(1 - Math.min(a, 2) * 0.12));
+      card.style.zIndex = String(10 - a);
+      card.classList.toggle("is-center", off === 0);
+      card.querySelector(".rcard-front").tabIndex = off === 0 ? 0 : -1;
+      card.setAttribute("aria-hidden", off === 0 ? "false" : "true");
     });
-
-    if (count) count.textContent = String(current + 1).padStart(2, "0");
-    if (fill) fill.style.transform = `scaleX(${(p || (1 / cards.length)).toFixed(3)})`;
   }
 
-  function onScroll() {
-    if (!raf) raf = requestAnimationFrame(() => { raf = 0; tick(); });
+  function go(dir) {
+    if (ring.classList.contains("has-flip")) return;
+    cur = (cur + dir + n) % n;
+    layout();
+    land();
   }
 
-  function enable() {
-    if (active) return;
-    active = true;
-    work.classList.add("js-scrub");
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", measure);
-    measure();
+  function flip(card) {
+    card.classList.add("is-flipped");
+    ring.classList.add("has-flip");
+    card.querySelector(".rback-close").focus();
   }
 
-  function disable() {
-    if (!active) return;
-    active = false;
-    work.classList.remove("js-scrub");
-    work.style.height = "";
-    track.style.transform = "";
-    cards.forEach((c) => { c.style.transform = ""; });
-    window.removeEventListener("scroll", onScroll);
-    window.removeEventListener("resize", measure);
-  }
-
-  function decide() {
-    if (wide.matches && finePointer.matches && !reduceMotion.matches) enable();
-    else disable();
-  }
-
-  decide();
-  wide.addEventListener("change", decide);
-  reduceMotion.addEventListener("change", decide);
-
-  // keyboard: keep the focused card in view by scrolling the page to its spot
-  track.addEventListener("focusin", (e) => {
-    if (!active) return;
-    const card = e.target.closest(".pcard");
+  function unflip() {
+    const card = ring.querySelector(".rcard.is-flipped");
     if (!card) return;
-    const i = cards.indexOf(card);
-    const top = work.getBoundingClientRect().top + window.scrollY;
-    const target = top + (overflow * i) / Math.max(1, cards.length - 1);
-    window.scrollTo({ top: target, behavior: "instant" });
-    tick();
+    card.classList.remove("is-flipped");
+    ring.classList.remove("has-flip");
+    card.querySelector(".rcard-front").focus();
+  }
+
+  ring.querySelector(".ring-prev").addEventListener("click", () => go(-1));
+  ring.querySelector(".ring-next").addEventListener("click", () => go(1));
+
+  cards.forEach((card, i) => {
+    card.querySelector(".rcard-front").addEventListener("click", () => {
+      if (card.classList.contains("is-center")) flip(card);
+      else if (!ring.classList.contains("has-flip")) { cur = i; layout(); land(); }
+    });
+    card.querySelector(".rback-close").addEventListener("click", unflip);
   });
 
-  // media may finish loading after first measure
-  window.addEventListener("load", measure);
+  window.addEventListener("keydown", (e) => {
+    if (document.querySelector("dialog[open]")) return; // the lightbox owns Esc
+    if (e.key === "Escape") { unflip(); return; }
+    if (ring.classList.contains("has-flip")) return;
+    const r = ring.getBoundingClientRect();
+    const visible = r.top < window.innerHeight * 0.6 && r.bottom > window.innerHeight * 0.4;
+    if (!visible) return;
+    if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
+  });
+
+  // swipe rotates the ring
+  let swipeX = null;
+  stage.addEventListener("pointerdown", (e) => {
+    if (!ring.classList.contains("has-flip")) swipeX = e.clientX;
+  });
+  window.addEventListener("pointerup", (e) => {
+    if (swipeX === null) return;
+    const dx = e.clientX - swipeX;
+    swipeX = null;
+    if (Math.abs(dx) > 48) go(dx < 0 ? 1 : -1);
+  });
+
+  // media inside the backs
+  ring.querySelectorAll(".proj-play").forEach((btn) => {
+    btn.addEventListener("click", () => openVideoLightbox(btn.dataset.videoSrc));
+  });
+  ring.querySelectorAll(".proj-zoom").forEach((btn) => {
+    const img = btn.querySelector("img");
+    if (img) btn.addEventListener("click", () => openLightbox(img.currentSrc || img.src));
+  });
+
+  wide.addEventListener("change", layout);
+  window.addEventListener("resize", layout);
+
+  layout();
+  land();
+  window.__ringLand = land; // retriggered when the section scrolls into view
 }
-setupScrub();
+setupRing();
 
 /* ---------------- travelling contact chip ----------------
    Hidden over the hero; appears while browsing the work; docks into its
@@ -303,12 +313,7 @@ function setupChip() {
 }
 setupChip();
 
-/* ---------------- overlays ---------------- */
-
-const overlay = document.querySelector(".overlay");
-const overlayHeading = document.getElementById("overlay-heading");
-const overlayBody = overlay.querySelector(".overlay-body");
-const overlayClose = overlay.querySelector(".overlay-close");
+/* ---------------- lightbox ---------------- */
 
 const lightbox = document.querySelector(".lightbox");
 const lightboxMedia = lightbox.querySelector(".lightbox-media");
@@ -338,55 +343,10 @@ lightbox.addEventListener("click", (event) => {
 lightboxClose.addEventListener("click", () => lightbox.close());
 lightbox.addEventListener("close", () => lightboxMedia.replaceChildren());
 
-function openOverlay(key, heading) {
-  const template = document.getElementById(`overlay-${key}`);
-  if (!template) return;
-  overlayHeading.textContent = heading;
-  overlayBody.replaceChildren(template.content.cloneNode(true));
-  overlayBody.querySelectorAll(".ov-img").forEach((btn) => {
-    const img = btn.querySelector("img");
-    if (img) btn.addEventListener("click", () => openLightbox(img.src));
-  });
-  applyLang(lang); // localise the freshly cloned content
-  overlay.showModal();
-  overlayBody.scrollTop = 0;
-}
-
-document.querySelectorAll("[data-overlay]").forEach((card) => {
-  card.addEventListener("click", () => {
-    const title = card.querySelector(".pcard-title");
-    openOverlay(card.dataset.overlay, title ? title.textContent.trim() : "");
-    // product cards: jump the overlay to their own set
-    if (card.dataset.set !== undefined) {
-      const target = overlayBody.querySelector(`.ov-set[data-set="${card.dataset.set}"]`);
-      if (target) target.scrollIntoView({ block: "start", behavior: "instant" });
-    }
-  });
-});
-
-document.querySelectorAll("[data-video-src]").forEach((card) => {
-  card.addEventListener("click", () => openVideoLightbox(card.dataset.videoSrc));
-});
-
-document.querySelectorAll("[data-lightbox-src]").forEach((card) => {
-  card.addEventListener("click", () => openLightbox(card.dataset.lightboxSrc));
-});
-
-overlayClose.addEventListener("click", () => overlay.close());
-
-overlay.addEventListener("click", (event) => {
-  if (event.target !== overlay) return;
-  const r = overlay.getBoundingClientRect();
-  const outside =
-    event.clientX < r.left || event.clientX > r.right ||
-    event.clientY < r.top || event.clientY > r.bottom;
-  if (outside) overlay.close();
-});
-
 /* ---------------- reveal on scroll ---------------- */
 
 function setupReveal() {
-  let targets = [...document.querySelectorAll(".hero-inner, .kontakt > *:not(.walker-track), .pcard")];
+  let targets = [...document.querySelectorAll(".hero-inner, .kontakt > *:not(.walker-track), .ring")];
   if (reduceMotion.matches) return;
   targets.forEach((el, i) => {
     el.classList.add("rv");
@@ -403,7 +363,11 @@ function setupReveal() {
     targets = targets.filter((el) => {
       const r = el.getBoundingClientRect();
       const visible = r.top < limit && r.bottom > 0 && (r.width || r.height);
-      if (visible) el.classList.add("in");
+      if (visible) {
+        el.classList.add("in");
+        // re-land the ring's title + pill as the section arrives
+        if (el.classList.contains("ring") && window.__ringLand) window.__ringLand();
+      }
       return !visible;
     });
     if (!targets.length) {

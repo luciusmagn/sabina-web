@@ -282,234 +282,238 @@ html.has-cursor * { cursor: none !important; }
 .scroll-cue:hover .scroll-cue-label { opacity: 1; }
 
 /* ============================================================
-   WORK — horizontal gallery
-   base: native horizontal scroll · .js-scrub: sticky scrub (desktop)
+   WORK — ring of category cards
+   A 3D circular carousel: the centre card faces the viewer, the rest
+   recede to the sides. Clicking the centre card flips it over to a
+   vertical scroll of that category's projects.
    ============================================================ */
 
-.work {
+.ring {
   position: relative;
+  min-height: 100svh;
   background: var(--bg);
-  padding: clamp(56px, 10vh, 120px) 0 clamp(48px, 8vh, 100px);
-}
-
-.work-title {
-  margin: 0 0 clamp(22px, 4vh, 48px);
-  padding: 0 var(--pad-x);
-  font-size: clamp(72px, 15vw, 210px);
-  font-weight: 800;
-  line-height: 0.9;
-  letter-spacing: -0.02em;
-  color: transparent;
-  -webkit-text-stroke: 2px var(--ink);
-  pointer-events: none;
-  user-select: none;
-}
-
-.track-wrap {
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  padding: 8px 0 24px;
-  scroll-snap-type: x proximity;
-  scroll-padding-left: var(--pad-x);
-}
-
-.track-wrap::-webkit-scrollbar { display: none; }
-
-.track {
-  display: flex;
-  gap: clamp(18px, 2.4vw, 34px);
-  width: max-content;
-  padding: 0 var(--pad-x);
-  counter-reset: pcard;
-}
-
-/* --- scrub upgrade (JS adds .js-scrub on wide, fine-pointer screens) --- */
-
-.work.js-scrub { padding: 0; }
-
-.work.js-scrub .work-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
   overflow: hidden;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: clamp(56px, 9vh, 110px) 0;
 }
 
-.work.js-scrub .work-title {
-  position: absolute;
-  left: var(--pad-x);
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;                 /* cards pass behind — visible through the letters */
-  margin: 0;
-  padding: 0;
-}
-
-.work.js-scrub .track-wrap {
-  overflow: visible;
-  padding: 0;
-  scroll-snap-type: none;
+.ring-stage {
+  position: relative;
   width: 100%;
+  height: min(74svh, 700px);
+  perspective: 1700px;
 }
 
-.work.js-scrub .track {
-  padding-left: 52vw;         /* room for the outline title before card 1 */
-  padding-right: 14vw;
-  will-change: transform;
-  align-items: center;
-}
-
-/* --- progress (scrub mode only) --- */
-
-.work-progress {
-  display: none;
+.rcard {
   position: absolute;
   left: 50%;
-  bottom: clamp(20px, 4.5vh, 44px);
-  transform: translateX(-50%);
-  align-items: center;
-  gap: 14px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.work.js-scrub .work-progress { display: flex; }
-
-.work-progress-bar {
-  width: clamp(120px, 16vw, 220px);
-  height: 2px;
-  background: color-mix(in srgb, var(--ink) 22%, transparent);
-  overflow: hidden;
-  border-radius: 2px;
-}
-
-.work-progress-fill {
-  display: block;
+  top: 50%;
+  width: min(58vw, 940px);
   height: 100%;
-  width: 100%;
-  background: var(--ink);
-  transform-origin: left center;
-  transform: scaleX(0);
+  transform: translate(-50%, -50%) translateX(var(--tx, 0px)) rotateY(var(--ry, 0deg)) scale(var(--sc, 1));
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.3, 0.7, 0.2, 1);
 }
 
-/* --- project cards --- */
+.rcard-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
 
-.pcard {
-  counter-increment: pcard;
-  position: relative;
+.rcard.is-flipped .rcard-inner { transform: rotateY(180deg); }
+
+.rcard-front,
+.rcard-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* front — a flat colour cover with the category name + open pill */
+
+.rcard-front {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vh, 30px);
+  background: var(--main-b);
+  color: #ffffff;
+  text-align: center;
+  padding: 6%;
+}
+
+[data-theme="dark"] .rcard-front { background: var(--main-a); }
+
+.rcard:not(.is-center) .rcard-front { cursor: pointer; }
+
+.rcard-title {
+  font-size: clamp(34px, 4.6vw, 78px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.rcard-open {
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* the landing animation — retriggered whenever a card becomes the centre */
+
+.rcard-front.land .rcard-title { animation: land-in 0.55s 0.14s both; }
+.rcard-front.land .rcard-open  { animation: land-in 0.55s 0.3s both; }
+
+@keyframes land-in {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* back — a vertical scroll of the category's projects */
+
+.rcard-back {
+  transform: rotateY(180deg);
+  background: var(--bg);
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+  display: flex;
+  flex-direction: column;
+}
+
+.rback-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1.5px solid color-mix(in srgb, var(--line) 25%, transparent);
+}
+
+.rback-title {
+  margin: 0;
+  font-size: clamp(17px, 1.8vw, 26px);
+  font-weight: 800;
+}
+
+.rback-close {
+  width: 42px;
+  height: 42px;
   flex: none;
-  width: clamp(280px, 74vw, 420px);
-  height: clamp(400px, 66svh, 600px);
-  padding: clamp(14px, 1.3vw, 20px);
-  border-radius: var(--radius);
-  text-align: left;
-  scroll-snap-align: center;
-  border: 1.5px solid transparent;
-  transition: background-color 0.28s ease, color 0.28s ease,
-              border-color 0.28s ease, transform 0.28s ease;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: grid;
+  place-items: center;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-@media (min-width: 900px) {
-  .pcard { width: clamp(320px, 26vw, 440px); }
-  .pcard--viz, .pcard--video { width: clamp(380px, 32vw, 560px); }
-  .pcard--kniha { width: clamp(280px, 22vw, 380px); }
+.rback-close svg { width: 15px; height: 15px; }
+
+.rback-close:hover {
+  background: var(--ink);
+  color: var(--bg);
+  transform: rotate(90deg);
 }
 
-.pcard:nth-child(odd) {
-  background: var(--card-a-bg);
-  color: var(--card-a-ink);
-  border-color: var(--card-a-line);
-}
-
-.pcard:nth-child(even) {
-  background: var(--card-b-bg);
-  color: var(--card-b-ink);
-  border-color: var(--card-b-line);
-}
-
-/* hover = swap to the other main + a small lift */
-.pcard:nth-child(odd):hover,
-.pcard:nth-child(odd):focus-visible {
-  background: var(--card-b-bg);
-  color: var(--card-b-ink);
-  border-color: var(--card-b-line);
-}
-
-.pcard:nth-child(even):hover,
-.pcard:nth-child(even):focus-visible {
-  background: var(--card-a-bg);
-  color: var(--card-a-ink);
-  border-color: var(--card-a-line);
-}
-
-.pcard:hover { transform: translateY(-10px) rotate(-0.6deg); }
-
-.pcard-media {
-  position: relative;
+.rback-scroll {
   flex: 1;
-  min-height: 0;
-  border-radius: calc(var(--radius) - 10px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(14px, 1.8vw, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.4vh, 26px);
+}
+
+.proj { margin: 0; }
+
+.proj-zoom,
+.proj-play {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border-radius: 14px;
   overflow: hidden;
 }
 
-.pcard-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
+.proj-zoom img,
+.proj-play img { width: 100%; }
 
-.pcard:hover .pcard-media img { transform: scale(1.035); }
+.proj-zoom:hover img,
+.proj-play:hover img { transform: scale(1.015); }
 
-.pcard-media--contain img { object-fit: contain; padding: 4%; }
+.proj-zoom img,
+.proj-play img { transition: transform 0.3s ease; }
 
-.pcard-play {
+.proj-play-mark {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: clamp(52px, 5vw, 72px);
+  width: clamp(52px, 5vw, 68px);
   transform: translate(-50%, -50%);
   color: #ffffff;
   transition: transform 0.25s ease;
 }
 
-.pcard:hover .pcard-play { transform: translate(-50%, -50%) scale(1.12) rotate(4deg); }
+.proj-play:hover .proj-play-mark { transform: translate(-50%, -50%) scale(1.12) rotate(4deg); }
 
-.pcard-text {
+.proj--kniha img { background: var(--bg); }
+
+.proj-cap {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 2px 6px 4px;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 9px 4px 0;
 }
 
-.pcard-num::before {
-  content: counter(pcard, decimal-leading-zero);
+.proj-cap a { text-decoration: none; border-bottom: 1.5px solid currentColor; }
+.proj-cap strong { font-size: 16px; font-weight: 800; }
+.proj-cap span { font-size: 13px; opacity: 0.7; }
+
+/* nav arrows — flat pills */
+
+.ring-nav {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(20px, 5vh, 46px);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 20;
+  transition: opacity 0.25s ease;
 }
 
-.pcard-num {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  opacity: 0.65;
+.ring.has-flip .ring-nav { opacity: 0; pointer-events: none; }
+
+.ring-btn {
+  width: 76px;
+  height: 46px;
+  border-radius: 999px;
+  background: var(--main-a);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease;
 }
 
-.pcard-title {
-  font-size: clamp(20px, 1.8vw, 28px);
-  font-weight: 800;
-  line-height: 1.12;
-}
+[data-theme="dark"] .ring-btn { color: #000000; }
 
-.pcard-tag {
-  font-size: 13px;
-  opacity: 0.75;
-}
+.ring-btn:hover { transform: translateY(-3px); }
+.ring-btn:active { transform: translateY(0) scale(0.96); }
+.ring-btn svg { width: 30px; height: 17px; }
 
 /* ============================================================
    KONTAKT — the second flat field
@@ -634,44 +638,9 @@ html.has-cursor * { cursor: none !important; }
 .chip[hidden] { display: grid; visibility: hidden; opacity: 0; }
 
 /* ============================================================
-   OVERLAY + LIGHTBOX
+   LIGHTBOX
    ============================================================ */
 
-.overlay {
-  width: min(1140px, calc(100vw - 32px));
-  height: calc(100dvh - 40px);
-  margin: auto;
-  padding: 0;
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--ink);
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.overlay[open] { display: flex; }
-
-.overlay::backdrop { background: rgba(0, 0, 0, 0.6); }
-
-.overlay-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: clamp(16px, 2.4vh, 26px) clamp(18px, 2.6vw, 32px);
-  border-bottom: 1.5px solid color-mix(in srgb, var(--line) 25%, transparent);
-}
-
-.overlay-heading {
-  margin: 0;
-  font-size: clamp(22px, 2.6vw, 34px);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.overlay-close,
 .lightbox-close {
   width: 46px;
   height: 46px;
@@ -683,69 +652,7 @@ html.has-cursor * { cursor: none !important; }
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-.overlay-close svg,
 .lightbox-close svg { width: 17px; height: 17px; }
-
-.overlay-close:hover {
-  background: var(--ink);
-  color: var(--bg);
-  transform: rotate(90deg);
-}
-
-.overlay-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: clamp(18px, 2.6vw, 32px);
-}
-
-.ov-lede { margin: 0 0 18px; max-width: 62ch; }
-.ov-lede strong { display: block; font-size: clamp(18px, 1.7vw, 24px); font-weight: 800; }
-.ov-lede span { display: block; font-size: 15px; opacity: 0.75; margin-top: 4px; }
-
-.ov-img {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border-radius: 14px;
-  overflow: hidden;
-  transition: transform 0.25s ease;
-}
-
-.ov-img img { width: 100%; }
-.ov-img:hover { transform: scale(1.012); }
-
-.ov-viz { display: grid; gap: 16px; grid-template-columns: 1fr; }
-
-.ov-devices { display: grid; gap: 16px; grid-template-columns: 1fr; }
-
-@media (min-width: 760px) {
-  .ov-devices { grid-template-columns: repeat(3, 1fr); align-items: center; }
-}
-
-.ov-set { margin: 0 0 44px; }
-.ov-set:last-child { margin-bottom: 0; }
-
-.ov-row { display: flex; gap: 14px; margin-bottom: 14px; }
-.ov-row .ov-img img { height: 100%; object-fit: cover; }
-
-.ov-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); }
-
-@media (max-width: 700px) {
-  .ov-row { flex-direction: column; }
-  .ov-row .ov-img { flex: none !important; }
-  .ov-grid { grid-template-columns: 1fr; }
-}
-
-.ov-portrety { display: grid; gap: 22px; grid-template-columns: 1fr; }
-
-@media (min-width: 760px) {
-  .ov-portrety { grid-template-columns: repeat(2, 1fr); }
-}
-
-.ov-portret { margin: 0; }
-.ov-portret figcaption { display: flex; gap: 10px; align-items: baseline; padding: 10px 4px 0; }
-.ov-portret strong { font-size: 17px; font-weight: 800; }
-.ov-portret span { font-size: 13px; opacity: 0.7; }
 
 /* lightbox — media only, black veil */
 
@@ -842,7 +749,9 @@ html.has-cursor * { cursor: none !important; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .trace--arrow, .walker, .w-limb { animation: none; }
-  .pcard, .pcard-media img { transition: none; }
+  .rcard, .rcard-inner, .proj-zoom img, .proj-play img { transition: none; }
+  .rcard-front.land .rcard-title,
+  .rcard-front.land .rcard-open { animation: none; }
   .walker { left: var(--pad-x); }
   .rv { opacity: 1; transform: none; }
   .kontakt-mail:hover .trace--ring path { animation: none; stroke-dashoffset: 0; }
@@ -861,6 +770,7 @@ html.has-cursor * { cursor: none !important; }
     flex-wrap: wrap;
   }
   .scroll-cue { right: auto; left: var(--pad-x); }
-  .work-title { -webkit-text-stroke: 1.5px var(--ink); }
+  .rcard { width: 86vw; }
+  .ring-stage { height: min(66svh, 560px); }
   .chip-slot { display: none; }
 }
