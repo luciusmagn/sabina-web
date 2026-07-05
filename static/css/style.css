@@ -818,3 +818,110 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   .ring-stage { height: min(66svh, 560px); }
   .kontakt-bio { font-size: clamp(20px, 5.6vw, 32px); } /* still one line on phones */
 }
+
+/* ============================================================
+   RISO PRINT EXPERIMENT — the two themes merged into one print:
+   blue + fluorescent orange inks on paper white, grain over all.
+   Delete this block (and revert palette() in main.js) to undo;
+   the pre-riso tag holds the previous look.
+   ============================================================ */
+
+:root, [data-theme="dark"] {
+  --paper: #fbf8f1;
+  --ink-blue: #0065f9;
+  --ink-orange: #fe5d40;
+
+  --bg: var(--paper);
+  --ink: var(--ink-blue);
+  --line: var(--ink-blue);
+  --main-a: var(--ink-blue);
+  --main-b: var(--ink-orange);
+
+  --hero-bg: var(--paper);
+  --hero-ink: var(--ink-blue);
+  --hero-accent: var(--ink-orange);
+
+  --card-a-bg: var(--ink-blue);   --card-a-ink: var(--paper);  --card-a-line: transparent;
+  --card-b-bg: var(--ink-orange); --card-b-ink: var(--paper);  --card-b-line: transparent;
+
+  --kontakt-bg: var(--ink-blue);
+  --kontakt-ink: var(--paper);
+
+  --cursor-c: var(--ink-orange);
+}
+
+/* one ink set — the mode toggle has nothing left to switch */
+.theme-toggle { display: none; }
+[data-theme="dark"] .cursor { --cc: var(--cursor-c); }
+[data-theme="dark"] .cursor.cursor--work { --cc: var(--cursor-c); }
+
+/* paper grain over the whole print (under the cursor dot) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.15;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* the riso sun — the big orange circle, half off the sheet */
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: clamp(300px, 42vw, 640px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--ink-orange);
+  right: -7vw;
+  top: -14vh;
+}
+
+.hero-inner { z-index: 2; }
+.hero-tagline { opacity: 0.92; }
+
+/* the ring sits on paper; pills print in orange with paper arrows */
+.ring-btn, .ring-jump-btn,
+[data-theme="dark"] .ring-btn, [data-theme="dark"] .ring-jump-btn {
+  background: var(--ink-orange);
+  color: var(--paper);
+}
+
+/* card fronts: orange ink flood, knockout title, paper pill */
+.rcard-cover, [data-theme="dark"] .rcard-cover { background: var(--ink-orange); }
+.rcard-title { color: var(--paper); }
+.rcard-open { background: var(--paper); color: var(--ink-blue); }
+
+/* decks: paper ground, blue captions, photos printed in blue ink */
+.rcard-back { background: var(--paper); color: var(--ink-blue); }
+.proj-zoom, .proj-play { background: var(--ink-blue); }
+.proj-zoom img, .proj-play img {
+  filter: grayscale(1) contrast(1.12) brightness(1.05);
+  mix-blend-mode: screen; /* darks take the ink, lights stay paper */
+}
+.proj--kniha img { background: transparent; }
+.proj-play-mark { color: var(--ink-orange); }
+
+/* kontakt: blue flood, paper type, the sun again at the horizon */
+.kontakt > *:not(.walker-track) { position: relative; z-index: 1; }
+.walker-track { z-index: 1; }
+.kontakt::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: clamp(240px, 30vw, 460px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--ink-orange);
+  right: 8vw;
+  bottom: -12vh;
+}
+.walker { color: var(--ink-orange); opacity: 1; }
+
+/* fixed chips print blue on paper */
+.lang-toggle { background: var(--paper); color: var(--ink-blue); border-color: var(--ink-blue); }
+
+:focus-visible { outline-color: var(--ink-orange); }

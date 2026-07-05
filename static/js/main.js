@@ -208,10 +208,9 @@ function setupCoverArt() {
   const LEVELS = Array.from({ length: 12 }, (_, i) => 0.07 + i * 0.078);
   const AMP = 26;                          // vertical-line warp
 
-  const palette = () =>
-    root.getAttribute("data-theme") === "dark"
-      ? { bg: "#fe5d40", line: "#000000" }
-      : { bg: "#ff87b1", line: "#0065f9" };
+  // riso experiment: one ink set regardless of theme — orange flood,
+  // blue linework, paper knockout for the nearest layer + silhouette
+  const palette = () => ({ bg: "#fe5d40", line: "#0065f9", top: "#fbf8f1" });
 
   const renderers = covers.map((img) => {
     const holder = img.parentElement;
@@ -343,13 +342,13 @@ function setupCoverArt() {
       const tOf = (v) => (v - lo) / span;
 
       /* --- draw: layer 0 = ground + low contours, 1 = mid, 2 = high + edge --- */
-      const { bg, line } = palette();
+      const { bg, line, top } = palette();
       const ctxs = layers.map((c) => c.getContext("2d"));
       ctxs.forEach((ctx, i) => {
         ctx.clearRect(0, 0, W, H);
         if (i === 0) { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
-        ctx.strokeStyle = line;
-        ctx.lineWidth = i === 2 ? 1.5 : 1.2;
+        ctx.strokeStyle = i === 2 ? top : line; // nearest layer knocks out in paper
+        ctx.lineWidth = i === 2 ? 1.6 : 1.2;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
         ctx.beginPath();
