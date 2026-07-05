@@ -192,8 +192,11 @@ function setupRing() {
       if (off > n / 2) off -= n;
       const a = Math.min(Math.abs(off), 2);
       const sign = Math.sign(off);
+      // the deep pair counter-rotates — they're on the far side of the
+      // circle wrapping back around, so the ring reads round from the front
+      const spin = a === 2 ? -1 : 1;
       card.style.setProperty("--tx", (sign * X[a]) + "vw");
-      card.style.setProperty("--ry", (sign * RY[a]) + "deg");
+      card.style.setProperty("--ry", (sign * spin * RY[a]) + "deg");
       card.style.setProperty("--tz", Z[a] + "px");
       card.style.setProperty("--sc", String(SC[a]));
       card.style.zIndex = String(10 - a);
@@ -203,8 +206,12 @@ function setupRing() {
     });
   }
 
+  let busy = false; // the label must land all the way before the next turn
+
   function go(dir) {
-    if (ring.classList.contains("has-flip")) return;
+    if (busy || ring.classList.contains("has-flip")) return;
+    busy = true;
+    setTimeout(() => { busy = false; }, reduceMotion.matches ? 60 : 1750);
     // the outgoing label flies up and away…
     const old = cards[cur].querySelector(".rcard-front");
     old.classList.remove("land");

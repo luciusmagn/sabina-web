@@ -399,8 +399,8 @@ html.has-cursor * { cursor: none !important; }
 /* the pixel move: the label starts high above the card and drops onto it
    as it arrives; when the ring turns, the old label flies up and away */
 
-.rcard-front.land .rcard-title { animation: land-in 0.75s cubic-bezier(0.2, 0.75, 0.25, 1) 0.05s both; }
-.rcard-front.land .rcard-open  { animation: land-in 0.75s cubic-bezier(0.2, 0.75, 0.25, 1) 0.18s both; }
+.rcard-front.land .rcard-title { animation: land-in 1.35s cubic-bezier(0.24, 0.7, 0.16, 1) 0.05s both; }
+.rcard-front.land .rcard-open  { animation: land-in 1.35s cubic-bezier(0.24, 0.7, 0.16, 1) 0.3s both; }
 
 .rcard-front.leave .rcard-title,
 .rcard-front.leave .rcard-open { animation: leave-up 0.35s ease-in both; }
