@@ -208,9 +208,13 @@ function setupCoverArt() {
   const LEVELS = Array.from({ length: 12 }, (_, i) => 0.07 + i * 0.078);
   const AMP = 26;                          // vertical-line warp
 
-  // riso experiment: one ink set regardless of theme — orange flood,
-  // blue linework, paper knockout for the nearest layer + silhouette
-  const palette = () => ({ bg: "#fe5d40", line: "#0065f9", top: "#fbf8f1" });
+  // riso experiment: pink flood, one ink per depth plate (far→near:
+  // blue, orange, black) and a paper-white silhouette knockout
+  const palette = () => ({
+    bg: "#ff87b1",
+    inks: ["#0065f9", "#fe5d40", "#000000"],
+    sil: "#fbf8f1",
+  });
 
   const renderers = covers.map((img) => {
     const holder = img.parentElement;
@@ -342,13 +346,17 @@ function setupCoverArt() {
       const tOf = (v) => (v - lo) / span;
 
       /* --- draw: layer 0 = ground + low contours, 1 = mid, 2 = high + edge --- */
-      const { bg, line, top } = palette();
+      const { bg, inks, sil } = palette();
+      // each plate sits a hair off-register, like a real riso pass
+      const REG = [[0.9, 0.7], [-0.8, 0.5], [0.5, -0.9]];
       const ctxs = layers.map((c) => c.getContext("2d"));
       ctxs.forEach((ctx, i) => {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, W, H);
         if (i === 0) { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
-        ctx.strokeStyle = i === 2 ? top : line; // nearest layer knocks out in paper
-        ctx.lineWidth = i === 2 ? 1.6 : 1.2;
+        ctx.translate(REG[i][0], REG[i][1]);
+        ctx.strokeStyle = inks[i];
+        ctx.lineWidth = 1.25;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
         ctx.beginPath();
@@ -401,7 +409,6 @@ function setupCoverArt() {
       vals.sort();
       const qLevel = (q) => vals[Math.min(vals.length - 1, Math.floor(q * vals.length))] || 0;
       LEVELS.forEach((q) => iso(field, qLevel(q), ctxs[bandFor(q)], true));
-      iso(mask, 0.5, ctxs[2], false); // the silhouette rides the top layer
 
       // the vertical family ties the contours into a mesh. Instead of
       // dropping straight down, each line bows around the forms — pushed
@@ -428,7 +435,27 @@ function setupCoverArt() {
         }
       }
 
-      ctxs.forEach((ctx) => ctx.stroke());
+      // printy ink: a soft bleed pass under a near-crisp pass
+      const inkStroke = (ctx) => {
+        ctx.save();
+        ctx.filter = "blur(1.1px)";
+        ctx.globalAlpha = 0.5;
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.filter = "blur(0.3px)";
+        ctx.stroke();
+        ctx.restore();
+      };
+      ctxs.forEach(inkStroke);
+
+      // the silhouette knocks out in paper white on the nearest plate
+      const c2 = ctxs[2];
+      c2.beginPath();
+      iso(mask, 0.5, c2, false);
+      c2.strokeStyle = sil;
+      c2.lineWidth = 2.1;
+      inkStroke(c2);
     }
 
     if (img.complete) render();

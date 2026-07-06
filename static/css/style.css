@@ -837,14 +837,16 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   --main-a: var(--ink-blue);
   --main-b: var(--ink-orange);
 
-  --hero-bg: var(--paper);
-  --hero-ink: var(--ink-blue);
-  --hero-accent: var(--ink-orange);
+  --ink-pink: #ff87b1;
+
+  --hero-bg: var(--ink-pink);
+  --hero-ink: var(--paper);
+  --hero-accent: #000000;
 
   --card-a-bg: var(--ink-blue);   --card-a-ink: var(--paper);  --card-a-line: transparent;
   --card-b-bg: var(--ink-orange); --card-b-ink: var(--paper);  --card-b-line: transparent;
 
-  --kontakt-bg: var(--ink-blue);
+  --kontakt-bg: var(--ink-pink);
   --kontakt-ink: var(--paper);
 
   --cursor-c: var(--ink-orange);
@@ -863,7 +865,7 @@ body::after {
   z-index: 900;
   pointer-events: none;
   mix-blend-mode: multiply;
-  opacity: 0.15;
+  opacity: 0.18;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
@@ -891,7 +893,7 @@ body::after {
 }
 
 /* card fronts: orange ink flood, knockout title, paper pill */
-.rcard-cover, [data-theme="dark"] .rcard-cover { background: var(--ink-orange); }
+.rcard-cover, [data-theme="dark"] .rcard-cover { background: var(--ink-pink); }
 .rcard-title { color: var(--paper); }
 .rcard-open { background: var(--paper); color: var(--ink-blue); }
 
@@ -920,6 +922,8 @@ body::after {
   bottom: -12vh;
 }
 .walker { color: var(--ink-orange); opacity: 1; }
+
+.kontakt-bio { text-shadow: var(--sun-dx, 0.05em) var(--sun-dy, 0.045em) 0 #000000; }
 
 /* fixed chips print blue on paper */
 .lang-toggle { background: var(--paper); color: var(--ink-blue); border-color: var(--ink-blue); }
