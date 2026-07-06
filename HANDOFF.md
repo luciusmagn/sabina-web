@@ -63,10 +63,11 @@ plus `palette()` in `static/js/main.js`.
 
 ## Git state
 
-- Branch `redesign`, ~20 commits ahead of the push point after `pre-riso`.
+- Branch `redesign`, pushed to origin (through the flip fix + riso
+  adjustments, 2026-07-06).
 - **Tags (pushed)**: `ring-v1`, `ring-v2` (photo covers + conveyor labels),
   `pre-riso` (two-theme + depth wireframes — revert point for the whole riso
-  experiment). Riso commits are LOCAL ONLY, not yet pushed.
+  experiment).
 - `master` = old live site. Do not touch without the deploy steps below.
 
 ## Resolved — cards not opening in real browsers (root cause found)
