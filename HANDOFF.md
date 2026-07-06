@@ -60,11 +60,18 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   repo root. Per-plate misregistration (REG), plates softened 0.35px, one
   plate per canvas layer so hover parallax = live misregistration. Knobs:
   PLATES ink curves, CRUSH thresholds (0.12 paper / 0.78 solid), REG.
-  Cut-out sources keep pink paper via alpha (videa is a cutout; **user
-  intends to supply cutouts for the other four**). The depth maps
-  (`static/covers/depth/`, `tools/depth/`) are left over from the old
-  wireframe covers and are NO LONGER USED. New cover workflow: just drop
-  the image in `static/covers/`.
+  Source images are the 2026-07 set (`static/covers/{viz,produkt,portrety,
+  videa,typografie}.jpg`, resized ≤1100px; originals with spaces sit
+  untracked in the repo root). Per-image tone can be nudged in the template
+  via `data-exposure` (gamma: <1 lifts shadows for too-dark sources, >1
+  deepens too-pale ones) and `data-contrast` — currently videa
+  (0.6/1.08, was near-black) and typografie (1.18/1.25, was washed out).
+  `data-crop="cx,cy,cw,ch"` (percent) still works but must be ~1.41:1 or it
+  stretches; none of the current covers use it (auto center-crop). The
+  depth maps (`static/covers/depth/`, `tools/depth/`) are left over from the
+  old wireframe covers and are NO LONGER USED. New cover workflow: drop the
+  image in `static/covers/`, point the card's `<img src>` at it, tune
+  data-exposure/contrast if it lands too dark or pale.
 - **Kontakt**: pink flood, white type + blue-shadow bio, icon email/LinkedIn
   lines, orange walker (animated line figure), orange sun at the horizon,
   © line bottom-left. Deck photos show their natural colours (the blue

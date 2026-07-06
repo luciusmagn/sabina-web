@@ -369,6 +369,22 @@ function setupCoverArt() {
       sctx.drawImage(img, sx, sy, sw, sh, 0, 0, SW, SH);
       const px = sctx.getImageData(0, 0, SW, SH).data;
 
+      /* --- per-image tone, applied to luminance before the crush ---
+         exposure is a gamma: <1 lifts shadows (rescues too-dark sources so
+         their mids grain up instead of fusing to solid), >1 deepens (gives
+         too-pale sources more ink). contrast pivots around mid-grey. Both
+         default to 1 (no change). */
+      const expo = parseFloat(img.dataset.exposure) || 1;
+      const cont = parseFloat(img.dataset.contrast) || 1;
+      const N = SW * SH;
+      const adj = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        let l = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255;
+        if (expo !== 1) l = Math.pow(l, expo);
+        if (cont !== 1) l = Math.min(1, Math.max(0, (l - 0.5) * cont + 0.5));
+        adj[i] = l;
+      }
+
       /* --- dither each plate into its own layer, off-register --- */
       const ctxs = layers.map((c) => c.getContext("2d"));
       ctxs.forEach((ctx, i) => {
@@ -388,8 +404,7 @@ function setupCoverArt() {
           for (let x = 0; x < SW; x++) {
             const i = (y * SW + x) * 4;
             if (px[i + 3] < 128) continue; // cut-outs keep the pink paper
-            const l = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) / 255;
-            const k = CRUSH(p.ink(l));
+            const k = CRUSH(p.ink(adj[y * SW + x]));
             if (k <= 0) continue; // highlights clear to bare paper
             const n = NOISE[nrow + ((x + ox) & (NTILE - 1))];
             // solids fuse shut (bar the rare paper fleck); mids grain up
