@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=12">
+  <link rel="stylesheet" href="/css/style.css?v=13">
 </head>
 <body>
 
@@ -316,34 +316,6 @@
 
   </main>
 
-  {# ---- riso ink filters: wobble + fiber roughness + bleed halo.
-        ink-lg suits display type and big shapes; ink-sm keeps small text
-        legible with a gentler pass. Referenced from CSS via filter: url(). #}
-  <svg class="ink-defs" aria-hidden="true" focusable="false">
-    <filter id="ink-lg" x="-8%" y="-8%" width="116%" height="116%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="7" result="wobble"/>
-      <feDisplacementMap in="SourceGraphic" in2="wobble" scale="3.4" xChannelSelector="R" yChannelSelector="G" result="shape"/>
-      <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="3" result="fiber"/>
-      <feDisplacementMap in="shape" in2="fiber" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-      <feMorphology in="rough" operator="dilate" radius="0.7" result="fat"/>
-      <feGaussianBlur in="fat" stdDeviation="1.1" result="halo"/>
-      <feComponentTransfer in="halo" result="haloSoft"><feFuncA type="linear" slope="0.42" intercept="0"/></feComponentTransfer>
-      <feGaussianBlur in="rough" stdDeviation="0.3" result="core"/>
-      <feMerge><feMergeNode in="haloSoft"/><feMergeNode in="core"/></feMerge>
-    </filter>
-    <filter id="ink-sm" x="-12%" y="-12%" width="124%" height="124%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="7" result="wobble"/>
-      <feDisplacementMap in="SourceGraphic" in2="wobble" scale="1.5" xChannelSelector="R" yChannelSelector="G" result="shape"/>
-      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="3" result="fiber"/>
-      <feDisplacementMap in="shape" in2="fiber" scale="1" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-      <feMorphology in="rough" operator="dilate" radius="0.35" result="fat"/>
-      <feGaussianBlur in="fat" stdDeviation="0.75" result="halo"/>
-      <feComponentTransfer in="halo" result="haloSoft"><feFuncA type="linear" slope="0.32" intercept="0"/></feComponentTransfer>
-      <feGaussianBlur in="rough" stdDeviation="0.2" result="core"/>
-      <feMerge><feMergeNode in="haloSoft"/><feMergeNode in="core"/></feMerge>
-    </filter>
-  </svg>
-
   <dialog class="lightbox" aria-label="Náhled">
     <button class="lightbox-close" type="button"
             data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
@@ -355,6 +327,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=12" defer></script>
+  <script src="/js/main.js?v=13" defer></script>
 </body>
 </html>

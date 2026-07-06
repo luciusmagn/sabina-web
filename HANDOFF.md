@@ -34,14 +34,13 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   breathes (`sun-breathe`, 4.6s scale swell); hovering it prints ONE solid
   blue ray toward the name — the light the blue shadow is cast by
   (`setupSunRays` in main.js; hover = circle test on mousemove, since the
-  disc is a ::before). Riso print treatments (kept SUBTLE per user): the
-  discs are flat ink with a blue plate 2px off-register (box-shadow); the
-  name and kontakt-bio carry an irregular turbulence mask that nibbles
-  paper flecks out of the glyphs; the ray overprints (multiply); the
-  contact pill has a misregistered blue pass; hero+kontakt carry a faint
-  paper-speckle ::after overlay. Contact pill reveals a selectable email
-  on hover and sits level with the scroll cue; "Kontakt" label anchors to
-  #kontakt.
+  disc is a ::before). NB: hero + kontakt were reverted to their v8
+  (`85b4d7f`) look on user request — combined colours + the sun, but NO
+  riso print treatment (no halftone/ink-bleed/dropout/speckle; the riso
+  effect is kept for the ring card covers only). The page-wide `body::after`
+  paper grain still lies over everything (it predates v8). Contact pill
+  reveals a selectable email on hover and sits level with the scroll cue;
+  "Kontakt" label anchors to #kontakt.
 - **Work ring** (`#prace`): 3D circular carousel, 5 category cards
   (viz / produkt / portréty / videa / typografie). Centre card faces you;
   ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it — vertical
@@ -70,13 +69,12 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   lines, orange walker (animated line figure), orange sun at the horizon,
   © line bottom-left. Deck photos show their natural colours (the blue
   duotone filter is gone).
-- **Ink edges**: nothing prints razor-sharp — an inline SVG filter pair in
-  index.html.tera (`#ink-lg` for display type/discs/ray/card titles,
-  `#ink-sm` for small text, pills, chips, the walker) gives every printed
-  element noise-displaced wobble, fiber-level edge roughness, and a faint
-  dilated bleed halo. The cover canvases stamp each plate twice (wide faint
-  pass + softened body) for the same bleed. Tune in the template's filter
-  defs (displacement scales, dilate radius, halo slope).
+- **Ink edges**: the DOM-wide ink-bleed SVG filters (`#ink-lg`/`#ink-sm`)
+  were REMOVED with the hero/kontakt revert — page type and shapes print
+  crisp again. The soft-ink/bleed character survives only on the covers:
+  `setupCoverArt` stamps each plate twice (wide faint pass + softened body)
+  in-canvas. If a printed-edge look is ever wanted site-wide again, the
+  filter defs live in git at tag/commit `854b831`.
 - Page-wide paper grain overlay; sections snap one-per-viewport
   (`scroll-snap y mandatory`); round translucent cursor (orange); theme
   toggle hidden (riso has one ink set). Reduced-motion is handled throughout.
