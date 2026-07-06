@@ -276,6 +276,7 @@ function setupKontaktBall() {
   let raf = 0, last = 0;
 
   const K = 85, D = 4.2, FORCE = 2200, MAX = 120; // stiffness, damping, push, travel cap
+  const ROLL = 2.0; // spin gain over strict roll-without-slip, so it reads clearly
 
   function geom() {
     const r = kontakt.getBoundingClientRect();
@@ -316,6 +317,9 @@ function setupKontaktBall() {
 
     kontakt.style.setProperty("--k-dx", px.toFixed(1) + "px");
     kontakt.style.setProperty("--k-dy", py.toFixed(1) + "px");
+    // rolling without slip: the disc turns by its horizontal travel / radius,
+    // so it visibly rolls right and left as it springs about
+    kontakt.style.setProperty("--k-rot", (px / g.rad * ROLL * 57.2958).toFixed(1) + "deg");
 
     const moving = Math.abs(px) > 0.15 || Math.abs(py) > 0.15 || Math.abs(vx) > 1.5 || Math.abs(vy) > 1.5;
     if (moving || now - mAt < 350) raf = requestAnimationFrame(frame);
