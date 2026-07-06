@@ -38,8 +38,11 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   sits level with the scroll cue; "Kontakt" label anchors to #kontakt.
 - **Work ring** (`#prace`): 3D circular carousel, 5 category cards
   (viz / produkt / portréty / videa / typografie). Centre card faces you;
-  ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it (releases
-  after a full loop so the page stays scrollable), arrows/keys/swipe too.
+  ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it — vertical
+  (releases after a full loop so the page stays scrollable) AND horizontal
+  touchpad swipes (never release; also suppress the browser's back/forward
+  gesture over the section); arrows/keys/pointer-swipe too. Firefox line-
+  mode wheel deltas are normalised (×16).
   Labels ride a slow conveyor (drop in from above 1.9s, exit down 0.6s,
   input locked ~2.65s per turn). Clicking the centre card FLIPS it to a
   vertical project deck (snap per project, slim blue scrollbar, 50%-pink

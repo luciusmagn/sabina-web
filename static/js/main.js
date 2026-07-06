@@ -741,9 +741,12 @@ function setupRing() {
     if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
   });
 
-  // the mouse wheel rotates the ring too (both directions) while the section
-  // fills the view. After a full loop in one direction it releases, so the
-  // page can always be scrolled past; a flipped card keeps native scrolling.
+  // the mouse wheel rotates the ring too while the section fills the view —
+  // vertically (both directions) and horizontally (touchpad side-swipes,
+  // which read as browsing the cards). After a full vertical loop in one
+  // direction it releases, so the page can always be scrolled past;
+  // horizontal never needs to release (the page has nowhere to go sideways).
+  // A flipped card keeps native scrolling.
   let wheelLock = 0, runDir = 0, runCount = 0, released = false;
   window.addEventListener("wheel", (e) => {
     if (reduceMotion.matches) return;
@@ -755,13 +758,28 @@ function setupRing() {
     const r = ring.getBoundingClientRect();
     const covering = r.top < window.innerHeight * 0.25 && r.bottom > window.innerHeight * 0.75;
     if (!covering) { runCount = 0; released = false; return; }
-    const dir = e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0;
+
+    const k = e.deltaMode === 1 ? 16 : 1; // Firefox wheels report lines, not px
+    const dX = e.deltaX * k, dY = e.deltaY * k;
+
+    // a dominantly sideways swipe turns the ring and never yields the page
+    // (preventDefault also stops the browser's back/forward swipe here)
+    if (Math.abs(dX) > Math.abs(dY) * 1.2) {
+      e.preventDefault();
+      const now = Date.now();
+      if (now - wheelLock < 450 || Math.abs(dX) < 8) return;
+      wheelLock = now;
+      go(dX > 0 ? 1 : -1); // fingers travel left → the next card arrives
+      return;
+    }
+
+    const dir = dY > 0 ? 1 : dY < 0 ? -1 : 0;
     if (!dir) return;
     if (dir !== runDir) { runDir = dir; runCount = 0; released = false; }
     if (released) return; // seen the whole ring — let the page move on
     e.preventDefault();
     const now = Date.now();
-    if (now - wheelLock < 450 || Math.abs(e.deltaY) < 8) return;
+    if (now - wheelLock < 450 || Math.abs(dY) < 8) return;
     wheelLock = now;
     if (go(dir)) { // count real turns only — no-ops while a label travels
       runCount += 1;
