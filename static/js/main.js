@@ -144,15 +144,16 @@ function setupSky() {
       else body = null;
     }
 
-    // the orange ball IS the sun: it travels the hero with the real one
-    // (east enters right, west leaves left, altitude lifts it), and rests
-    // half-sunk under the sheet's edge once it has set
+    // the orange disc IS the sun: it travels the hero with the real one
+    // (east enters right, west leaves left, altitude lifts it — low near
+    // sunrise/sunset, high at noon), and rests half-sunk under the sheet's
+    // edge once it has set. Prague's sun tops out near 63°, hence /70.
     if (heroEl) {
       const t = Math.min(1, Math.max(0, (sunP.az - 60) / 240));
       heroEl.style.setProperty("--ball-x", (88 - t * 74).toFixed(1) + "%");
       heroEl.style.setProperty(
         "--ball-y",
-        sunP.alt > 0 ? Math.max(4, 40 - (sunP.alt / 90) * 36).toFixed(1) + "%" : "104%"
+        sunP.alt > 0 ? Math.max(5, 78 - (sunP.alt / 70) * 70).toFixed(1) + "%" : "104%"
       );
     }
 

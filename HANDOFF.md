@@ -26,11 +26,12 @@ refresh always gets fresh assets. Rust changes need a rebuild.
 
 One merged look — risograph two-ink print (was: light/dark themes, see tags):
 
-- **Hero**: pink flood, paper-white name, BLACK offset text-shadow driven by
+- **Hero**: pink flood, paper-white name, BLUE offset text-shadow driven by
   the real sun over Prague (recomputed each minute, `setupSky` in main.js).
-  The big orange ball IS the sun — `--ball-x/--ball-y` track real solar
-  azimuth/altitude; it sinks below the sheet edge after sunset. Contact pill
-  reveals a selectable email on hover; "Kontakt" label anchors to #kontakt.
+  A small orange disc IS the sun — `--ball-x/--ball-y` track real solar
+  azimuth/altitude (low near sunrise/sunset, high at noon); it sinks below
+  the sheet edge after sunset. Contact pill reveals a selectable email on
+  hover; "Kontakt" label anchors to #kontakt.
 - **Work ring** (`#prace`): 3D circular carousel, 5 category cards
   (viz / produkt / portréty / videa / typografie). Centre card faces you;
   ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it (releases
@@ -49,9 +50,10 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   supply cutouts for those** (transparent PNG, text removed). New cover
   workflow: drop image in `static/covers/`, run
   `node tools/depth/depth.mjs <img> static/covers/depth/<name>.png`.
-- **Kontakt**: pink flood, white type + black-shadow bio, icon email/LinkedIn
+- **Kontakt**: pink flood, white type + blue-shadow bio, icon email/LinkedIn
   lines, orange walker (animated line figure), orange sun at the horizon,
-  © line bottom-left.
+  © line bottom-left. Deck photos show their natural colours (the blue
+  duotone filter is gone).
 - Page-wide paper grain overlay; sections snap one-per-viewport
   (`scroll-snap y mandatory`); round translucent cursor (orange); theme
   toggle hidden (riso has one ink set). Reduced-motion is handled throughout.
