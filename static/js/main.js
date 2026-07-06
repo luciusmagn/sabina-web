@@ -282,48 +282,40 @@ function setupChrome() {
 }
 setupChrome();
 
-/* ---------------- wireframe covers ----------------
-   Each ring cover is redrawn as a form-following wireframe: the image's
-   luminance becomes a smooth height field, and iso-contour lines (plus a
-   sparse warped vertical family and the silhouette) wrap around the subject
-   like a 3D mesh. Strokes are split across three depth layers so the
-   subject can parallax under the cursor. Flat ground, thin lines, no
-   gradients — pink + blue in light, orange + black in dark. The source
-   <img> stays as the no-JS fallback. */
+/* ---------------- riso covers ----------------
+   Each ring cover reprints its source image as a risograph separation:
+   three ink plates (orange / blue / black) laid down as coarse halftone
+   dots at classic screen angles over the pink card, each plate slightly
+   off-register, with uneven ink coverage, the odd missing dot, and tiny
+   paper-white dropouts. One plate per canvas layer, so the hover parallax
+   doubles as live misregistration. Cut-out sources (alpha) keep the pink
+   paper around the subject. The source <img> stays as the no-JS fallback. */
 
 function setupCoverArt() {
   const covers = [...document.querySelectorAll(".rcard-cover img")];
   if (!covers.length) return;
 
-  const CELL = 6;                          // lattice pitch in canvas px
-  const W = 762;
-  const COLS = Math.floor(W / CELL) + 1;   // sample points, not cells
-  const ROWS = 91;
-  const H = (ROWS - 1) * CELL;
-  const LEVELS = Array.from({ length: 12 }, (_, i) => 0.07 + i * 0.078);
-  const AMP = 26;                          // vertical-line warp
+  const W = 762, H = 540;
+  const PAPER = "#fbf8f1", CARD = "#ff87b1";
 
-  // riso experiment: pink flood, one ink per depth plate (far→near:
-  // blue, orange, black) and a paper-white silhouette knockout
-  const palette = () => ({
-    bg: "#ff87b1",
-    inks: ["#0065f9", "#fe5d40", "#000000"],
-    sil: "#fbf8f1",
-  });
+  // far→near: orange carries the mids, blue the shade, black the depths.
+  // ink() maps luminance (0 dark … 1 light) to dot coverage; the alphas
+  // let overlapping plates darken each other — poor man's overprint that
+  // needs no blend modes (those break the 3D card faces).
+  const PLATES = [
+    { color: "#fe5d40", angle: 15, pitch: 9, alpha: 0.92, ink: (l) => Math.min(1, Math.max(0, (0.94 - l) * 1.45)) },
+    { color: "#0065f9", angle: 75, pitch: 8, alpha: 0.85, ink: (l) => Math.min(1, Math.max(0, (0.66 - l) * 1.9)) },
+    { color: "#0a0a0a", angle: 45, pitch: 8, alpha: 0.9, ink: (l) => Math.min(1, Math.max(0, (0.38 - l) * 2.6)) },
+  ];
+  const REG = [[1.8, 1.2], [-1.6, 1.0], [1.0, -1.8]]; // px off-register per plate
+  const hash = (a, b) => {
+    const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+    return s - Math.floor(s);
+  };
 
   const renderers = covers.map((img) => {
     const holder = img.parentElement;
     let layers = null;
-
-    // optional baked depth map (white = near); rendering waits for it
-    let depthImg = null, depthReady = true;
-    if (img.dataset.depth) {
-      depthReady = false;
-      depthImg = new Image();
-      depthImg.onload = () => { depthReady = true; render(); };
-      depthImg.onerror = () => { depthImg = null; depthReady = true; render(); };
-      depthImg.src = img.dataset.depth;
-    }
 
     function ensureLayers() {
       if (layers) return;
@@ -340,13 +332,14 @@ function setupCoverArt() {
     }
 
     function render() {
-      if (!img.naturalWidth || !depthReady) return;
+      if (!img.naturalWidth) return;
       ensureLayers();
 
-      /* --- sample luminance + alpha on the lattice --- */
+      /* --- sample the crop at a working resolution --- */
+      const SW = 191, SH = 135;
       const sample = document.createElement("canvas");
-      sample.width = COLS;
-      sample.height = ROWS;
+      sample.width = SW;
+      sample.height = SH;
       const sctx = sample.getContext("2d", { willReadFrequently: true });
       let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
       if (img.dataset.crop) {
@@ -361,196 +354,71 @@ function setupCoverArt() {
         if (srcRatio > targetRatio) { sw = sh * targetRatio; sx = (img.naturalWidth - sw) / 2; }
         else { sh = sw / targetRatio; sy = (img.naturalHeight - sh) / 2; }
       }
-      sctx.drawImage(img, sx, sy, sw, sh, 0, 0, COLS, ROWS);
-      const px = sctx.getImageData(0, 0, COLS, ROWS).data;
-      const N = COLS * ROWS;
-      const lum = new Float32Array(N);
-      const alpha = new Float32Array(N);
-      for (let i = 0; i < N; i++) {
-        lum[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255;
-        alpha[i] = px[i * 4 + 3] / 255;
-      }
+      sctx.drawImage(img, sx, sy, sw, sh, 0, 0, SW, SH);
+      const px = sctx.getImageData(0, 0, SW, SH).data;
+      const sampleAt = (x, y) => {
+        const ix = Math.max(0, Math.min(SW - 1, Math.round((x * SW) / W)));
+        const iy = Math.max(0, Math.min(SH - 1, Math.round((y * SH) / H)));
+        const i = (iy * SW + ix) * 4;
+        return {
+          l: (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) / 255,
+          a: px[i + 3] / 255,
+        };
+      };
 
-      /* --- the height field: true depth when a map is baked, else luminance.
-         The depth map was generated from the source at the same aspect, so
-         the same crop rectangle applies (scaled to its own pixel size). */
-      let field;
-      if (depthImg) {
-        const kx = depthImg.naturalWidth / img.naturalWidth;
-        const ky = depthImg.naturalHeight / img.naturalHeight;
-        sctx.drawImage(depthImg, sx * kx, sy * ky, sw * kx, sh * ky, 0, 0, COLS, ROWS);
-        const dp = sctx.getImageData(0, 0, COLS, ROWS).data;
-        field = new Float32Array(N);
-        // mostly true depth (macro form), a dash of luminance (surface detail)
-        for (let i = 0; i < N; i++) field[i] = 0.78 * (dp[i * 4] / 255) + 0.22 * lum[i];
-      } else {
-        field = Float32Array.from(lum);
-      }
-
-      /* --- the subject mask ---
-         Cut-out sources (transparent background) give it directly; opaque
-         photos fall back to "differs from the border tone or sits on an
-         edge", closed with one dilation. */
-      const at = (arr, c, r) =>
-        arr[Math.max(0, Math.min(ROWS - 1, r)) * COLS + Math.max(0, Math.min(COLS - 1, c))];
-      let mask = new Float32Array(N);
-      const transparent = alpha.some((a) => a < 0.5);
-      if (transparent) {
-        for (let i = 0; i < N; i++) mask[i] = alpha[i] > 0.5 ? 1 : 0;
-      } else {
-        const border = [];
-        for (let c = 0; c < COLS; c++) border.push(lum[c], lum[(ROWS - 1) * COLS + c]);
-        for (let r = 0; r < ROWS; r++) border.push(lum[r * COLS], lum[r * COLS + COLS - 1]);
-        border.sort();
-        const bgLum = border[Math.floor(border.length / 2)];
-        const raw = new Uint8Array(N);
-        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-          const v = at(lum, c, r);
-          const grad = Math.max(
-            Math.abs(v - at(lum, c + 1, r)), Math.abs(v - at(lum, c - 1, r)),
-            Math.abs(v - at(lum, c, r + 1)), Math.abs(v - at(lum, c, r - 1))
-          );
-          raw[r * COLS + c] = (Math.abs(v - bgLum) > 0.14 || grad > 0.075) ? 1 : 0;
-        }
-        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-          mask[r * COLS + c] =
-            at(raw, c, r) || at(raw, c - 1, r) || at(raw, c + 1, r) || at(raw, c, r - 1) || at(raw, c, r + 1) ? 1 : 0;
-        }
-      }
-
-      /* --- smooth the height field so contours follow FORM, not noise --- */
-      const blurPasses = depthImg ? 1 : 2; // real depth is already smooth
-      for (let pass = 0; pass < blurPasses; pass++) {
-        const out = new Float32Array(N);
-        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-          let s = 0, w = 0;
-          for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-            if (at(mask, c + dc, r + dr)) { s += at(field, c + dc, r + dr); w++; }
-          }
-          out[r * COLS + c] = w ? s / w : at(field, c, r);
-        }
-        field = out;
-      }
-
-      // spread the LEVELS across the subject's own range instead of
-      // stretching the field — stretching amplifies invisible vignettes
-      // into level-crossing ramps (long straight artifact lines)
-      let lo = 1, hi = 0;
-      for (let i = 0; i < N; i++) if (mask[i]) { if (field[i] < lo) lo = field[i]; if (field[i] > hi) hi = field[i]; }
-      const span = Math.max(0.1, hi - lo);
-      const tOf = (v) => (v - lo) / span;
-
-      /* --- draw: layer 0 = ground + low contours, 1 = mid, 2 = high + edge --- */
-      const { bg, inks, sil } = palette();
-      // each plate sits a hair off-register, like a real riso pass
-      const REG = [[0.9, 0.7], [-0.8, 0.5], [0.5, -0.9]];
+      /* --- lay down the plates, one per parallax layer --- */
       const ctxs = layers.map((c) => c.getContext("2d"));
       ctxs.forEach((ctx, i) => {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, W, H);
-        if (i === 0) { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
+        if (i === 0) { ctx.fillStyle = CARD; ctx.fillRect(0, 0, W, H); }
         ctx.translate(REG[i][0], REG[i][1]);
-        ctx.strokeStyle = inks[i];
-        ctx.lineWidth = 1.25;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.beginPath();
       });
-      const bandFor = (t) => (t < 0.34 ? 0 : t < 0.68 ? 1 : 2);
 
-      // marching squares over a field: draws the iso-line f=level
-      function iso(f, level, ctx, gated) {
-        for (let r = 0; r < ROWS - 1; r++) {
-          for (let c = 0; c < COLS - 1; c++) {
-            const v0 = at(f, c, r), v1 = at(f, c + 1, r);
-            const v2 = at(f, c + 1, r + 1), v3 = at(f, c, r + 1);
-            if (gated) {
-              if (!(at(mask, c, r) && at(mask, c + 1, r) && at(mask, c + 1, r + 1) && at(mask, c, r + 1))) continue;
-              // near-flat ramps cross levels in long straight chains — skip them
-              if (Math.max(v0, v1, v2, v3) - Math.min(v0, v1, v2, v3) < 0.02) continue;
-            }
-            let idx = 0;
-            if (v0 > level) idx |= 1;
-            if (v1 > level) idx |= 2;
-            if (v2 > level) idx |= 4;
-            if (v3 > level) idx |= 8;
-            if (idx === 0 || idx === 15) continue;
-            const x = c * CELL, y = r * CELL;
-            // clamped lerp — equal corners would otherwise explode the
-            // division and shoot a line across the whole canvas
-            const t = (a, b) => Math.max(0, Math.min(1, (level - a) / ((b - a) || 1)));
-            const top    = [x + CELL * t(v0, v1), y];
-            const right  = [x + CELL, y + CELL * t(v1, v2)];
-            const bottom = [x + CELL * t(v3, v2), y + CELL];
-            const left   = [x, y + CELL * t(v0, v3)];
-            const SEGS = {
-              1: [left, top], 2: [top, right], 3: [left, right], 4: [right, bottom],
-              5: [left, top, right, bottom], 6: [top, bottom], 7: [left, bottom],
-              8: [bottom, left], 9: [top, bottom], 10: [top, right, bottom, left],
-              11: [right, bottom], 12: [right, left], 13: [top, right], 14: [left, top],
-            }[idx];
-            for (let s = 0; s < SEGS.length; s += 2) {
-              ctx.moveTo(SEGS[s][0], SEGS[s][1]);
-              ctx.lineTo(SEGS[s + 1][0], SEGS[s + 1][1]);
-            }
+      const DIAG = Math.hypot(W, H) / 2;
+      PLATES.forEach((p, pi) => {
+        const ctx = ctxs[pi];
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        const a = (p.angle * Math.PI) / 180;
+        const ca = Math.cos(a), sa = Math.sin(a);
+        const rmax = p.pitch * 0.62; // full-coverage dots just about touch
+        ctx.beginPath();
+        for (let v = -DIAG; v <= DIAG; v += p.pitch) {
+          for (let u = -DIAG; u <= DIAG; u += p.pitch) {
+            const x = W / 2 + u * ca - v * sa;
+            const y = H / 2 + u * sa + v * ca;
+            if (x < -p.pitch || x > W + p.pitch || y < -p.pitch || y > H + p.pitch) continue;
+            const s = sampleAt(x, y);
+            if (s.a < 0.5) continue;      // cut-outs keep the pink paper
+            const n = hash(u + pi * 13, v - pi * 7);
+            if (n > 0.985) continue;      // the odd dot the drum missed
+            const k = p.ink(s.l) * (0.78 + 0.3 * n); // uneven ink coverage
+            if (k < 0.04) continue;
+            const r = rmax * Math.sqrt(Math.min(1, k));
+            ctx.moveTo(x + r, y);
+            ctx.arc(x, y, r, 0, Math.PI * 2);
           }
         }
-      }
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
 
-      // contour levels sit at QUANTILES of the subject's field values, so
-      // the mesh wraps evenly however the depth happens to be distributed
-      const vals = [];
-      for (let i = 0; i < N; i++) if (mask[i]) vals.push(field[i]);
-      vals.sort();
-      const qLevel = (q) => vals[Math.min(vals.length - 1, Math.floor(q * vals.length))] || 0;
-      LEVELS.forEach((q) => iso(field, qLevel(q), ctxs[bandFor(q)], true));
-
-      // the vertical family ties the contours into a mesh. Instead of
-      // dropping straight down, each line bows around the forms — pushed
-      // sideways off the field's horizontal gradient, like longitude lines
-      // wrapping a bulge. (A run also restarts whenever it hops to another
-      // depth layer — continuing a path on a different canvas would drag a
-      // stray line from wherever that layer's path last ended.)
-      const gx = new Float32Array(N);
-      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-        if (at(mask, c, r)) gx[r * COLS + c] = (at(field, c + 1, r) - at(field, c - 1, r)) / 2;
-      }
-      const BOW = 130, MAXBOW = CELL * 2.2;
-      for (let c = 0; c < COLS; c += 3) {
-        let run = false, lastBand = -1;
-        for (let r = 0; r < ROWS; r++) {
-          if (at(mask, c, r)) {
-            const t = tOf(at(field, c, r));
-            const band = bandFor(t);
-            const bow = Math.max(-MAXBOW, Math.min(MAXBOW, -at(gx, c, r) * BOW));
-            const px2 = c * CELL + bow, py = r * CELL - t * AMP + AMP / 2;
-            if (!run || band !== lastBand) { ctxs[band].moveTo(px2, py); run = true; lastBand = band; }
-            else ctxs[band].lineTo(px2, py);
-          } else run = false;
+      /* --- tiny paper dropouts where the ink actually sits --- */
+      const c2 = ctxs[2];
+      c2.fillStyle = PAPER;
+      c2.beginPath();
+      for (let y = 5; y < H; y += 11) {
+        for (let x = 5; x < W; x += 11) {
+          if (hash(x * 0.7, y * 1.3) < 0.955) continue;
+          const s = sampleAt(x, y);
+          if (s.a < 0.5 || s.l > 0.85) continue;
+          const r = 0.8 + 1.6 * hash(y, x);
+          c2.moveTo(x + r, y);
+          c2.arc(x, y, r, 0, Math.PI * 2);
         }
       }
-
-      // printy ink: a soft bleed pass under a near-crisp pass
-      const inkStroke = (ctx) => {
-        ctx.save();
-        ctx.filter = "blur(1.1px)";
-        ctx.globalAlpha = 0.5;
-        ctx.stroke();
-        ctx.restore();
-        ctx.save();
-        ctx.filter = "blur(0.3px)";
-        ctx.stroke();
-        ctx.restore();
-      };
-      ctxs.forEach(inkStroke);
-
-      // the silhouette knocks out in paper white on the nearest plate
-      const c2 = ctxs[2];
-      c2.beginPath();
-      iso(mask, 0.5, c2, false);
-      c2.strokeStyle = sil;
-      c2.lineWidth = 2.1;
-      inkStroke(c2);
+      c2.fill();
     }
 
     if (img.complete) render();

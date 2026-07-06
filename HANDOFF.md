@@ -34,8 +34,13 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   breathes (`sun-breathe`, 4.6s scale swell); hovering it prints ONE solid
   blue ray toward the name — the light the blue shadow is cast by
   (`setupSunRays` in main.js; hover = circle test on mousemove, since the
-  disc is a ::before). Contact pill reveals a selectable email on hover and
-  sits level with the scroll cue; "Kontakt" label anchors to #kontakt.
+  disc is a ::before). Riso print treatments: the disc carries coarse
+  halftone dots + a blue plate 2px off-register (box-shadow); the name and
+  kontakt-bio are mask-punched with tiny paper dropouts; the ray overprints
+  (multiply); the contact pill has a misregistered blue pass; hero+kontakt
+  carry a fine paper-speckle ::after overlay. Contact pill reveals a
+  selectable email on hover and sits level with the scroll cue; "Kontakt"
+  label anchors to #kontakt.
 - **Work ring** (`#prace`): 3D circular carousel, 5 category cards
   (viz / produkt / portréty / videa / typografie). Centre card faces you;
   ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it — vertical
@@ -47,16 +52,17 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   input locked ~2.65s per turn). Clicking the centre card FLIPS it to a
   vertical project deck (snap per project, slim blue scrollbar, 50%-pink
   veil dims everything behind; Esc / click outside closes).
-- **Covers**: generated wireframes — Depth-Anything depth maps
-  (`static/covers/depth/*.png`, baked by `tools/depth/depth.mjs`) drive
-  marching-squares contours + curved verticals, four inks on pink
-  (blue/orange/black plates + white silhouette), ink-bleed double strokes,
-  per-plate misregistration. Hover = tilt + per-plate parallax
-  (`setupCoverParallax`). Videa cover uses a supplied cutout PNG (alpha =
-  exact silhouette); the other four use full screenshots — **user intends to
-  supply cutouts for those** (transparent PNG, text removed). New cover
-  workflow: drop image in `static/covers/`, run
-  `node tools/depth/depth.mjs <img> static/covers/depth/<name>.png`.
+- **Covers**: riso halftone separations (`setupCoverArt` in main.js) — each
+  source image reprints as three ink plates (orange/blue/black) of coarse
+  halftone dots at classic screen angles (15/75/45°) over the pink card,
+  per-plate misregistration (REG), uneven coverage + missing dots (seeded
+  hash), paper-white dropouts. One plate per canvas layer, so hover
+  parallax = live misregistration. Knobs: PLATES (color/angle/pitch/alpha/
+  ink curves) and REG at the top of `setupCoverArt`. Cut-out sources keep
+  pink paper via alpha (videa is a cutout; **user intends to supply cutouts
+  for the other four**). The depth maps (`static/covers/depth/`,
+  `tools/depth/`) are left over from the old wireframe covers and are NO
+  LONGER USED. New cover workflow: just drop the image in `static/covers/`.
 - **Kontakt**: pink flood, white type + blue-shadow bio, icon email/LinkedIn
   lines, orange walker (animated line figure), orange sun at the horizon,
   © line bottom-left. Deck photos show their natural colours (the blue
@@ -66,7 +72,8 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   toggle hidden (riso has one ink set). Reduced-motion is handled throughout.
 
 The riso look is one deletable block at the END of `static/css/style.css`
-plus `palette()` in `static/js/main.js`.
+plus the riso cover renderer (`setupCoverArt`) in `static/js/main.js`
+(the `pre-riso` tag holds the pre-riso wireframe renderer).
 
 ## Git state
 
@@ -115,9 +122,10 @@ kept as is.
 
 ## Other known follow-ups
 
-- Ring covers: user may want denser/sparser mesh; knobs at top of
-  `setupCoverArt` (CELL, LEVELS, AMP, BOW in the verticals, REG offsets,
-  inkStroke blur/alpha) and grain opacity in the riso CSS block.
+- Ring covers: user may want coarser/finer halftone; knobs at top of
+  `setupCoverArt` (PLATES pitch/angle/alpha + ink curves, REG offsets,
+  dropout density in the two hash thresholds) and grain/speckle opacity
+  in the riso CSS block.
 - Sun ball rests half-sunk (104%) after sunset — user may want it visible.
 - Kontakt small white text on pink = low contrast (user accepted so far).
 - `static/profilove-fotky/Čert s knihou (1).jpg` untracked, unused.
