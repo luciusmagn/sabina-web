@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=14">
+  <link rel="stylesheet" href="/css/style.css?v=15">
 </head>
 <body>
 
@@ -225,7 +225,7 @@
         <div class="rcard">
           <div class="rcard-inner">
             <button class="rcard-front" type="button">
-              <span class="rcard-cover" aria-hidden="true"><img src="/covers/typografie.jpg" alt="" data-exposure="1.18" data-contrast="1.25"></span>
+              <span class="rcard-cover" aria-hidden="true"><img src="/covers/typografie.jpg" alt="" data-exposure="1.32" data-contrast="1.32"></span>
               <span class="rcard-label">
                 <span class="rcard-title" data-cs="{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.typografie.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.typografie.cs | replace(from="<br>", to=" ") | striptags }}</span>
                 <span class="rcard-open" data-cs="Otevřít" data-en="Open">Otevřít</span>
@@ -327,6 +327,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=14" defer></script>
+  <script src="/js/main.js?v=15" defer></script>
 </body>
 </html>

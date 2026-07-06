@@ -309,11 +309,12 @@ function setupCoverArt() {
   // other — poor man's overprint that needs no blend modes (those break
   // the 3D card faces).
   const PLATES = [
-    { rgb: [254, 93, 64], alpha: 0.94, ink: (l) => (0.97 - l) * 1.7 },
+    { rgb: [254, 93, 64], alpha: 0.84, ink: (l) => (0.88 - l) * 1.5 }, // orange pulled back — narrower range, lighter
     { rgb: [0, 101, 249], alpha: 0.9, ink: (l) => (0.64 - l) * 2.2 },
     { rgb: [10, 10, 10], alpha: 0.94, ink: (l) => (0.4 - l) * 3.2 },
   ];
-  const CRUSH = (k) => (k - 0.12) / (0.78 - 0.12); // <0.12 → paper, >0.78 → solid
+  // wider bare-paper cutoff + narrower grain band = less speckle
+  const CRUSH = (k) => (k - 0.2) / (0.74 - 0.2); // <0.2 → paper, >0.74 → solid
   const REG = [[1.8, 1.2], [-1.6, 1.0], [1.0, -1.8]]; // px off-register per plate
 
   // one seeded noise tile shared by every render — stable, no flicker
@@ -427,7 +428,7 @@ function setupCoverArt() {
         ctx.drawImage(stage, REG[pi][0], REG[pi][1], W, H);
         ctx.restore();
         ctx.save();
-        ctx.filter = "blur(0.4px)";
+        ctx.filter = "blur(0.55px)"; // a hair softer so the grain reads quieter
         ctx.drawImage(stage, REG[pi][0], REG[pi][1], W, H);
         ctx.restore();
       });

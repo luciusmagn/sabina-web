@@ -59,13 +59,17 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   only in the mid-tones — tuned against the user's `inspo*.png` refs in the
   repo root. Per-plate misregistration (REG), plates softened 0.35px, one
   plate per canvas layer so hover parallax = live misregistration. Knobs:
-  PLATES ink curves, CRUSH thresholds (0.12 paper / 0.78 solid), REG.
+  PLATES ink curves, CRUSH thresholds (0.2 paper / 0.74 solid — widened to
+  quiet the grain and let more pink paper show), REG. Orange plate is
+  deliberately pulled back (alpha 0.84, range l<0.88) so blue/black carry
+  more and the set reads less orange; body stamp blur 0.55px softens grain.
   Source images are the 2026-07 set (`static/covers/{viz,produkt,portrety,
   videa,typografie}.jpg`, resized ≤1100px; originals with spaces sit
   untracked in the repo root). Per-image tone can be nudged in the template
   via `data-exposure` (gamma: <1 lifts shadows for too-dark sources, >1
   deepens too-pale ones) and `data-contrast` — currently videa
-  (0.6/1.08, was near-black) and typografie (1.18/1.25, was washed out).
+  (0.6/1.08, was near-black) and typografie (1.32/1.32 — deepened extra to
+  hold presence now that orange is pulled back).
   `data-crop="cx,cy,cw,ch"` (percent) still works but must be ~1.41:1 or it
   stretches; none of the current covers use it (auto center-crop). The
   depth maps (`static/covers/depth/`, `tools/depth/`) are left over from the
