@@ -34,13 +34,14 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   breathes (`sun-breathe`, 4.6s scale swell); hovering it prints ONE solid
   blue ray toward the name — the light the blue shadow is cast by
   (`setupSunRays` in main.js; hover = circle test on mousemove, since the
-  disc is a ::before). Riso print treatments: the disc carries coarse
-  halftone dots + a blue plate 2px off-register (box-shadow); the name and
-  kontakt-bio are mask-punched with tiny paper dropouts; the ray overprints
-  (multiply); the contact pill has a misregistered blue pass; hero+kontakt
-  carry a fine paper-speckle ::after overlay. Contact pill reveals a
-  selectable email on hover and sits level with the scroll cue; "Kontakt"
-  label anchors to #kontakt.
+  disc is a ::before). Riso print treatments (kept SUBTLE per user): the
+  discs are flat ink with a blue plate 2px off-register (box-shadow); the
+  name and kontakt-bio carry an irregular turbulence mask that nibbles
+  paper flecks out of the glyphs; the ray overprints (multiply); the
+  contact pill has a misregistered blue pass; hero+kontakt carry a faint
+  paper-speckle ::after overlay. Contact pill reveals a selectable email
+  on hover and sits level with the scroll cue; "Kontakt" label anchors to
+  #kontakt.
 - **Work ring** (`#prace`): 3D circular carousel, 5 category cards
   (viz / produkt / portréty / videa / typografie). Centre card faces you;
   ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it — vertical
@@ -52,17 +53,19 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   input locked ~2.65s per turn). Clicking the centre card FLIPS it to a
   vertical project deck (snap per project, slim blue scrollbar, 50%-pink
   veil dims everything behind; Esc / click outside closes).
-- **Covers**: riso halftone separations (`setupCoverArt` in main.js) — each
-  source image reprints as three ink plates (orange/blue/black) of coarse
-  halftone dots at classic screen angles (15/75/45°) over the pink card,
-  per-plate misregistration (REG), uneven coverage + missing dots (seeded
-  hash), paper-white dropouts. One plate per canvas layer, so hover
-  parallax = live misregistration. Knobs: PLATES (color/angle/pitch/alpha/
-  ink curves) and REG at the top of `setupCoverArt`. Cut-out sources keep
-  pink paper via alpha (videa is a cutout; **user intends to supply cutouts
-  for the other four**). The depth maps (`static/covers/depth/`,
-  `tools/depth/`) are left over from the old wireframe covers and are NO
-  LONGER USED. New cover workflow: just drop the image in `static/covers/`.
+- **Covers**: continuous-tone riso separations (`setupCoverArt` in main.js)
+  — each source image reprints as three ink plates (orange/blue/black) via
+  a 1px stochastic grain dither with CRUSH: heavy coverage fuses to SOLID
+  ink (rare paper flecks), highlights clear to the pink paper, grain lives
+  only in the mid-tones — tuned against the user's `inspo*.png` refs in the
+  repo root. Per-plate misregistration (REG), plates softened 0.35px, one
+  plate per canvas layer so hover parallax = live misregistration. Knobs:
+  PLATES ink curves, CRUSH thresholds (0.12 paper / 0.78 solid), REG.
+  Cut-out sources keep pink paper via alpha (videa is a cutout; **user
+  intends to supply cutouts for the other four**). The depth maps
+  (`static/covers/depth/`, `tools/depth/`) are left over from the old
+  wireframe covers and are NO LONGER USED. New cover workflow: just drop
+  the image in `static/covers/`.
 - **Kontakt**: pink flood, white type + blue-shadow bio, icon email/LinkedIn
   lines, orange walker (animated line figure), orange sun at the horizon,
   © line bottom-left. Deck photos show their natural colours (the blue

@@ -284,34 +284,47 @@ setupChrome();
 
 /* ---------------- riso covers ----------------
    Each ring cover reprints its source image as a risograph separation:
-   three ink plates (orange / blue / black) laid down as coarse halftone
-   dots at classic screen angles over the pink card, each plate slightly
-   off-register, with uneven ink coverage, the odd missing dot, and tiny
-   paper-white dropouts. One plate per canvas layer, so the hover parallax
-   doubles as live misregistration. Cut-out sources (alpha) keep the pink
-   paper around the subject. The source <img> stays as the no-JS fallback. */
+   three ink plates (orange / blue / black) rendered as CONTINUOUS TONE —
+   a fine 2px stochastic grain dither, the way a real riso master screens
+   a photo. No visible dot lattice: darks crush toward solid ink, lights
+   blow out to the pink paper, and the tone in between reads as subtle
+   noise. Each plate sits slightly off-register on its own canvas layer,
+   so the hover parallax doubles as live misregistration. Cut-out sources
+   (alpha) keep the pink paper around the subject. The source <img> stays
+   as the no-JS fallback. */
 
 function setupCoverArt() {
   const covers = [...document.querySelectorAll(".rcard-cover img")];
   if (!covers.length) return;
 
   const W = 762, H = 540;
-  const PAPER = "#fbf8f1", CARD = "#ff87b1";
+  const SW = W, SH = H; // dither at full resolution — 1px grain, no blocks
+  const CARD = "#ff87b1";
 
   // far→near: orange carries the mids, blue the shade, black the depths.
-  // ink() maps luminance (0 dark … 1 light) to dot coverage; the alphas
-  // let overlapping plates darken each other — poor man's overprint that
-  // needs no blend modes (those break the 3D card faces).
+  // ink() maps luminance (0 dark … 1 light) to raw ink demand; CRUSH then
+  // squeezes it so heavy areas fuse into SOLID ink and light areas clear
+  // to bare paper — grain lives only in the mid-tones, like a real riso
+  // screening a photo. The alphas let overlapping solid plates darken each
+  // other — poor man's overprint that needs no blend modes (those break
+  // the 3D card faces).
   const PLATES = [
-    { color: "#fe5d40", angle: 15, pitch: 9, alpha: 0.92, ink: (l) => Math.min(1, Math.max(0, (0.94 - l) * 1.45)) },
-    { color: "#0065f9", angle: 75, pitch: 8, alpha: 0.85, ink: (l) => Math.min(1, Math.max(0, (0.66 - l) * 1.9)) },
-    { color: "#0a0a0a", angle: 45, pitch: 8, alpha: 0.9, ink: (l) => Math.min(1, Math.max(0, (0.38 - l) * 2.6)) },
+    { rgb: [254, 93, 64], alpha: 0.94, ink: (l) => (0.97 - l) * 1.7 },
+    { rgb: [0, 101, 249], alpha: 0.9, ink: (l) => (0.64 - l) * 2.2 },
+    { rgb: [10, 10, 10], alpha: 0.94, ink: (l) => (0.4 - l) * 3.2 },
   ];
+  const CRUSH = (k) => (k - 0.12) / (0.78 - 0.12); // <0.12 → paper, >0.78 → solid
   const REG = [[1.8, 1.2], [-1.6, 1.0], [1.0, -1.8]]; // px off-register per plate
-  const hash = (a, b) => {
-    const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
-    return s - Math.floor(s);
-  };
+
+  // one seeded noise tile shared by every render — stable, no flicker
+  const NTILE = 256;
+  const NOISE = new Float32Array(NTILE * NTILE);
+  for (let y = 0; y < NTILE; y++) {
+    for (let x = 0; x < NTILE; x++) {
+      const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+      NOISE[y * NTILE + x] = s - Math.floor(s);
+    }
+  }
 
   const renderers = covers.map((img) => {
     const holder = img.parentElement;
@@ -335,8 +348,7 @@ function setupCoverArt() {
       if (!img.naturalWidth) return;
       ensureLayers();
 
-      /* --- sample the crop at a working resolution --- */
-      const SW = 191, SH = 135;
+      /* --- sample the crop at grain resolution --- */
       const sample = document.createElement("canvas");
       sample.width = SW;
       sample.height = SH;
@@ -356,69 +368,49 @@ function setupCoverArt() {
       }
       sctx.drawImage(img, sx, sy, sw, sh, 0, 0, SW, SH);
       const px = sctx.getImageData(0, 0, SW, SH).data;
-      const sampleAt = (x, y) => {
-        const ix = Math.max(0, Math.min(SW - 1, Math.round((x * SW) / W)));
-        const iy = Math.max(0, Math.min(SH - 1, Math.round((y * SH) / H)));
-        const i = (iy * SW + ix) * 4;
-        return {
-          l: (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) / 255,
-          a: px[i + 3] / 255,
-        };
-      };
 
-      /* --- lay down the plates, one per parallax layer --- */
+      /* --- dither each plate into its own layer, off-register --- */
       const ctxs = layers.map((c) => c.getContext("2d"));
       ctxs.forEach((ctx, i) => {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, W, H);
         if (i === 0) { ctx.fillStyle = CARD; ctx.fillRect(0, 0, W, H); }
-        ctx.translate(REG[i][0], REG[i][1]);
       });
 
-      const DIAG = Math.hypot(W, H) / 2;
       PLATES.forEach((p, pi) => {
-        const ctx = ctxs[pi];
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
-        const a = (p.angle * Math.PI) / 180;
-        const ca = Math.cos(a), sa = Math.sin(a);
-        const rmax = p.pitch * 0.62; // full-coverage dots just about touch
-        ctx.beginPath();
-        for (let v = -DIAG; v <= DIAG; v += p.pitch) {
-          for (let u = -DIAG; u <= DIAG; u += p.pitch) {
-            const x = W / 2 + u * ca - v * sa;
-            const y = H / 2 + u * sa + v * ca;
-            if (x < -p.pitch || x > W + p.pitch || y < -p.pitch || y > H + p.pitch) continue;
-            const s = sampleAt(x, y);
-            if (s.a < 0.5) continue;      // cut-outs keep the pink paper
-            const n = hash(u + pi * 13, v - pi * 7);
-            if (n > 0.985) continue;      // the odd dot the drum missed
-            const k = p.ink(s.l) * (0.78 + 0.3 * n); // uneven ink coverage
-            if (k < 0.04) continue;
-            const r = rmax * Math.sqrt(Math.min(1, k));
-            ctx.moveTo(x + r, y);
-            ctx.arc(x, y, r, 0, Math.PI * 2);
+        const plate = sctx.createImageData(SW, SH);
+        const out = plate.data;
+        const A = Math.round(p.alpha * 255);
+        const [pr, pg, pb] = p.rgb;
+        const ox = pi * 41, oy = pi * 59; // decorrelate the plates' grain
+        for (let y = 0; y < SH; y++) {
+          const nrow = ((y + oy) & (NTILE - 1)) * NTILE;
+          for (let x = 0; x < SW; x++) {
+            const i = (y * SW + x) * 4;
+            if (px[i + 3] < 128) continue; // cut-outs keep the pink paper
+            const l = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) / 255;
+            const k = CRUSH(p.ink(l));
+            if (k <= 0) continue; // highlights clear to bare paper
+            const n = NOISE[nrow + ((x + ox) & (NTILE - 1))];
+            // solids fuse shut (bar the rare paper fleck); mids grain up
+            if (k >= 1 ? n < 0.995 : n < k) {
+              out[i] = pr; out[i + 1] = pg; out[i + 2] = pb; out[i + 3] = A;
+            }
           }
         }
-        ctx.fill();
-        ctx.globalAlpha = 1;
+        // putImageData ignores transforms, so stage the plate and stamp it
+        // onto the layer at its misregistration offset, softened a hair so
+        // the grain reads as ink, not pixels
+        const stage = document.createElement("canvas");
+        stage.width = SW;
+        stage.height = SH;
+        stage.getContext("2d").putImageData(plate, 0, 0);
+        const ctx = ctxs[pi];
+        ctx.save();
+        ctx.filter = "blur(0.35px)";
+        ctx.drawImage(stage, REG[pi][0], REG[pi][1], W, H);
+        ctx.restore();
       });
-
-      /* --- tiny paper dropouts where the ink actually sits --- */
-      const c2 = ctxs[2];
-      c2.fillStyle = PAPER;
-      c2.beginPath();
-      for (let y = 5; y < H; y += 11) {
-        for (let x = 5; x < W; x += 11) {
-          if (hash(x * 0.7, y * 1.3) < 0.955) continue;
-          const s = sampleAt(x, y);
-          if (s.a < 0.5 || s.l > 0.85) continue;
-          const r = 0.8 + 1.6 * hash(y, x);
-          c2.moveTo(x + r, y);
-          c2.arc(x, y, r, 0, Math.PI * 2);
-        }
-      }
-      c2.fill();
     }
 
     if (img.complete) render();

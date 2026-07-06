@@ -904,8 +904,8 @@ body::after {
 
 /* the riso sun — a small orange disc riding the real sun's path,
    breathing slowly so the sheet is never quite still. It prints like a
-   spot-colour layer: coarse halftone dots inside, paper flecks, and a
-   blue plate a couple of px off-register behind it. */
+   spot-colour layer: flat ink (the page grain textures it) with a blue
+   plate a couple of px off-register behind it. */
 .hero::before {
   content: "";
   position: absolute;
@@ -913,12 +913,7 @@ body::after {
   width: clamp(100px, 12vw, 180px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background-color: var(--ink-orange);
-  background-image:
-    radial-gradient(circle, rgba(0, 0, 0, 0.30) 0 2.2px, transparent 2.7px),
-    radial-gradient(circle, rgba(251, 248, 241, 0.40) 0 1.1px, transparent 1.5px);
-  background-size: 10px 10px, 14px 14px;
-  background-position: 0 0, 3px 6px;
+  background: var(--ink-orange);
   box-shadow: 2.5px 2px 0 0 var(--ink-blue);
   left: var(--ball-x, 82%);
   top: var(--ball-y, 8%);
@@ -961,14 +956,15 @@ body::after {
 .hero-inner { z-index: 2; }
 .hero-tagline { opacity: 0.92; }
 
-/* the headlines print with tiny ink dropouts — a dot grid punched out of
-   the glyphs (and their shadow plate) so the paper shows through */
+/* the headlines print with uneven ink — an irregular noise mask nibbles
+   at the glyphs (and their shadow plate) so the paper peeks through in
+   scattered flecks, never a visible grid */
 .hero-name,
 .kontakt-bio {
-  -webkit-mask-image: radial-gradient(circle, transparent 0 1px, #000 1.4px);
-  -webkit-mask-size: 7px 7px;
-  mask-image: radial-gradient(circle, transparent 0 1px, #000 1.4px);
-  mask-size: 7px 7px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 -8 0 0 0 6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%23fff' filter='url(%23m)'/%3E%3C/svg%3E");
+  -webkit-mask-size: 220px 220px;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 -8 0 0 0 6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%23fff' filter='url(%23m)'/%3E%3C/svg%3E");
+  mask-size: 220px 220px;
 }
 
 /* the ray overprints the inks under it instead of covering them */
@@ -985,8 +981,8 @@ body::after {
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.984 0 0 0 0 0.973 0 0 0 0 0.945 4 0 0 0 -2.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  opacity: 0.3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.984 0 0 0 0 0.973 0 0 0 0 0.945 4 0 0 0 -3.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
 }
 
 /* the ring sits on paper; pills print in orange with paper arrows */
@@ -1017,12 +1013,7 @@ body::after {
   width: clamp(240px, 30vw, 460px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background-color: var(--ink-orange);
-  background-image:
-    radial-gradient(circle, rgba(0, 0, 0, 0.30) 0 2.2px, transparent 2.7px),
-    radial-gradient(circle, rgba(251, 248, 241, 0.40) 0 1.1px, transparent 1.5px);
-  background-size: 10px 10px, 14px 14px;
-  background-position: 0 0, 3px 6px;
+  background: var(--ink-orange);
   box-shadow: -2.5px -2px 0 0 var(--ink-blue);
   right: 8vw;
   bottom: -12vh;
