@@ -104,4 +104,12 @@ fn rocket() -> _ {
         .mount("/", routes![index, editor, get_content, save_content, login])
         .mount("/", FileServer::from(relative!("static")))
         .attach(Template::fairing())
+        // Browsers must revalidate everything on each load: stale CSS/JS kept
+        // haunting sessions after deploys (assets carry no version hashes).
+        // FileServer sends Last-Modified, so revalidation is a cheap 304.
+        .attach(rocket::fairing::AdHoc::on_response("no-cache", |_, res| {
+            Box::pin(async move {
+                res.set_raw_header("Cache-Control", "no-cache");
+            })
+        }))
 }
