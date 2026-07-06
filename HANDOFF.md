@@ -79,7 +79,12 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
 - **Kontakt**: pink flood, white type + blue-shadow bio, icon email/LinkedIn
   lines, orange walker (animated line figure), orange sun at the horizon,
   © line bottom-left. Deck photos show their natural colours (the blue
-  duotone filter is gone).
+  duotone filter is gone). The horizon sun breathes (CSS `kontakt-breathe`
+  scale keyframes) and springs about when the cursor nudges it —
+  `setupKontaktBall` in main.js runs a damped spring (K/D/FORCE/MAX knobs)
+  driving `--k-dx/--k-dy`, which the `.kontakt::before` translates by;
+  breathing (scale) and nudge (translate) are separate transform props so
+  they compose. rAF only runs while it's moving.
 - **Ink edges**: the DOM-wide ink-bleed SVG filters (`#ink-lg`/`#ink-sm`)
   were REMOVED with the hero/kontakt revert — page type and shapes print
   crisp again. The soft-ink/bleed character survives only on the covers:

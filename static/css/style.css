@@ -946,7 +946,7 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero::before { animation: none; }
+  .hero::before, .kontakt::before { animation: none; }
   .sun-rays line { transition: opacity 0.3s ease; stroke-dashoffset: 0 !important; }
 }
 
@@ -984,7 +984,18 @@ body::after {
   background: var(--ink-orange);
   right: 8vw;
   bottom: -12vh;
+  /* breathes like the hero sun (scale), and springs about when the cursor
+     nudges it (translate, driven by JS via --k-dx/--k-dy). The two are
+     separate transform properties so they compose without fighting. */
+  translate: var(--k-dx, 0px) var(--k-dy, 0px);
+  animation: kontakt-breathe 4.6s ease-in-out infinite;
 }
+
+@keyframes kontakt-breathe {
+  0%, 100% { scale: 1; }
+  50%      { scale: 1.07; }
+}
+
 .walker { color: var(--ink-orange); opacity: 1; }
 
 .kontakt-bio { text-shadow: var(--sun-dx, 0.05em) var(--sun-dy, 0.045em) 0 var(--ink-blue); }

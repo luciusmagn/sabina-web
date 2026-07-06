@@ -260,6 +260,78 @@ function setupSunRays() {
 }
 setupSunRays();
 
+/* ---------------- the kontakt sun: nudge-and-spring ----------------
+   The footer disc breathes via CSS; here it also gets shoved when the
+   cursor pushes into it and springs back and forth about its resting
+   spot (a damped spring on --k-dx/--k-dy, which the ::before translates
+   by). rAF only runs while it's moving or was just nudged. */
+
+function setupKontaktBall() {
+  if (reduceMotion.matches || !finePointer.matches) return;
+  const kontakt = document.querySelector(".kontakt");
+  if (!kontakt) return;
+
+  let px = 0, py = 0, vx = 0, vy = 0;   // displacement + velocity (px, px/s)
+  let mx = -1e9, my = -1e9, mAt = -1e9; // last cursor pos + time
+  let raf = 0, last = 0;
+
+  const K = 85, D = 4.2, FORCE = 2200, MAX = 120; // stiffness, damping, push, travel cap
+
+  function geom() {
+    const r = kontakt.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const size = Math.max(240, Math.min(460, 0.30 * vw)); // matches clamp(240px,30vw,460px)
+    // resting centre (CSS: right 8vw, bottom -12vh), plus the live displacement
+    return {
+      cx: r.right - 0.08 * vw - size / 2 + px,
+      cy: r.bottom + 0.12 * vh - size / 2 + py,
+      rad: size / 2,
+    };
+  }
+
+  function frame(t) {
+    raf = 0;
+    if (!last) last = t;
+    let dt = (t - last) / 1000; last = t;
+    if (dt > 0.032) dt = 0.032; // clamp big gaps for a stable spring
+
+    const g = geom();
+    const now = performance.now();
+    if (now - mAt < 350) { // the cursor is live — push the ball off it
+      const dx = g.cx - mx, dy = g.cy - my;
+      const dist = Math.hypot(dx, dy) || 1;
+      const R = g.rad + 70;
+      if (dist < R) {
+        const push = (1 - dist / R) * FORCE;
+        vx += (dx / dist) * push * dt;
+        vy += (dy / dist) * push * dt;
+      }
+    }
+    // spring back to the resting spot, with damping
+    vx += (-K * px - D * vx) * dt;
+    vy += (-K * py - D * vy) * dt;
+    px += vx * dt; py += vy * dt;
+    px = Math.max(-MAX, Math.min(MAX, px));
+    py = Math.max(-MAX, Math.min(MAX, py));
+
+    kontakt.style.setProperty("--k-dx", px.toFixed(1) + "px");
+    kontakt.style.setProperty("--k-dy", py.toFixed(1) + "px");
+
+    const moving = Math.abs(px) > 0.15 || Math.abs(py) > 0.15 || Math.abs(vx) > 1.5 || Math.abs(vy) > 1.5;
+    if (moving || now - mAt < 350) raf = requestAnimationFrame(frame);
+    else last = 0;
+  }
+
+  function kick() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
+
+  kontakt.addEventListener("pointermove", (e) => {
+    mx = e.clientX; my = e.clientY; mAt = performance.now();
+    kick();
+  }, { passive: true });
+  window.addEventListener("resize", kick);
+}
+setupKontaktBall();
+
 /* ---------------- fixed chrome vs sections ----------------
    The lang/theme chips float over every section; they only keep their
    border while the plain middle section is under them. */
