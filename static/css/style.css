@@ -359,6 +359,22 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 .rcard.is-flipped .rcard-front { pointer-events: none; }
 .rcard:not(.is-flipped) .rcard-back { pointer-events: none; }
 
+/* an open card gets a half-pink veil behind it, dimming the rest */
+.ring-stage::after {
+  content: "";
+  position: absolute;
+  inset: -60vh -60vw;
+  z-index: 15;
+  background: rgba(255, 135, 177, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.ring.has-flip .ring-stage::after { opacity: 1; }
+
+.rcard.is-flipped { z-index: 30 !important; } /* above the veil (JS sets inline z) */
+
 .rcard-front,
 .rcard-back {
   position: absolute;
@@ -494,11 +510,14 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   overflow-y: auto;
   overscroll-behavior: contain;
   scroll-snap-type: y mandatory;
-  scrollbar-width: none;
+  scrollbar-width: thin;                          /* slim, round, blue */
+  scrollbar-color: var(--main-a) transparent;
   outline: none;
 }
 
-.rback-scroll::-webkit-scrollbar { display: none; }
+.rback-scroll::-webkit-scrollbar { width: 6px; }
+.rback-scroll::-webkit-scrollbar-thumb { background: var(--main-a); border-radius: 999px; }
+.rback-scroll::-webkit-scrollbar-track { background: transparent; }
 
 .proj {
   margin: 0;
@@ -878,8 +897,10 @@ body::after {
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--ink-orange);
-  right: -7vw;
-  top: -14vh;
+  left: var(--ball-x, 82%);
+  top: var(--ball-y, 8%);
+  transform: translate(-50%, -50%);
+  transition: left 2s ease, top 2s ease;
 }
 
 .hero-inner { z-index: 2; }
@@ -899,10 +920,11 @@ body::after {
 
 /* decks: paper ground, blue captions, photos printed in blue ink */
 .rcard-back { background: var(--paper); color: var(--ink-blue); }
-.proj-zoom, .proj-play { background: var(--ink-blue); }
+.proj-zoom, .proj-play { background: var(--paper); }
 .proj-zoom img, .proj-play img {
-  filter: grayscale(1) contrast(1.12) brightness(1.05);
-  mix-blend-mode: screen; /* darks take the ink, lights stay paper */
+  /* blue-ink duotone via filter only — a mix-blend-mode here lives inside
+     the 3D card faces and breaks backface culling in real compositors */
+  filter: grayscale(1) sepia(1) hue-rotate(186deg) saturate(4.2) brightness(1.04) contrast(1.06);
 }
 .proj--kniha img { background: transparent; }
 .proj-play-mark { color: var(--ink-orange); }

@@ -132,13 +132,28 @@ function setupSky() {
     return { alt: alt / rad, az: (azS / rad + 180 + 360) % 360 };
   }
 
+  const heroEl = document.querySelector(".hero");
+
   function apply() {
     const now = new Date();
-    let body = position(now, sunCoords), isMoon = false;
+    const sunP = position(now, sunCoords);
+    let body = sunP, isMoon = false;
     if (body.alt <= 0) {
       const moon = position(now, moonCoords);
       if (moon.alt > 0) { body = moon; isMoon = true; }
       else body = null;
+    }
+
+    // the orange ball IS the sun: it travels the hero with the real one
+    // (east enters right, west leaves left, altitude lifts it), and rests
+    // half-sunk under the sheet's edge once it has set
+    if (heroEl) {
+      const t = Math.min(1, Math.max(0, (sunP.az - 60) / 240));
+      heroEl.style.setProperty("--ball-x", (88 - t * 74).toFixed(1) + "%");
+      heroEl.style.setProperty(
+        "--ball-y",
+        sunP.alt > 0 ? Math.max(4, 40 - (sunP.alt / 90) * 36).toFixed(1) + "%" : "104%"
+      );
     }
 
     if (!body) {
