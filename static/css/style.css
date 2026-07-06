@@ -901,7 +901,8 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
-/* the riso sun — a small orange disc riding the real sun's path */
+/* the riso sun — a small orange disc riding the real sun's path,
+   breathing slowly so the sheet is never quite still */
 .hero::before {
   content: "";
   position: absolute;
@@ -914,6 +915,39 @@ body::after {
   top: var(--ball-y, 8%);
   transform: translate(-50%, -50%);
   transition: left 2s ease, top 2s ease;
+  animation: sun-breathe 4.6s ease-in-out infinite;
+}
+
+@keyframes sun-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(-50%, -50%) scale(1.07); }
+}
+
+/* hovering the sun: its rays print toward the name — the light source the
+   flat shadow is cast from. JS builds the fan; each line draws outward. */
+.sun-rays {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* over the disc, under the type (hero-inner sits at 2) */
+  pointer-events: none;
+}
+
+.sun-rays line {
+  stroke: var(--ink-orange);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 0.3s ease, stroke-dashoffset 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+
+.hero.sun-hover .sun-rays line {
+  opacity: 1;
+  stroke-dashoffset: 0 !important; /* over the JS-set full-length offset */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::before { animation: none; }
+  .sun-rays line { transition: opacity 0.3s ease; stroke-dashoffset: 0 !important; }
 }
 
 .hero-inner { z-index: 2; }

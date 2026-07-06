@@ -147,13 +147,14 @@ function setupSky() {
     // the orange disc IS the sun: it travels the hero with the real one
     // (east enters right, west leaves left, altitude lifts it — low near
     // sunrise/sunset, high at noon), and rests half-sunk under the sheet's
-    // edge once it has set. Prague's sun tops out near 63°, hence /70.
+    // edge once it has set. Prague's sun tops out near 63°, hence /70; the
+    // band tops out at 36% so the disc rides the empty sky above the name.
     if (heroEl) {
       const t = Math.min(1, Math.max(0, (sunP.az - 60) / 240));
       heroEl.style.setProperty("--ball-x", (88 - t * 74).toFixed(1) + "%");
       heroEl.style.setProperty(
         "--ball-y",
-        sunP.alt > 0 ? Math.max(5, 78 - (sunP.alt / 70) * 70).toFixed(1) + "%" : "104%"
+        sunP.alt > 0 ? Math.max(4, 32 - (sunP.alt / 70) * 30).toFixed(1) + "%" : "104%"
       );
     }
 
@@ -180,6 +181,92 @@ function setupSky() {
   setInterval(apply, 60000);
 }
 setupSky();
+
+/* ---------------- sun rays ----------------
+   Hovering the sun prints its rays toward the name — the light source the
+   flat shadows are cast from. The disc is a ::before, so the hover is a
+   plain circle test on mousemove; the rays are an SVG fan rebuilt on each
+   approach (the sun wanders as the day goes on). */
+
+function setupSunRays() {
+  const hero = document.querySelector(".hero");
+  const name = document.querySelector(".hero-name");
+  if (!hero || !name || !finePointer.matches) return;
+
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "sun-rays");
+  svg.setAttribute("aria-hidden", "true");
+  hero.append(svg);
+
+  const sunGeom = () => {
+    const hr = hero.getBoundingClientRect();
+    return {
+      hr,
+      x: ((parseFloat(hero.style.getPropertyValue("--ball-x")) || 82) / 100) * hr.width,
+      y: ((parseFloat(hero.style.getPropertyValue("--ball-y")) || 8) / 100) * hr.height,
+      r: (parseFloat(getComputedStyle(hero, "::before").width) || 0) / 2,
+    };
+  };
+
+  function build() {
+    const { hr, x, y, r } = sunGeom();
+    svg.setAttribute("viewBox", `0 0 ${hr.width} ${hr.height}`);
+    svg.replaceChildren();
+    const nb = name.getBoundingClientRect();
+    const box = { x0: nb.left - hr.left, y0: nb.top - hr.top, x1: nb.right - hr.left, y1: nb.bottom - hr.top };
+
+    // fan the rays across the angle the name subtends from the sun (the
+    // name hangs below the disc, so a plain min/max over the corners holds)
+    const corners = [[box.x0, box.y0], [box.x1, box.y0], [box.x0, box.y1], [box.x1, box.y1]]
+      .map(([cx, cy]) => Math.atan2(cy - y, cx - x));
+    let a0 = Math.min(...corners), a1 = Math.max(...corners);
+    const pad = (a1 - a0) * 0.08;
+    a0 += pad; a1 -= pad;
+
+    const K = 9;
+    for (let i = 0; i < K; i++) {
+      const a = a0 + (i / (K - 1)) * (a1 - a0);
+      const dx = Math.cos(a), dy = Math.sin(a);
+      // march to the first name-box edge on this bearing, stop shy of it
+      let t = Infinity;
+      if (dx) for (const bx of [box.x0, box.x1]) {
+        const tt = (bx - x) / dx;
+        if (tt > 0) { const yy = y + tt * dy; if (yy >= box.y0 && yy <= box.y1) t = Math.min(t, tt); }
+      }
+      if (dy) for (const by of [box.y0, box.y1]) {
+        const tt = (by - y) / dy;
+        if (tt > 0) { const xx = x + tt * dx; if (xx >= box.x0 && xx <= box.x1) t = Math.min(t, tt); }
+      }
+      if (t === Infinity) continue;
+      const jitter = 0.88 + 0.1 * (((i * 37) % 5) / 4); // stable hand-drawn unevenness
+      const r0 = r + 14;
+      const r1 = Math.max(r0 + 24, t * 0.86 * jitter);
+      const line = document.createElementNS(NS, "line");
+      line.setAttribute("x1", (x + dx * r0).toFixed(1));
+      line.setAttribute("y1", (y + dy * r0).toFixed(1));
+      line.setAttribute("x2", (x + dx * r1).toFixed(1));
+      line.setAttribute("y2", (y + dy * r1).toFixed(1));
+      const len = (r1 - r0).toFixed(1);
+      line.style.strokeDasharray = len;
+      line.style.strokeDashoffset = len; // draws outward on hover
+      line.style.transitionDelay = (i * 35) + "ms";
+      svg.append(line);
+    }
+  }
+
+  let hot = false;
+  hero.addEventListener("mousemove", (e) => {
+    const { hr, x, y, r } = sunGeom();
+    const on = Math.hypot(e.clientX - hr.left - x, e.clientY - hr.top - y) <= r + 10;
+    if (on && !hot) { build(); hero.classList.add("sun-hover"); }
+    else if (!on && hot) hero.classList.remove("sun-hover");
+    hot = on;
+  }, { passive: true });
+  hero.addEventListener("mouseleave", () => { hot = false; hero.classList.remove("sun-hover"); });
+  window.addEventListener("resize", () => { if (hot) build(); });
+}
+setupSunRays();
 
 /* ---------------- fixed chrome vs sections ----------------
    The lang/theme chips float over every section; they only keep their

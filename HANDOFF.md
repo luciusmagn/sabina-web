@@ -29,9 +29,13 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
 - **Hero**: pink flood, paper-white name, BLUE offset text-shadow driven by
   the real sun over Prague (recomputed each minute, `setupSky` in main.js).
   A small orange disc IS the sun — `--ball-x/--ball-y` track real solar
-  azimuth/altitude (low near sunrise/sunset, high at noon); it sinks below
-  the sheet edge after sunset. Contact pill reveals a selectable email on
-  hover; "Kontakt" label anchors to #kontakt.
+  azimuth/altitude (low near sunrise/sunset, high at noon, riding the clear
+  sky above the name); it sinks below the sheet edge after sunset. The disc
+  breathes (`sun-breathe`, 4.6s scale swell); hovering it prints an SVG fan
+  of rays toward the name — the shadow's light source (`setupSunRays` in
+  main.js; hover = circle test on mousemove, since the disc is a ::before).
+  Contact pill reveals a selectable email on hover; "Kontakt" label anchors
+  to #kontakt.
 - **Work ring** (`#prace`): 3D circular carousel, 5 category cards
   (viz / produkt / portréty / videa / typografie). Centre card faces you;
   ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it (releases
