@@ -399,15 +399,20 @@ function setupCoverArt() {
           }
         }
         // putImageData ignores transforms, so stage the plate and stamp it
-        // onto the layer at its misregistration offset, softened a hair so
-        // the grain reads as ink, not pixels
+        // twice at its misregistration offset: a wide faint pass first (the
+        // ink bleeding into the paper fibres), then the softened ink body
         const stage = document.createElement("canvas");
         stage.width = SW;
         stage.height = SH;
         stage.getContext("2d").putImageData(plate, 0, 0);
         const ctx = ctxs[pi];
         ctx.save();
-        ctx.filter = "blur(0.35px)";
+        ctx.filter = "blur(1.4px)";
+        ctx.globalAlpha = 0.45;
+        ctx.drawImage(stage, REG[pi][0], REG[pi][1], W, H);
+        ctx.restore();
+        ctx.save();
+        ctx.filter = "blur(0.4px)";
         ctx.drawImage(stage, REG[pi][0], REG[pi][1], W, H);
         ctx.restore();
       });

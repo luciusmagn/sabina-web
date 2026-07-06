@@ -973,6 +973,30 @@ body::after {
 /* the CTA pill prints as its own plate, blue pass a hair off-register */
 .hero-contact { box-shadow: 2px 1.5px 0 0 var(--ink-blue); }
 
+/* nothing prints razor-sharp: every shape and letter runs through the ink
+   filters (defined inline in the page) — noise-displaced edges, fiber
+   roughness, and a faint dilated halo where the ink bleeds into the paper.
+   Big type and discs take the strong pass, small text a gentler one. */
+.ink-defs { position: absolute; width: 0; height: 0; }
+
+.hero-name,
+.kontakt-bio,
+.hero::before,
+.kontakt::before,
+.sun-rays,
+.rcard-title { filter: url(#ink-lg); }
+
+.hero-contact,
+.hero-tagline,
+.scroll-cue,
+.lang-toggle,
+.rcard-open,
+.ring-btn,
+.ring-jump-btn,
+.kontakt-lines,
+.kontakt-foot,
+.walker { filter: url(#ink-sm); }
+
 /* very fine speckle over the printed fields — flecks of bare paper */
 .hero::after,
 .kontakt::after {

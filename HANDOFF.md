@@ -70,6 +70,13 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   lines, orange walker (animated line figure), orange sun at the horizon,
   © line bottom-left. Deck photos show their natural colours (the blue
   duotone filter is gone).
+- **Ink edges**: nothing prints razor-sharp — an inline SVG filter pair in
+  index.html.tera (`#ink-lg` for display type/discs/ray/card titles,
+  `#ink-sm` for small text, pills, chips, the walker) gives every printed
+  element noise-displaced wobble, fiber-level edge roughness, and a faint
+  dilated bleed halo. The cover canvases stamp each plate twice (wide faint
+  pass + softened body) for the same bleed. Tune in the template's filter
+  defs (displacement scales, dilate radius, halo slope).
 - Page-wide paper grain overlay; sections snap one-per-viewport
   (`scroll-snap y mandatory`); round translucent cursor (orange); theme
   toggle hidden (riso has one ink set). Reduced-motion is handled throughout.
