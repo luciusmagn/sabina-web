@@ -67,31 +67,41 @@ plus `palette()` in `static/js/main.js`.
   experiment). Riso commits are LOCAL ONLY, not yet pushed.
 - `master` = old live site. Do not touch without the deploy steps below.
 
-## Open issue #1 — cards may still not open in real browsers (VERIFY FIRST)
+## Resolved — cards not opening in real browsers (root cause found)
 
-Symptom: clicking the centre card does nothing visible in the user's browsers
-(any browser). Never reproducible in the harness preview (its compositor
-freezes rAF/transitions/pointermove, so hover-parallax never runs there).
+Symptom was: clicking the centre card does nothing visible in any real
+browser; never reproducible in the harness preview.
 
-History of eliminated suspects: backface hit-testing (pointer-events fixed),
-mix-blend-mode duotone inside the 3D faces (replaced with pure CSS filter),
-stale cached assets (server now no-cache + `?v=3` busts; user confirmed still
-broken after).
+**Root cause (verified by driving a real Chrome over CDP, headed and
+headless):** `setupCoverParallax` wrote its hover tilt as an inline
+`rotateY()/rotateX()` transform on **`.rcard-front`** — a backface-hidden
+face inside the preserve-3d flip. Any transform there (even a residual
+`rotateY(-0.09deg)`) breaks hit-testing of the face: `elementFromPoint` over
+the card returns `.rcard-inner`, clicks fall through the button, the click
+listener never fires. No pointermove ever runs in the harness preview, so
+the front there stays transform-free and clicks always worked; a real user
+always crosses the card with the mouse first, so it always failed. All the
+compositor/painting theories from earlier rounds were misdiagnoses of this.
 
-**Current fix, applied but NOT yet user-verified** (last commits): the
-parallax canvases (`.cover-mesh`) carry inline transforms + `will-change`,
-promoting them to compositor layers that escape `backface-visibility`, so the
-front face keeps painting over the opened back. Fix in style.css: the
-away-facing side gets `visibility: hidden` after a 0.3s delay (half the flip)
-— `.rcard.is-flipped .rcard-front, .rcard:not(.is-flipped) .rcard-back` —
-plus `.rcard.is-flipped .cover-mesh { transform: none !important }`.
+**Fix (commit on this branch):**
+- the tilt now targets `.rcard-cover` (flat decorative child) with
+  `perspective(1100px)` baked into the transform; `.rcard-front` is never
+  transformed. Transition moved to `.rcard-cover` in style.css.
+- the click listener moved from `.rcard-front` to the `.rcard` itself with
+  an `is-flipped` guard, so a stray fall-through click still lands on an
+  ancestor that handles it (belt and braces).
+- `.rcard.is-flipped .rcard-cover { transform: none !important }` joins the
+  mesh reset; asset query strings bumped to `?v=4`.
 
-If STILL broken: ask which browser + any console errors; next suspects are
-(a) the `.land`/`.leave` animations on `.rcard-label` intercepting the click
-target mid-animation, (b) `ctx.filter` unsupported → renderer throw killing
-listener wiring (wrap `render()` in try/catch to test), (c) the front's tilt
-transform during pointermove retargeting the click. A quick bisect: comment
-out `setupCoverParallax()` and test; then `inkStroke` blur.
+Verified in real Chrome 149 via CDP: hover→click opens (the exact failing
+path), reopen after Esc works, outside-click closes, side-card click
+rotates the ring, deck clicks don't re-flip, hit-test grid stays clean
+after hovering, no console errors. Screenshots confirmed the riso look and
+the open deck render correctly. Not yet user-confirmed in their browsers.
+
+Note: clicking mid-conveyor (~1.3s while the ring is still turning) can hit
+a card that is mid-flight and merely re-centre it — pre-existing niggle,
+kept as is.
 
 ## Other known follow-ups
 

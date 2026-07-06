@@ -485,7 +485,13 @@ setupCoverArt();
 /* ---------------- hover look-around ----------------
    Moving the mouse over the centre card tilts it a touch and shifts the
    wireframe's depth layers at different rates — the subject appears to
-   turn under the cursor (the razorpay hero move, in 2.5D). */
+   turn under the cursor (the razorpay hero move, in 2.5D).
+
+   The tilt lives on .rcard-cover, NEVER on .rcard-front: a transform on the
+   backface-hidden front (inside the preserve-3d flip) breaks browser hit
+   testing — clicks fall through the button onto .rcard-inner and the card
+   stops opening. The cover is a flat decorative child, safe to rotate; the
+   perspective() in its transform keeps the tilt reading as 3D. */
 
 function setupCoverParallax() {
   if (!finePointer.matches || reduceMotion.matches) return;
@@ -494,13 +500,13 @@ function setupCoverParallax() {
   const RATES = [4, 10, 17]; // px of travel per layer, back to front
 
   ring.querySelectorAll(".rcard").forEach((card) => {
-    const front = card.querySelector(".rcard-front");
+    const cover = card.querySelector(".rcard-cover");
     const inner = card.querySelector(".rcard-inner");
     let raf = 0, nx = 0, ny = 0;
 
     function apply() {
       raf = 0;
-      front.style.transform = `rotateY(${(nx * 3).toFixed(2)}deg) rotateX(${(-ny * 2.2).toFixed(2)}deg)`;
+      cover.style.transform = `perspective(1100px) rotateY(${(nx * 3).toFixed(2)}deg) rotateX(${(-ny * 2.2).toFixed(2)}deg)`;
       card.querySelectorAll(".cover-mesh").forEach((c, i) => {
         c.style.transform = `translate(${(-nx * RATES[i]).toFixed(1)}px, ${(-ny * RATES[i] * 0.6).toFixed(1)}px)`;
       });
@@ -628,7 +634,11 @@ function setupRing() {
   ring.querySelector(".ring-next").addEventListener("click", () => go(1));
 
   cards.forEach((card, i) => {
-    card.querySelector(".rcard-front").addEventListener("click", () => {
+    // the listener sits on the card, not the front face: engines hit-test
+    // 3D faces unreliably and a click can land on .rcard-inner instead of
+    // the button — from the card, every variant still bubbles here
+    card.addEventListener("click", () => {
+      if (card.classList.contains("is-flipped")) return; // deck clicks are its own
       if (card.classList.contains("is-center")) flip(card);
       else if (!ring.classList.contains("has-flip")) { cur = i; layout(); land(); }
     });

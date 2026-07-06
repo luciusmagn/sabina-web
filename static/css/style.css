@@ -359,15 +359,17 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 .rcard.is-flipped .rcard-front { pointer-events: none; }
 .rcard:not(.is-flipped) .rcard-back { pointer-events: none; }
 
-/* the honest fix for "cards don't open": the parallax canvases carry inline
-   transforms + will-change, promoting them to their own compositor layers
-   that escape backface-visibility — the front kept painting over the back.
-   Hide the away-facing side outright once the flip is past halfway, so no
-   engine quirk can leak the wrong face. */
+/* "cards don't open" root cause: a transform on the backface-hidden front
+   (the old hover tilt) breaks hit testing — clicks fall through the button
+   onto .rcard-inner. The tilt now lives on .rcard-cover and the click
+   listener on .rcard itself. Belt and braces, the away-facing side also
+   hides outright once the flip is past halfway, so no engine quirk can
+   paint or hit-test the wrong face. */
 .rcard-back { transition: visibility 0s 0.3s; }
 .rcard.is-flipped .rcard-front,
 .rcard:not(.is-flipped) .rcard-back { visibility: hidden; }
-.rcard.is-flipped .cover-mesh { transform: none !important; }
+.rcard.is-flipped .cover-mesh,
+.rcard.is-flipped .rcard-cover { transform: none !important; }
 
 /* an open card gets a half-pink veil behind it, dimming the rest */
 .ring-stage::after {
@@ -443,10 +445,11 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 
 .rcard-cover.has-mesh img { visibility: hidden; }
 
-.rcard-front { transition: transform 0.25s ease-out, visibility 0s 0.3s; } /* tilt + half-flip face hide */
+.rcard-front { transition: visibility 0s 0.3s; } /* half-flip face hide */
+.rcard-cover { transition: transform 0.25s ease-out; } /* the hover tilt eases */
 
 @media (prefers-reduced-motion: reduce) {
-  .cover-mesh, .rcard-front, .rcard-back { transition: none; }
+  .cover-mesh, .rcard-front, .rcard-back, .rcard-cover { transition: none; }
 }
 
 .rcard:not(.is-center) .rcard-front { cursor: pointer; }
