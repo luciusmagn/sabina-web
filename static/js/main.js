@@ -182,11 +182,11 @@ function setupSky() {
 }
 setupSky();
 
-/* ---------------- sun rays ----------------
-   Hovering the sun prints its rays toward the name — the light source the
-   flat shadows are cast from. The disc is a ::before, so the hover is a
-   plain circle test on mousemove; the rays are an SVG fan rebuilt on each
-   approach (the sun wanders as the day goes on). */
+/* ---------------- the sun ray ----------------
+   Hovering the sun prints one solid blue ray toward the name — the light
+   the flat blue shadows are cast by. The disc is a ::before, so the hover
+   is a plain circle test on mousemove; the ray is an SVG line rebuilt on
+   each approach (the sun wanders as the day goes on). */
 
 function setupSunRays() {
   const hero = document.querySelector(".hero");
@@ -216,43 +216,35 @@ function setupSunRays() {
     const nb = name.getBoundingClientRect();
     const box = { x0: nb.left - hr.left, y0: nb.top - hr.top, x1: nb.right - hr.left, y1: nb.bottom - hr.top };
 
-    // fan the rays across the angle the name subtends from the sun (the
-    // name hangs below the disc, so a plain min/max over the corners holds)
-    const corners = [[box.x0, box.y0], [box.x1, box.y0], [box.x0, box.y1], [box.x1, box.y1]]
-      .map(([cx, cy]) => Math.atan2(cy - y, cx - x));
-    let a0 = Math.min(...corners), a1 = Math.max(...corners);
-    const pad = (a1 - a0) * 0.08;
-    a0 += pad; a1 -= pad;
+    // one beam, aimed at the heart of the name
+    const a = Math.atan2((box.y0 + box.y1) / 2 - y, (box.x0 + box.x1) / 2 - x);
+    const dx = Math.cos(a), dy = Math.sin(a);
 
-    const K = 9;
-    for (let i = 0; i < K; i++) {
-      const a = a0 + (i / (K - 1)) * (a1 - a0);
-      const dx = Math.cos(a), dy = Math.sin(a);
-      // march to the first name-box edge on this bearing, stop shy of it
-      let t = Infinity;
-      if (dx) for (const bx of [box.x0, box.x1]) {
-        const tt = (bx - x) / dx;
-        if (tt > 0) { const yy = y + tt * dy; if (yy >= box.y0 && yy <= box.y1) t = Math.min(t, tt); }
-      }
-      if (dy) for (const by of [box.y0, box.y1]) {
-        const tt = (by - y) / dy;
-        if (tt > 0) { const xx = x + tt * dx; if (xx >= box.x0 && xx <= box.x1) t = Math.min(t, tt); }
-      }
-      if (t === Infinity) continue;
-      const jitter = 0.88 + 0.1 * (((i * 37) % 5) / 4); // stable hand-drawn unevenness
-      const r0 = r + 14;
-      const r1 = Math.max(r0 + 24, t * 0.86 * jitter);
-      const line = document.createElementNS(NS, "line");
-      line.setAttribute("x1", (x + dx * r0).toFixed(1));
-      line.setAttribute("y1", (y + dy * r0).toFixed(1));
-      line.setAttribute("x2", (x + dx * r1).toFixed(1));
-      line.setAttribute("y2", (y + dy * r1).toFixed(1));
-      const len = (r1 - r0).toFixed(1);
-      line.style.strokeDasharray = len;
-      line.style.strokeDashoffset = len; // draws outward on hover
-      line.style.transitionDelay = (i * 35) + "ms";
-      svg.append(line);
+    // march to the first name-box edge on this bearing, stop shy of it
+    let t = Infinity;
+    if (dx) for (const bx of [box.x0, box.x1]) {
+      const tt = (bx - x) / dx;
+      if (tt > 0) { const yy = y + tt * dy; if (yy >= box.y0 && yy <= box.y1) t = Math.min(t, tt); }
     }
+    if (dy) for (const by of [box.y0, box.y1]) {
+      const tt = (by - y) / dy;
+      if (tt > 0) { const xx = x + tt * dx; if (xx >= box.x0 && xx <= box.x1) t = Math.min(t, tt); }
+    }
+    if (t === Infinity) t = Math.hypot((box.x0 + box.x1) / 2 - x, (box.y0 + box.y1) / 2 - y) * 0.7;
+
+    const w = Math.max(26, r * 0.42);      // the beam's thickness
+    const r0 = r + w / 2 + 8;              // clear of the rim (round cap included)
+    const r1 = Math.max(r0 + 30, t * 0.9); // just short of the glyphs
+    const line = document.createElementNS(NS, "line");
+    line.setAttribute("x1", (x + dx * r0).toFixed(1));
+    line.setAttribute("y1", (y + dy * r0).toFixed(1));
+    line.setAttribute("x2", (x + dx * r1).toFixed(1));
+    line.setAttribute("y2", (y + dy * r1).toFixed(1));
+    line.setAttribute("stroke-width", w.toFixed(1));
+    const len = (r1 - r0).toFixed(1);
+    line.style.strokeDasharray = len;
+    line.style.strokeDashoffset = len; // draws outward from the sun on hover
+    svg.append(line);
   }
 
   let hot = false;

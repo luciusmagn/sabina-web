@@ -198,7 +198,8 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 .hero-inner {
   position: relative;
   z-index: 2;
-  padding: 0 var(--pad-x) clamp(96px, 15vh, 160px);
+  /* low enough that the contact pill sits on the scroll cue's line */
+  padding: 0 var(--pad-x) clamp(40px, 7vh, 72px);
   max-width: 100%;
 }
 
@@ -923,8 +924,8 @@ body::after {
   50%      { transform: translate(-50%, -50%) scale(1.07); }
 }
 
-/* hovering the sun: its rays print toward the name — the light source the
-   flat shadow is cast from. JS builds the fan; each line draws outward. */
+/* hovering the sun: one solid blue ray prints toward the name — the light
+   the flat blue shadow is cast by. JS builds it; it draws outward. */
 .sun-rays {
   position: absolute;
   inset: 0;
@@ -933,8 +934,7 @@ body::after {
 }
 
 .sun-rays line {
-  stroke: var(--ink-orange);
-  stroke-width: 2.5;
+  stroke: var(--ink-blue); /* width set per-build in JS (scales with the disc) */
   stroke-linecap: round;
   opacity: 0;
   transition: opacity 0.3s ease, stroke-dashoffset 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);

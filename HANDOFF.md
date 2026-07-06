@@ -31,11 +31,11 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   A small orange disc IS the sun — `--ball-x/--ball-y` track real solar
   azimuth/altitude (low near sunrise/sunset, high at noon, riding the clear
   sky above the name); it sinks below the sheet edge after sunset. The disc
-  breathes (`sun-breathe`, 4.6s scale swell); hovering it prints an SVG fan
-  of rays toward the name — the shadow's light source (`setupSunRays` in
-  main.js; hover = circle test on mousemove, since the disc is a ::before).
-  Contact pill reveals a selectable email on hover; "Kontakt" label anchors
-  to #kontakt.
+  breathes (`sun-breathe`, 4.6s scale swell); hovering it prints ONE solid
+  blue ray toward the name — the light the blue shadow is cast by
+  (`setupSunRays` in main.js; hover = circle test on mousemove, since the
+  disc is a ::before). Contact pill reveals a selectable email on hover and
+  sits level with the scroll cue; "Kontakt" label anchors to #kontakt.
 - **Work ring** (`#prace`): 3D circular carousel, 5 category cards
   (viz / produkt / portréty / videa / typografie). Centre card faces you;
   ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it (releases
