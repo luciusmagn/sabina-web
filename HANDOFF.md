@@ -50,8 +50,14 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   mode wheel deltas are normalised (×16).
   Labels ride a slow conveyor (drop in from above 1.9s, exit down 0.6s,
   input locked ~2.65s per turn). Clicking the centre card FLIPS it to a
-  vertical project deck (snap per project, slim blue scrollbar, 50%-pink
-  veil dims everything behind; Esc / click outside closes).
+  vertical project deck (snap per project, slim blue scrollbar whose track
+  is inset `margin-block: var(--radius)` so the thumb clears the card's
+  rounded corners, 50%-pink veil dims everything behind; Esc / click outside
+  closes). NB headless Chrome doesn't paint custom scrollbars, so verify the
+  scrollbar visually in a real browser.
+  All nav arrows (hero scroll cue, ring prev/next, ring up/down jumps) are
+  plain straight arrows in index.html.tera — swapped from the earlier
+  hand-drawn curvy paths.
 - **Covers**: continuous-tone riso separations (`setupCoverArt` in main.js)
   — each source image reprints as three ink plates (orange/blue/black) via
   a 1px stochastic grain dither with CRUSH: heavy coverage fuses to SOLID
@@ -84,9 +90,11 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   (TRANSFER) to the disc, which rolls horizontally across the field
   (`--k-dx`), turning as it goes (`--k-rot` = travel / radius) and bouncing
   softly off the screen edges, then an over-damped home spring (K/D) eases
-  it back with no wiggle. Only the horizontal axis moves (rolls along the
-  floor); the disc is flat orange (no sunspots — the big travel reads as the
-  roll). rAF only runs while it's moving.
+  it back with no wiggle. The ball's speed is capped (MAXV) so a flurry of
+  pointermove events can't accumulate into a launch — keeps the roll slow &
+  smooth (that was the fix for "too fast"). Only the horizontal axis moves;
+  the disc is flat orange (no sunspots — the big travel reads as the roll).
+  rAF only runs while it's moving.
   The **walker** (animated line figure) is hidden via `.walker-track {
   display: none }` in the riso CSS block but KEPT in the index template —
   delete that one rule to bring him back.

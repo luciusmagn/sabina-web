@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=20">
+  <link rel="stylesheet" href="/css/style.css?v=24">
 </head>
 <body>
 
@@ -69,7 +69,7 @@
          aria-label="{{ content.ui.scrollDown.cs }}">
         <span class="scroll-cue-label" data-cs="{{ content.ui.scrollDown.cs }}" data-en="{{ content.ui.scrollDown.en }}">{{ content.ui.scrollDown.cs }}</span>
         <svg class="trace trace--arrow" viewBox="0 0 34 52" fill="none" aria-hidden="true">
-          <path d="M16.2 4C17.4 15 17.8 26 16.9 44.5M16.9 44.5C13.4 40.8 11.2 38.9 6 36.2M16.9 44.5C20.8 41.4 23.6 39 28.4 37" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M17 5V44M6.5 33.5L17 44L27.5 33.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>
     </section>
@@ -254,12 +254,12 @@
         <button class="ring-btn ring-prev" type="button"
                 data-aria-cs="{{ content.ui.previous.cs }}" data-aria-en="{{ content.ui.previous.en }}"
                 aria-label="{{ content.ui.previous.cs }}">
-          <svg viewBox="0 0 44 24" fill="none" aria-hidden="true"><path d="M40 12.5C27 11.6 17 11.8 5.5 12.4M5.5 12.4C9.8 9.2 12 7.4 15 4M5.5 12.4C9.4 15.6 11.8 17.6 15.4 20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 44 24" fill="none" aria-hidden="true"><path d="M39 12H7M16.5 4.5L7 12L16.5 19.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button class="ring-btn ring-next" type="button"
                 data-aria-cs="{{ content.ui.next.cs }}" data-aria-en="{{ content.ui.next.en }}"
                 aria-label="{{ content.ui.next.cs }}">
-          <svg viewBox="0 0 44 24" fill="none" aria-hidden="true"><path d="M4 12.5C17 11.6 27 11.8 38.5 12.4M38.5 12.4C34.2 9.2 32 7.4 29 4M38.5 12.4C34.6 15.6 32.2 17.6 28.6 20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 44 24" fill="none" aria-hidden="true"><path d="M5 12H37M27.5 4.5L37 12L27.5 19.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
 
@@ -268,14 +268,14 @@
         <a class="ring-jump-btn ring-jump-btn--up" href="#domu"
            data-aria-cs="Nahoru" data-aria-en="To the top" aria-label="Nahoru">
           <svg viewBox="0 0 34 52" fill="none" aria-hidden="true">
-            <path d="M16.2 4C17.4 15 17.8 26 16.9 44.5M16.9 44.5C13.4 40.8 11.2 38.9 6 36.2M16.9 44.5C20.8 41.4 23.6 39 28.4 37" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+            <path d="M17 5V44M6.5 33.5L17 44L27.5 33.5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
         <a class="ring-jump-btn" href="#kontakt"
            data-aria-cs="{{ content.tiles.kontakt.cs }}" data-aria-en="{{ content.tiles.kontakt.en }}"
            aria-label="{{ content.tiles.kontakt.cs }}">
           <svg viewBox="0 0 34 52" fill="none" aria-hidden="true">
-            <path d="M16.2 4C17.4 15 17.8 26 16.9 44.5M16.9 44.5C13.4 40.8 11.2 38.9 6 36.2M16.9 44.5C20.8 41.4 23.6 39 28.4 37" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+            <path d="M17 5V44M6.5 33.5L17 44L27.5 33.5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
       </div>
@@ -327,6 +327,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=20" defer></script>
+  <script src="/js/main.js?v=24" defer></script>
 </body>
 </html>

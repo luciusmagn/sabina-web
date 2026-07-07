@@ -531,7 +531,10 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 
 .rback-scroll::-webkit-scrollbar { width: 6px; }
 .rback-scroll::-webkit-scrollbar-thumb { background: var(--main-a); border-radius: 999px; }
-.rback-scroll::-webkit-scrollbar-track { background: transparent; }
+/* inset the track top & bottom so the thumb clears the card's rounded
+   corners (it was starting up inside the top-right radius and getting
+   clipped) — content still runs full-bleed */
+.rback-scroll::-webkit-scrollbar-track { background: transparent; margin-block: var(--radius); }
 
 .proj {
   margin: 0;

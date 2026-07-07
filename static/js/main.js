@@ -277,9 +277,10 @@ function setupKontaktBall() {
   let lastX = null, lastMoveT = 0;
   let raf = 0, last = 0;
 
-  const K = 2.3, D = 4.2;   // weak spring, over-damped = long roll home with no wiggle
-  const TRANSFER = 1.1;     // how much of the swipe speed the ball takes on
-  const CVX_CAP = 5600;     // clamp wild pointer jumps (px/s)
+  const K = 1.3, D = 3.1;   // soft spring, over-damped = a long, slow roll home, no wiggle
+  const TRANSFER = 0.5;     // how much of the swipe speed the ball takes on (gentle)
+  const CVX_CAP = 3000;     // clamp wild pointer jumps (px/s)
+  const MAXV = 1250;        // cap the ball's speed so a flurry of moves can't launch it — slow & smooth
 
   function geom() {
     const r = kontakt.getBoundingClientRect();
@@ -322,7 +323,10 @@ function setupKontaktBall() {
       const cvx = Math.max(-CVX_CAP, Math.min(CVX_CAP, (e.clientX - lastX) / dtm));
       const g = geom();
       const dist = Math.hypot(e.clientX - (g.cx0 + px), e.clientY - g.cy);
-      if (dist < g.rad + 40) { vx += cvx * TRANSFER; kick(); } // cursor on the ball → flick it
+      if (dist < g.rad + 40) { // cursor on the ball → flick it, but cap the speed
+        vx = Math.max(-MAXV, Math.min(MAXV, vx + cvx * TRANSFER));
+        kick();
+      }
     }
     lastX = e.clientX; lastMoveT = now;
   }, { passive: true });
