@@ -79,13 +79,14 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
 - **Kontakt**: pink flood, white type + blue-shadow bio, icon email/LinkedIn
   lines, orange sun at the horizon, © line bottom-left. Deck photos show
   their natural colours (the blue duotone filter is gone). The horizon sun
-  breathes (CSS `kontakt-breathe` scale keyframes) and, when the cursor
-  nudges it, springs about AND rolls — `setupKontaktBall` in main.js runs a
-  damped spring (K/D/FORCE/MAX knobs) driving `--k-dx/--k-dy`, plus a roll
-  angle `--k-rot` = horizontal travel / radius × ROLL gain. The
-  `.kontakt::before` translates + rotates by those (breathing scale is a
-  separate transform prop so they compose); two faint sunspots in its
-  background make the roll visible. rAF only runs while it's moving.
+  breathes (CSS `kontakt-breathe` scale keyframes) and ROLLS when you swipe
+  it — `setupKontaktBall` in main.js transfers the cursor's swipe speed
+  (TRANSFER) to the disc, which rolls horizontally across the field
+  (`--k-dx`), turning as it goes (`--k-rot` = travel / radius) and bouncing
+  softly off the screen edges, then an over-damped home spring (K/D) eases
+  it back with no wiggle. Only the horizontal axis moves (rolls along the
+  floor); the disc is flat orange (no sunspots — the big travel reads as the
+  roll). rAF only runs while it's moving.
   The **walker** (animated line figure) is hidden via `.walker-track {
   display: none }` in the riso CSS block but KEPT in the index template —
   delete that one rule to bring him back.

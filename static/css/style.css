@@ -981,18 +981,14 @@ body::after {
   width: clamp(240px, 30vw, 460px);
   aspect-ratio: 1;
   border-radius: 50%;
-  /* two faint sunspots so the rolling rotation actually reads on the disc */
-  background:
-    radial-gradient(circle at 39% 41%, rgba(0, 0, 0, 0.10) 0 6.5%, transparent 7.5%),
-    radial-gradient(circle at 63% 58%, rgba(0, 0, 0, 0.08) 0 4.5%, transparent 5.5%),
-    var(--ink-orange);
+  background: var(--ink-orange);
   right: 8vw;
   bottom: -12vh;
-  /* breathes like the hero sun (scale); the cursor nudges it (translate)
-     and it ROLLS — the rotate tracks its horizontal travel. All three are
-     separate transform properties (JS drives --k-dx/--k-dy/--k-rot) so
-     they compose without fighting. */
-  translate: var(--k-dx, 0px) var(--k-dy, 0px);
+  /* breathes like the hero sun (scale); a cursor swipe flicks it and it
+     ROLLS across the field — translate carries it, rotate turns it (JS
+     drives --k-dx/--k-rot). scale/translate/rotate are separate transform
+     properties so they compose without fighting. */
+  translate: var(--k-dx, 0px) 0;
   rotate: var(--k-rot, 0deg);
   animation: kontakt-breathe 4.6s ease-in-out infinite;
 }

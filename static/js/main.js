@@ -260,77 +260,71 @@ function setupSunRays() {
 }
 setupSunRays();
 
-/* ---------------- the kontakt sun: nudge-and-spring ----------------
-   The footer disc breathes via CSS; here it also gets shoved when the
-   cursor pushes into it and springs back and forth about its resting
-   spot (a damped spring on --k-dx/--k-dy, which the ::before translates
-   by). rAF only runs while it's moving or was just nudged. */
+/* ---------------- the kontakt sun: flick it and it rolls ----------------
+   The footer disc breathes via CSS. Here, swiping the cursor across it
+   transfers your swipe speed to the ball, which then ROLLS horizontally —
+   far across the field — turning as it goes (rotate = travel / radius) and
+   bouncing softly off the screen edges. A gentle, over-damped home spring
+   eases it back to its corner afterwards without any wiggle. Only the
+   horizontal axis moves (it rolls along the floor). rAF runs while moving. */
 
 function setupKontaktBall() {
   if (reduceMotion.matches || !finePointer.matches) return;
   const kontakt = document.querySelector(".kontakt");
   if (!kontakt) return;
 
-  let px = 0, py = 0, vx = 0, vy = 0;   // displacement + velocity (px, px/s)
-  let mx = -1e9, my = -1e9, mAt = -1e9; // last cursor pos + time
+  let px = 0, vx = 0;                    // horizontal displacement + velocity
+  let lastX = null, lastMoveT = 0;
   let raf = 0, last = 0;
 
-  const K = 85, D = 4.2, FORCE = 2200, MAX = 120; // stiffness, damping, push, travel cap
-  const ROLL = 2.0; // spin gain over strict roll-without-slip, so it reads clearly
+  const K = 2.3, D = 4.2;   // weak spring, over-damped = long roll home with no wiggle
+  const TRANSFER = 1.1;     // how much of the swipe speed the ball takes on
+  const CVX_CAP = 5600;     // clamp wild pointer jumps (px/s)
 
   function geom() {
     const r = kontakt.getBoundingClientRect();
     const vw = window.innerWidth, vh = window.innerHeight;
     const size = Math.max(240, Math.min(460, 0.30 * vw)); // matches clamp(240px,30vw,460px)
-    // resting centre (CSS: right 8vw, bottom -12vh), plus the live displacement
-    return {
-      cx: r.right - 0.08 * vw - size / 2 + px,
-      cy: r.bottom + 0.12 * vh - size / 2 + py,
-      rad: size / 2,
-    };
+    const rad = size / 2;
+    return { rad, vw, cx0: r.right - 0.08 * vw - rad, cy: r.bottom + 0.12 * vh - rad };
   }
 
   function frame(t) {
     raf = 0;
     if (!last) last = t;
     let dt = (t - last) / 1000; last = t;
-    if (dt > 0.032) dt = 0.032; // clamp big gaps for a stable spring
+    if (dt > 0.032) dt = 0.032; // clamp big gaps for a stable integrator
 
     const g = geom();
-    const now = performance.now();
-    if (now - mAt < 350) { // the cursor is live — push the ball off it
-      const dx = g.cx - mx, dy = g.cy - my;
-      const dist = Math.hypot(dx, dy) || 1;
-      const R = g.rad + 70;
-      if (dist < R) {
-        const push = (1 - dist / R) * FORCE;
-        vx += (dx / dist) * push * dt;
-        vy += (dy / dist) * push * dt;
-      }
-    }
-    // spring back to the resting spot, with damping
+    // over-damped home spring: rolls out on a flick, eases back, never wiggles
     vx += (-K * px - D * vx) * dt;
-    vy += (-K * py - D * vy) * dt;
-    px += vx * dt; py += vy * dt;
-    px = Math.max(-MAX, Math.min(MAX, px));
-    py = Math.max(-MAX, Math.min(MAX, py));
+    px += vx * dt;
+
+    // keep it on screen — soft bounce off the left/right edges
+    const minPx = g.rad - g.cx0;            // ball's left edge reaches 0
+    const maxPx = (g.vw - g.rad) - g.cx0;   // ball's right edge reaches the viewport edge
+    if (px < minPx) { px = minPx; vx = Math.abs(vx) * 0.3; }
+    if (px > maxPx) { px = maxPx; vx = -Math.abs(vx) * 0.3; }
 
     kontakt.style.setProperty("--k-dx", px.toFixed(1) + "px");
-    kontakt.style.setProperty("--k-dy", py.toFixed(1) + "px");
-    // rolling without slip: the disc turns by its horizontal travel / radius,
-    // so it visibly rolls right and left as it springs about
-    kontakt.style.setProperty("--k-rot", (px / g.rad * ROLL * 57.2958).toFixed(1) + "deg");
+    kontakt.style.setProperty("--k-rot", (px / g.rad * 57.2958).toFixed(1) + "deg"); // roll without slip
 
-    const moving = Math.abs(px) > 0.15 || Math.abs(py) > 0.15 || Math.abs(vx) > 1.5 || Math.abs(vy) > 1.5;
-    if (moving || now - mAt < 350) raf = requestAnimationFrame(frame);
-    else last = 0;
+    if (Math.abs(px) > 0.3 || Math.abs(vx) > 2) raf = requestAnimationFrame(frame);
+    else { last = 0; kontakt.style.setProperty("--k-dx", "0px"); kontakt.style.setProperty("--k-rot", "0deg"); }
   }
 
   function kick() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
 
   kontakt.addEventListener("pointermove", (e) => {
-    mx = e.clientX; my = e.clientY; mAt = performance.now();
-    kick();
+    const now = performance.now();
+    if (lastX !== null) {
+      const dtm = Math.max(0.008, (now - lastMoveT) / 1000);
+      const cvx = Math.max(-CVX_CAP, Math.min(CVX_CAP, (e.clientX - lastX) / dtm));
+      const g = geom();
+      const dist = Math.hypot(e.clientX - (g.cx0 + px), e.clientY - g.cy);
+      if (dist < g.rad + 40) { vx += cvx * TRANSFER; kick(); } // cursor on the ball → flick it
+    }
+    lastX = e.clientX; lastMoveT = now;
   }, { passive: true });
   window.addEventListener("resize", kick);
 }
