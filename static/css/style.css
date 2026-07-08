@@ -581,6 +581,14 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 
 .proj--kniha img { object-fit: contain; background: var(--bg); }
 
+/* the books sit smaller on their page — air above and below the spread */
+.proj--kniha .proj-zoom { padding: clamp(26px, 6vh, 46px) 0 clamp(10px, 2.5vh, 20px); }
+
+/* portraits are tight head-and-shoulders shots in mixed aspects — never
+   crop them; they hang framed on the paper instead */
+.proj--portrait .proj-zoom { padding: clamp(16px, 4vh, 30px) clamp(14px, 3vw, 26px) 0; }
+.proj--portrait .proj-zoom img { object-fit: contain; }
+
 .proj-cap {
   flex: none;
   margin: 0;
@@ -588,6 +596,65 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 }
 
 .proj-cap span { font-size: 14px; font-weight: 700; opacity: 0.8; }
+
+/* ---- grouped set pages ----
+   One deck page per project set: its name + caption up top, the photos
+   arranged beneath — rows share their height and widths follow each
+   photo's aspect ratio (--ar, from content.json); the grid variant is two
+   even columns. Cut-out collages use the contain variant (never cropped). */
+
+.proj--set {
+  padding: clamp(28px, 6.5vh, 50px) clamp(22px, 4.5vw, 46px) clamp(18px, 4vh, 32px);
+  gap: clamp(12px, 2.5vh, 22px);
+}
+
+.proj-set-head { flex: none; }
+
+.proj-set-title {
+  margin: 0;
+  font-size: clamp(22px, 2.1vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.proj-set-cap {
+  margin: 3px 0 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.proj-set-media {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.proj-set-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 12px;
+}
+
+.proj--set .proj-zoom {
+  min-width: 0;
+  min-height: 0;
+  border-radius: 10px;
+}
+
+.proj-set-row .proj-zoom { flex: var(--ar, 1) 1 0%; }
+
+.proj-set-row--contain .proj-zoom img { object-fit: contain; }
+
+.proj-set-media--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 12px;
+}
 
 /* nav arrows — flat pills */
 

@@ -50,11 +50,19 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   mode wheel deltas are normalised (×16).
   Labels ride a slow conveyor (drop in from above 1.9s, exit down 0.6s,
   input locked ~2.65s per turn). Clicking the centre card FLIPS it to a
-  vertical project deck (snap per project, slim blue scrollbar whose track
+  vertical project deck (snap per page, slim blue scrollbar whose track
   is inset `margin-block: var(--radius)` so the thumb clears the card's
   rounded corners, 50%-pink veil dims everything behind; Esc / click outside
   closes). NB headless Chrome doesn't paint custom scrollbars, so verify the
   scrollbar visually in a real browser.
+  Deck page types (all data from content.json, template-side layout only):
+  `.proj--set` = grouped pages (viz: Krulichovi brand page + devices page;
+  produkt: one page per productSet) with the set's label + caption up top
+  and photos in rows (widths ∝ `--ar` aspect, from content.json where
+  available) or a 2-col grid; `--contain` rows never crop (used for the viz
+  collages + devices). `.proj--portrait` = contain + padding, portraits
+  hang framed, never cropped. `.proj--kniha` books are padded smaller with
+  air above/below; captions read "Title, Author · /activity/".
   All nav arrows (hero scroll cue, ring prev/next, ring up/down jumps) are
   plain straight arrows in index.html.tera — swapped from the earlier
   hand-drawn curvy paths.

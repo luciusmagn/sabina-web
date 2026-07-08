@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=24">
+  <link rel="stylesheet" href="/css/style.css?v=25">
 </head>
 <body>
 
@@ -95,26 +95,35 @@
             </button>
             <div class="rcard-back">
               <div class="rback-scroll" tabindex="0">
-                <article class="proj">
-                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                    <img src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
-                  </button>
-                  <p class="proj-cap">
-                    <span data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</span>
-                  </p>
+                {# page 1 — the Krulichovi brand set: logos + printed mockups #}
+                <article class="proj proj--set">
+                  <header class="proj-set-head">
+                    <h3 class="proj-set-title" data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</h3>
+                    <p class="proj-set-cap" data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</p>
+                  </header>
+                  <div class="proj-set-media">
+                    <div class="proj-set-row proj-set-row--contain">
+                      <button class="proj-zoom" type="button" style="--ar: 1.85" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                        <img src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
+                      </button>
+                      <button class="proj-zoom" type="button" style="--ar: 1.28" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                        <img src="{{ content.visualIdentity.detail.sideImage }}" alt="" loading="lazy">
+                      </button>
+                    </div>
+                  </div>
                 </article>
-                <article class="proj">
-                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                    <img src="{{ content.visualIdentity.detail.sideImage }}" alt="" loading="lazy">
-                  </button>
+                {# page 2 — the web design on devices #}
+                <article class="proj proj--set">
+                  <div class="proj-set-media">
+                    <div class="proj-set-row proj-set-row--contain">
+                      {% for d in content.visualIdentity.devices %}
+                      <button class="proj-zoom" type="button" style="--ar: 0.72" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                        <img src="{{ d }}" alt="" loading="lazy">
+                      </button>
+                      {% endfor %}
+                    </div>
+                  </div>
                 </article>
-                {% for d in content.visualIdentity.devices %}
-                <article class="proj">
-                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                    <img src="{{ d }}" alt="" loading="lazy">
-                  </button>
-                </article>
-                {% endfor %}
               </div>
             </div>
           </div>
@@ -132,30 +141,35 @@
             </button>
             <div class="rcard-back">
               <div class="rback-scroll" tabindex="0">
+                {# one page per product set: its name + caption, photos grouped #}
                 {% for set in content.productSets %}
+                <article class="proj proj--set">
+                  <header class="proj-set-head">
+                    <h3 class="proj-set-title" data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</h3>
+                    <p class="proj-set-cap" data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</p>
+                  </header>
                   {% if set.layout == "rows" %}
-                    {% for row in set.rows %}{% for img in row %}
-                    <article class="proj">
-                      <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                  <div class="proj-set-media">
+                    {% for row in set.rows %}
+                    <div class="proj-set-row">
+                      {% for img in row %}
+                      <button class="proj-zoom" type="button" style="--ar: {{ img.1 }}" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
                         <img src="{{ img.0 }}" alt="" loading="lazy">
                       </button>
-                      <p class="proj-cap">
-                        <span data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
-                      </p>
-                    </article>
-                    {% endfor %}{% endfor %}
-                  {% else %}
-                    {% for img in set.images %}
-                    <article class="proj">
-                      <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                        <img src="{{ img.0 }}" alt="" loading="lazy">
-                      </button>
-                      <p class="proj-cap">
-                        <span data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</span>
-                      </p>
-                    </article>
+                      {% endfor %}
+                    </div>
                     {% endfor %}
+                  </div>
+                  {% else %}
+                  <div class="proj-set-media proj-set-media--grid">
+                    {% for img in set.images %}
+                    <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
+                      <img src="{{ img.0 }}" alt="" loading="lazy">
+                    </button>
+                    {% endfor %}
+                  </div>
                   {% endif %}
+                </article>
                 {% endfor %}
               </div>
             </div>
@@ -175,7 +189,7 @@
             <div class="rcard-back">
               <div class="rback-scroll" tabindex="0">
                 {% for p in content.profilePhotos.photos %}
-                <article class="proj">
+                <article class="proj proj--portrait">
                   <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
                     <img src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
                   </button>
@@ -239,7 +253,7 @@
                     <img src="{{ b.image }}" alt="{{ b.title }} — {{ b.author }}" loading="lazy">
                   </button>
                   <p class="proj-cap">
-                    <span data-cs="{{ b.author }} · /{{ b.activity.cs }}/" data-en="{{ b.author }} · /{{ b.activity.en }}/">{{ b.author }} · /{{ b.activity.cs }}/</span>
+                    <span data-cs="{{ b.title }}, {{ b.author }} · /{{ b.activity.cs }}/" data-en="{{ b.title }}, {{ b.author }} · /{{ b.activity.en }}/">{{ b.title }}, {{ b.author }} · /{{ b.activity.cs }}/</span>
                   </p>
                 </article>
                 {% endfor %}
@@ -327,6 +341,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=24" defer></script>
+  <script src="/js/main.js?v=25" defer></script>
 </body>
 </html>
