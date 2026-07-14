@@ -604,12 +604,16 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 
 .proj--person {
   position: relative;
+  /* shorter than the deck: the next tile always peeks from below, so the
+     stack reads as MULTIPLE cards even at rest */
+  height: calc(100% - clamp(34px, 7vh, 56px));
   border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: clamp(16px, 3vh, 26px); /* the gap between tiles */
 }
 
-.proj--person:last-child { margin-bottom: 0; }
+/* trailing space so the last tile can still snap to the top */
+.proj--person:last-child { margin-bottom: clamp(34px, 7vh, 56px); }
 
 .proj--person .person-photo {
   flex: 1;

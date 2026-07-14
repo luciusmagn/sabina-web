@@ -708,8 +708,13 @@ function setupRing() {
   window.addEventListener("wheel", (e) => {
     if (reduceMotion.matches) return;
     if (ring.classList.contains("has-flip")) {
-      // the open deck scrolls natively; anywhere else the page must hold still
-      if (!e.target.closest(".rback-scroll, .album-overlay")) e.preventDefault();
+      // over the deck or the album overlay, native scroll does the work…
+      if (e.target.closest(".rback-scroll, .album-overlay")) return;
+      // …anywhere else on the page the wheel still drives the open deck,
+      // so you can browse the tiles without aiming at the card
+      e.preventDefault();
+      const deck = ring.querySelector(".rcard.is-flipped .rback-scroll");
+      if (deck) deck.scrollTop += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
       return;
     }
     const r = ring.getBoundingClientRect();

@@ -71,10 +71,13 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   (`setupAlbumsIntro` reads each tile's `data-role-*`; pink body text was
   tried and is ILLEGIBLE on the pink veil). Each person is their own
   free-floating TILE (`.proj--person`, gap between tiles, the card's own
-  back transparent) — the whole tile scrolls away as the next arrives with
+  back transparent, tiles SHORTER than the deck so the next one always
+  peeks from below) — the whole tile scrolls away as the next arrives with
   the veil showing through the gap (per user, matching the reference; a
   sticky cover/stacking variant was tried and rejected), scrollbar hidden
-  for this deck; full-bleed photo (object-position 50% 18% keeps faces),
+  for this deck. While ANY card is open the wheel drives its deck from
+  anywhere on the page (redirect in the ring wheel handler), not just
+  over the card; full-bleed photo (object-position 50% 18% keeps faces),
   BLUE name bottom-left (only the name — the role lives in the left text),
   paper pill bottom-right. The pill opens `.album-overlay` — a full-screen
   <dialog> (Esc/top-layer free; lightbox stacks above it) with that
