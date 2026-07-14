@@ -621,11 +621,25 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   width: 100%;              /* height + margin set by JS (albumLayout) */
   border-radius: var(--radius);
   overflow: hidden;
-  opacity: 0.5;             /* neighbours recede, like the ring's flanks */
-  transition: opacity 0.5s ease;
 }
 
-.proj--person.is-active { opacity: 1; }
+/* wide photos fill the card; ones NARROWER than the card show whole
+   (contain) over a blurred, scaled copy of themselves that fills the sides
+   — so a square/portrait shot sits in the wide card without cropping the
+   person (JS toggles .is-narrow per photo). A true generative-fill wide
+   version can be dropped in later and will just fill edge-to-edge. */
+.proj--person .person-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(26px) saturate(1.1);
+  transform: scale(1.15);   /* hide the blur's soft edge */
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.proj--person.is-narrow .person-bg { opacity: 1; }
 
 .proj--person .person-photo {
   position: absolute;
@@ -633,8 +647,10 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 22%; /* keep faces in the tall crop */
+  object-position: 50% 22%; /* keep faces in the crop */
 }
+
+.proj--person.is-narrow .person-photo { object-fit: contain; }
 
 .person-name {
   position: absolute;
@@ -667,9 +683,9 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
      the inline --tx layout() writes; height overrides the ring-stage height. */
   .rcard--albums { transition: transform 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), width 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), height 0.65s cubic-bezier(0.3, 0.7, 0.2, 1); }
   .rcard--albums.is-flipped {
-    --tx: 20vw !important;
-    width: min(40vw, 600px);
-    height: min(88svh, 900px);
+    --tx: 15vw !important;
+    width: min(56vw, 940px);
+    height: min(82svh, 820px);
   }
 }
 

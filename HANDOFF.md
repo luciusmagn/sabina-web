@@ -64,18 +64,23 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   air above/below; captions read "Title, Author · /activity/".
   **Portréty = the ALBUMS CARD** (`.rcard--albums`, modelled on
   pixel.melbourne/directors). Opening it flips the card and grows it TALL &
-  NARROW (`.is-flipped`: `height: min(88svh,900px)`, `width: min(40vw,600px)`,
-  `--tx: 20vw !important`) slid right over a deep veil (0.93); the ring
-  stays faintly behind. Floating text on the left (`.ring-albums-intro`):
+  NARROW (`.is-flipped`: `height: min(82svh,820px)`, `width: min(56vw,940px)`,
+  `--tx: 15vw !important`) slid right over a deep veil (0.93); the ring
+  stays faintly behind. WIDE landscape-ish card (was portrait), ONE card
+  showing at a time — no peeking neighbours (per user). Floating text on the left (`.ring-albums-intro`):
   flat BLUE heading + PAPER description that FOLLOWS the person in view
   (pink body text was tried and is ILLEGIBLE on the pink veil).
   Inside it's a **VERTICAL CAROUSEL — the ring, but vertical** (NOT a
   scroll container — earlier scroll-box/sticky-tile variants were rejected
   for the blank-space "container" feel). `.album-viewport` (overflow
   hidden) holds `.person-track`; JS `albumLayout()` sizes each
-  `.proj--person` to ~82% of the viewport with a gap and translateYs the
-  track so the active card is centred with neighbours peeking above/below
-  (`.is-active` full opacity, others 0.5). `albumStep(±1)` moves one person
+  `.proj--person` to the FULL viewport height and translateYs the track by
+  -idx*H, so only the active card shows and the old one slides fully up/out
+  as the next rises in. Photos NARROWER than the wide card (`albumFit()`
+  toggles `.is-narrow`, e.g. Lukáš 0.90) show whole (contain) over a
+  blurred scaled copy of themselves (`.person-bg`) that fills the sides —
+  a non-AI substitute for generative fill (no image-gen tool available);
+  drop in true outpainted wides later and they just fill (cover). `albumStep(±1)` moves one person
   at a time (clamped, no wrap); driven by the ring's own wheel (debounced,
   from ANYWHERE on the page — no pointer-over-card needed), Up/Down keys,
   and vertical swipe. Each card: full-bleed photo (object-position 50% 22%),

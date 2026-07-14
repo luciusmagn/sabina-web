@@ -655,20 +655,34 @@ function setupRing() {
   const albumItems = albumTrack ? [...albumTrack.querySelectorAll(".proj--person")] : [];
   const introText = document.querySelector(".albums-intro-text");
   let albumIdx = 0;
+  // re-check fit once each photo's real dimensions are known
+  albumItems.forEach((c) => {
+    const img = c.querySelector(".person-photo");
+    if (img) img.addEventListener("load", () => albumFit());
+  });
+
+  function albumFit() {
+    // a photo narrower than the card shows whole (contain) over its own
+    // blurred fill; wider ones fill (cover)
+    const vp = albumCard && albumCard.querySelector(".album-viewport");
+    if (!vp || !vp.clientWidth) return;
+    const cardAspect = vp.clientWidth / vp.clientHeight;
+    albumItems.forEach((c) => {
+      const img = c.querySelector(".person-photo");
+      if (!img.naturalWidth) return;
+      c.classList.toggle("is-narrow", img.naturalWidth / img.naturalHeight < cardAspect - 0.02);
+    });
+  }
 
   function albumLayout(animate) {
     if (!albumTrack) return;
     const vp = albumCard.querySelector(".album-viewport");
     const H = vp.clientHeight;
-    const cardH = Math.round(H * 0.82);       // tall card, neighbours peek
-    const gap = Math.round(H * 0.05);
-    albumItems.forEach((c, i) => {
-      c.style.height = cardH + "px";
-      c.style.marginBottom = (i === albumItems.length - 1 ? 0 : gap) + "px";
-      c.classList.toggle("is-active", i === albumIdx);
-    });
+    // one card fills the view; neighbours sit fully off-screen and slide in
+    albumItems.forEach((c) => { c.style.height = H + "px"; c.style.marginBottom = "0px"; });
+    albumFit();
     if (!animate) albumTrack.style.transition = "none";
-    albumTrack.style.transform = `translateY(${((H - cardH) / 2 - albumIdx * (cardH + gap)).toFixed(1)}px)`;
+    albumTrack.style.transform = `translateY(${(-albumIdx * H).toFixed(1)}px)`;
     if (!animate) { void albumTrack.offsetWidth; albumTrack.style.transition = ""; }
     // the floating description follows the person in view
     const active = albumItems[albumIdx];
