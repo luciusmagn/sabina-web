@@ -841,6 +841,32 @@ function setupAlbums() {
 }
 setupAlbums();
 
+/* the floating description beside the albums card follows whichever
+   person's tile is in view (each tile carries its text in data-role-*) */
+function setupAlbumsIntro() {
+  const card = document.querySelector(".rcard--albums");
+  const introText = document.querySelector(".albums-intro-text");
+  if (!card || !introText) return;
+  const deck = card.querySelector(".rback-scroll");
+  const pages = [...card.querySelectorAll(".proj--person")];
+  if (!pages.length) return;
+
+  let cur = 0;
+  function apply() {
+    const idx = Math.max(0, Math.min(pages.length - 1, Math.round(deck.scrollTop / deck.clientHeight)));
+    if (idx === cur) return;
+    cur = idx;
+    introText.dataset.cs = pages[idx].dataset.roleCs || "";
+    introText.dataset.en = pages[idx].dataset.roleEn || "";
+    introText.textContent = lang === "cs" ? introText.dataset.cs : introText.dataset.en;
+    introText.classList.remove("swap");
+    void introText.offsetWidth; // restart the little landing animation
+    introText.classList.add("swap");
+  }
+  deck.addEventListener("scroll", () => requestAnimationFrame(apply), { passive: true });
+}
+setupAlbumsIntro();
+
 /* ---------------- reveal on scroll ---------------- */
 
 function setupReveal() {

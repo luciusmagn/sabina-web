@@ -65,19 +65,22 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   **Portréty = the ALBUMS CARD** (`.rcard--albums`, modelled on
   pixel.melbourne/directors): opening it slides the card right
   (`--tx !important` outbids layout()'s inline var; width grows to 56vw)
-  and a floating intro (`.ring-albums-intro` — paper title + blue body;
-  pink body text was tried and is ILLEGIBLE on the pink veil) fades in on
-  the left over a deepened veil (0.85); the rest of the ring stays visible
-  behind. One person per page (`.proj--person`: full-bleed cover photo,
-  object-position 50% 18% to keep faces, name + role bottom-left, paper
-  pill bottom-right). The pill opens `.album-overlay` — a full-screen
+  over a deep veil (0.93; the ring stays faintly visible behind). Floating
+  text on the left (`.ring-albums-intro`): flat BLUE heading (no shadow
+  plate) + PAPER description that FOLLOWS the tile in view
+  (`setupAlbumsIntro` reads each tile's `data-role-*`; pink body text was
+  tried and is ILLEGIBLE on the pink veil). Each person is their own TILE
+  (`.proj--person`, sticky top:0) — scrolling slides the next tile up OVER
+  the pinned previous one (the reference's cover motion), scrollbar hidden
+  for this deck; full-bleed photo (object-position 50% 18% keeps faces),
+  BLUE name bottom-left (only the name — the role lives in the left text),
+  paper pill bottom-right. The pill opens `.album-overlay` — a full-screen
   <dialog> (Esc/top-layer free; lightbox stacks above it) with that
-  person's photo grid from `photos[].album` in content.json. `album` and
-  `profilePhotos.intro` are OPTIONAL (guarded `is defined`, intro has a
-  hardcoded fallback) — the server's live content.json renders fine
-  without them, but the album buttons only appear once its content.json
-  gains `album` arrays (add via /editor, never git-reset). Mobile <900px:
-  no intro, card stays centred, everything else identical.
+  person's photo grid from `photos[].album` in content.json. `album` is
+  OPTIONAL (guarded `is defined`) — the server's live content.json renders
+  fine without it, but album buttons only appear once it gains `album`
+  arrays (add via /editor, never git-reset). `profilePhotos.intro` is
+  currently unused. Mobile <900px: no side text, card stays centred.
   All nav arrows (hero scroll cue, ring prev/next, ring up/down jumps) are
   plain straight arrows in index.html.tera — swapped from the earlier
   hand-drawn curvy paths.

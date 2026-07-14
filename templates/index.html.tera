@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=26">
+  <link rel="stylesheet" href="/css/style.css?v=27">
 </head>
 <body>
 
@@ -190,12 +190,9 @@
             <div class="rcard-back">
               <div class="rback-scroll" tabindex="0">
                 {% for p in content.profilePhotos.photos %}
-                <article class="proj proj--person">
+                <article class="proj proj--person" data-role-cs="{{ p.text.cs }}" data-role-en="{{ p.text.en }}">
                   <img class="person-photo" src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
-                  <div class="person-id">
-                    <h3 class="person-name" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</h3>
-                    <p class="person-role" data-cs="{{ p.text.cs }}" data-en="{{ p.text.en }}">{{ p.text.cs }}</p>
-                  </div>
+                  <h3 class="person-name" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</h3>
                   {% if p.album is defined %}
                   <button class="person-album-btn" type="button"
                           data-person="{{ p.title.cs }}"
@@ -270,18 +267,12 @@
 
       </div>
 
-      {# floating intro beside the open albums card — over the veil, the
-         other cards stay visible behind (desktop only) #}
-      {% if content.profilePhotos.intro is defined %}
-        {% set albums_intro_cs = content.profilePhotos.intro.cs %}
-        {% set albums_intro_en = content.profilePhotos.intro.en %}
-      {% else %}
-        {% set albums_intro_cs = "Portréty focené v ateliéru i venku. Každý člověk má vlastní album — otevřete ho tlačítkem na kartě." %}
-        {% set albums_intro_en = "Portraits shot in the studio and outdoors. Each person has an album of their own — open it with the button on the card." %}
-      {% endif %}
+      {# floating text beside the open albums card — blue heading, paper
+         description that follows the person currently in view (JS swaps it).
+         Desktop only; the other cards stay visible behind the veil. #}
       <aside class="ring-albums-intro" aria-hidden="true">
         <h3 class="albums-intro-title" data-cs="{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.profilovky.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}</h3>
-        <p class="albums-intro-text" data-cs="{{ albums_intro_cs }}" data-en="{{ albums_intro_en }}">{{ albums_intro_cs }}</p>
+        <p class="albums-intro-text" data-cs="{{ content.profilePhotos.photos.0.text.cs }}" data-en="{{ content.profilePhotos.photos.0.text.en }}">{{ content.profilePhotos.photos.0.text.cs }}</p>
       </aside>
 
       <div class="ring-nav">
@@ -375,6 +366,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=26" defer></script>
+  <script src="/js/main.js?v=27" defer></script>
 </body>
 </html>
