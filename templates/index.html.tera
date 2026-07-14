@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=29">
+  <link rel="stylesheet" href="/css/style.css?v=30">
 </head>
 <body>
 
@@ -188,19 +188,21 @@
               </span>
             </button>
             <div class="rcard-back">
-              <div class="rback-scroll" tabindex="0">
-                {% for p in content.profilePhotos.photos %}
-                <article class="proj proj--person" data-role-cs="{{ p.text.cs }}" data-role-en="{{ p.text.en }}">
-                  <img class="person-photo" src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
-                  <h3 class="person-name" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</h3>
-                  {% if p.album is defined %}
-                  <button class="person-album-btn" type="button"
-                          data-person="{{ p.title.cs }}"
-                          data-album="{% for a in p.album %}{{ a }}{% if not loop.last %}|{% endif %}{% endfor %}"
-                          data-cs="Otevřít album" data-en="Open album">Otevřít album</button>
-                  {% endif %}
-                </article>
-                {% endfor %}
+              <div class="album-viewport" tabindex="0">
+                <div class="person-track">
+                  {% for p in content.profilePhotos.photos %}
+                  <article class="proj proj--person" data-role-cs="{{ p.text.cs }}" data-role-en="{{ p.text.en }}">
+                    <img class="person-photo" src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
+                    <h3 class="person-name" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</h3>
+                    {% if p.album is defined %}
+                    <button class="person-album-btn" type="button"
+                            data-person="{{ p.title.cs }}"
+                            data-album="{% for a in p.album %}{{ a }}{% if not loop.last %}|{% endif %}{% endfor %}"
+                            data-cs="Otevřít album" data-en="Open album">Otevřít album</button>
+                    {% endif %}
+                  </article>
+                  {% endfor %}
+                </div>
               </div>
             </div>
           </div>
@@ -366,6 +368,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=29" defer></script>
+  <script src="/js/main.js?v=30" defer></script>
 </body>
 </html>

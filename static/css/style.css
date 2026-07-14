@@ -594,34 +594,46 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
    their album. The open card sits off-centre with a floating intro beside
    it (desktop only) — the rest of the ring stays visible behind the veil. */
 
-/* each person is their own free-floating TILE: the whole card scrolls
-   away as the next arrives, with a gap between them showing the veil
-   (the reference's motion). The card's own back goes transparent so the
-   tiles read as independent cards; the scrollbar is hidden. */
-.rcard--albums .rback-scroll { scrollbar-width: none; }
-.rcard--albums .rback-scroll::-webkit-scrollbar { display: none; }
-.rcard--albums .rcard-back { background: transparent; }
+/* the albums card is a VERTICAL CAROUSEL — like the ring, but vertical:
+   tall person cards, one centred with the neighbours peeking, stepping one
+   at a time (JS drives the track transform). No scroll container, so no
+   box + blank space; the card's own back is transparent. */
+.rcard--albums .rcard-back { background: transparent; overflow: visible; }
+
+.album-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.person-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  will-change: transform;
+  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
 
 .proj--person {
   position: relative;
-  /* shorter than the deck: the next tile always peeks from below, so the
-     stack reads as MULTIPLE cards even at rest */
-  height: calc(100% - clamp(34px, 7vh, 56px));
+  width: 100%;              /* height + margin set by JS (albumLayout) */
   border-radius: var(--radius);
   overflow: hidden;
-  margin-bottom: clamp(16px, 3vh, 26px); /* the gap between tiles */
+  opacity: 0.5;             /* neighbours recede, like the ring's flanks */
+  transition: opacity 0.5s ease;
 }
 
-/* trailing space so the last tile can still snap to the top */
-.proj--person:last-child { margin-bottom: clamp(34px, 7vh, 56px); }
+.proj--person.is-active { opacity: 1; }
 
 .proj--person .person-photo {
-  flex: 1;
-  min-height: 0;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 18%; /* keep faces when the crop bites */
+  object-position: 50% 22%; /* keep faces in the tall crop */
 }
 
 .person-name {
@@ -650,12 +662,14 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 .person-album-btn:hover { transform: translateY(-2px); }
 
 @media (min-width: 900px) {
-  /* the open albums card slides right, making room for the intro
-     (!important outbids the inline --tx that layout() writes) */
-  .rcard--albums { transition: transform 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), width 0.65s cubic-bezier(0.3, 0.7, 0.2, 1); }
+  /* the open albums card grows TALL and narrow (better portrait crop) and
+     slides right, making room for the intro on the left. !important outbids
+     the inline --tx layout() writes; height overrides the ring-stage height. */
+  .rcard--albums { transition: transform 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), width 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), height 0.65s cubic-bezier(0.3, 0.7, 0.2, 1); }
   .rcard--albums.is-flipped {
-    --tx: 16vw !important;
-    width: min(56vw, 980px);
+    --tx: 20vw !important;
+    width: min(40vw, 600px);
+    height: min(88svh, 900px);
   }
 }
 

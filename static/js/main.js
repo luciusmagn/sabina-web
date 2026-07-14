@@ -649,14 +649,63 @@ function setupRing() {
     return true;
   }
 
+  /* ---- the albums card's vertical carousel (like the ring, but vertical) ---- */
+  const albumCard = ring.querySelector(".rcard--albums");
+  const albumTrack = albumCard && albumCard.querySelector(".person-track");
+  const albumItems = albumTrack ? [...albumTrack.querySelectorAll(".proj--person")] : [];
+  const introText = document.querySelector(".albums-intro-text");
+  let albumIdx = 0;
+
+  function albumLayout(animate) {
+    if (!albumTrack) return;
+    const vp = albumCard.querySelector(".album-viewport");
+    const H = vp.clientHeight;
+    const cardH = Math.round(H * 0.82);       // tall card, neighbours peek
+    const gap = Math.round(H * 0.05);
+    albumItems.forEach((c, i) => {
+      c.style.height = cardH + "px";
+      c.style.marginBottom = (i === albumItems.length - 1 ? 0 : gap) + "px";
+      c.classList.toggle("is-active", i === albumIdx);
+    });
+    if (!animate) albumTrack.style.transition = "none";
+    albumTrack.style.transform = `translateY(${((H - cardH) / 2 - albumIdx * (cardH + gap)).toFixed(1)}px)`;
+    if (!animate) { void albumTrack.offsetWidth; albumTrack.style.transition = ""; }
+    // the floating description follows the person in view
+    const active = albumItems[albumIdx];
+    if (introText && active) {
+      introText.dataset.cs = active.dataset.roleCs || "";
+      introText.dataset.en = active.dataset.roleEn || "";
+      introText.textContent = lang === "cs" ? introText.dataset.cs : introText.dataset.en;
+      introText.classList.remove("swap");
+      void introText.offsetWidth;
+      introText.classList.add("swap");
+    }
+  }
+
+  function albumStep(dir) {
+    if (!albumItems.length) return false;
+    const next = Math.max(0, Math.min(albumItems.length - 1, albumIdx + dir));
+    if (next === albumIdx) return false;
+    albumIdx = next;
+    albumLayout(true);
+    return true;
+  }
+
   function flip(card) {
     card.classList.add("is-flipped");
     ring.classList.add("has-flip");
-    // the albums card opens off-centre with a floating intro beside it
-    ring.classList.toggle("has-flip--albums", card.classList.contains("rcard--albums"));
-    const deck = card.querySelector(".rback-scroll");
-    deck.scrollTop = 0;
-    deck.focus({ preventScroll: true });
+    // the albums card opens tall & off-centre as a vertical carousel
+    const isAlbums = card.classList.contains("rcard--albums");
+    ring.classList.toggle("has-flip--albums", isAlbums);
+    if (isAlbums) {
+      albumIdx = 0;
+      albumLayout(false);
+      setTimeout(() => albumLayout(false), 700); // re-measure once the card has grown
+      card.querySelector(".album-viewport").focus({ preventScroll: true });
+    } else {
+      const deck = card.querySelector(".rback-scroll");
+      if (deck) { deck.scrollTop = 0; deck.focus({ preventScroll: true }); }
+    }
   }
 
   function unflip() {
@@ -690,6 +739,12 @@ function setupRing() {
   window.addEventListener("keydown", (e) => {
     if (document.querySelector("dialog[open]")) return; // the lightbox owns Esc
     if (e.key === "Escape") { unflip(); return; }
+    // the open albums card steps with up/down arrows
+    if (ring.classList.contains("has-flip--albums")) {
+      if (e.key === "ArrowDown") { e.preventDefault(); albumStep(1); }
+      if (e.key === "ArrowUp") { e.preventDefault(); albumStep(-1); }
+      return;
+    }
     if (ring.classList.contains("has-flip")) return;
     const r = ring.getBoundingClientRect();
     const visible = r.top < window.innerHeight * 0.6 && r.bottom > window.innerHeight * 0.4;
@@ -708,10 +763,20 @@ function setupRing() {
   window.addEventListener("wheel", (e) => {
     if (reduceMotion.matches) return;
     if (ring.classList.contains("has-flip")) {
-      // over the deck or the album overlay, native scroll does the work…
+      // the albums carousel steps one person per wheel notch, from anywhere
+      // on the page (like the ring) — no scroll container involved
+      if (ring.classList.contains("has-flip--albums")) {
+        if (e.target.closest(".album-overlay")) return; // the open album grid scrolls native
+        e.preventDefault();
+        const dY = e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+        const now = Date.now();
+        if (now - wheelLock < 480 || Math.abs(dY) < 8) return;
+        wheelLock = now;
+        albumStep(dY > 0 ? 1 : -1);
+        return;
+      }
+      // other decks: native scroll over them, redirected from elsewhere
       if (e.target.closest(".rback-scroll, .album-overlay")) return;
-      // …anywhere else on the page the wheel still drives the open deck,
-      // so you can browse the tiles without aiming at the card
       e.preventDefault();
       const deck = ring.querySelector(".rcard.is-flipped .rback-scroll");
       if (deck) deck.scrollTop += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
@@ -749,12 +814,19 @@ function setupRing() {
     }
   }, { passive: false });
 
-  // swipe rotates the ring
-  let swipeX = null;
+  // swipe rotates the ring (horizontal) or steps the albums carousel (vertical)
+  let swipeX = null, swipeY = null;
   stage.addEventListener("pointerdown", (e) => {
-    if (!ring.classList.contains("has-flip")) swipeX = e.clientX;
+    if (ring.classList.contains("has-flip--albums")) swipeY = e.clientY;
+    else if (!ring.classList.contains("has-flip")) swipeX = e.clientX;
   });
   window.addEventListener("pointerup", (e) => {
+    if (swipeY !== null) {
+      const dy = e.clientY - swipeY;
+      swipeY = null;
+      if (Math.abs(dy) > 48) albumStep(dy < 0 ? 1 : -1);
+      return;
+    }
     if (swipeX === null) return;
     const dx = e.clientX - swipeX;
     swipeX = null;
@@ -771,7 +843,10 @@ function setupRing() {
   });
 
   wide.addEventListener("change", layout);
-  window.addEventListener("resize", layout);
+  window.addEventListener("resize", () => {
+    layout();
+    if (ring.classList.contains("has-flip--albums")) albumLayout(false);
+  });
 
   layout();
   land();
@@ -846,36 +921,6 @@ function setupAlbums() {
 }
 setupAlbums();
 
-/* the floating description beside the albums card follows whichever
-   person's tile is in view (each tile carries its text in data-role-*) */
-function setupAlbumsIntro() {
-  const card = document.querySelector(".rcard--albums");
-  const introText = document.querySelector(".albums-intro-text");
-  if (!card || !introText) return;
-  const deck = card.querySelector(".rback-scroll");
-  const pages = [...card.querySelectorAll(".proj--person")];
-  if (!pages.length) return;
-
-  let cur = 0;
-  function apply() {
-    // nearest tile to the current scroll position (tiles carry gaps, so
-    // plain division by page height would drift)
-    let idx = 0;
-    for (let i = 1; i < pages.length; i++) {
-      if (Math.abs(pages[i].offsetTop - deck.scrollTop) < Math.abs(pages[idx].offsetTop - deck.scrollTop)) idx = i;
-    }
-    if (idx === cur) return;
-    cur = idx;
-    introText.dataset.cs = pages[idx].dataset.roleCs || "";
-    introText.dataset.en = pages[idx].dataset.roleEn || "";
-    introText.textContent = lang === "cs" ? introText.dataset.cs : introText.dataset.en;
-    introText.classList.remove("swap");
-    void introText.offsetWidth; // restart the little landing animation
-    introText.classList.add("swap");
-  }
-  deck.addEventListener("scroll", () => requestAnimationFrame(apply), { passive: true });
-}
-setupAlbumsIntro();
 
 /* ---------------- reveal on scroll ---------------- */
 

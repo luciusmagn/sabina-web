@@ -63,29 +63,30 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   collages + devices). `.proj--kniha` books are padded smaller with
   air above/below; captions read "Title, Author · /activity/".
   **Portréty = the ALBUMS CARD** (`.rcard--albums`, modelled on
-  pixel.melbourne/directors): opening it slides the card right
-  (`--tx !important` outbids layout()'s inline var; width grows to 56vw)
-  over a deep veil (0.93; the ring stays faintly visible behind). Floating
-  text on the left (`.ring-albums-intro`): flat BLUE heading (no shadow
-  plate) + PAPER description that FOLLOWS the tile in view
-  (`setupAlbumsIntro` reads each tile's `data-role-*`; pink body text was
-  tried and is ILLEGIBLE on the pink veil). Each person is their own
-  free-floating TILE (`.proj--person`, gap between tiles, the card's own
-  back transparent, tiles SHORTER than the deck so the next one always
-  peeks from below) — the whole tile scrolls away as the next arrives with
-  the veil showing through the gap (per user, matching the reference; a
-  sticky cover/stacking variant was tried and rejected), scrollbar hidden
-  for this deck. While ANY card is open the wheel drives its deck from
-  anywhere on the page (redirect in the ring wheel handler), not just
-  over the card; full-bleed photo (object-position 50% 18% keeps faces),
-  BLUE name bottom-left (only the name — the role lives in the left text),
-  paper pill bottom-right. The pill opens `.album-overlay` — a full-screen
+  pixel.melbourne/directors). Opening it flips the card and grows it TALL &
+  NARROW (`.is-flipped`: `height: min(88svh,900px)`, `width: min(40vw,600px)`,
+  `--tx: 20vw !important`) slid right over a deep veil (0.93); the ring
+  stays faintly behind. Floating text on the left (`.ring-albums-intro`):
+  flat BLUE heading + PAPER description that FOLLOWS the person in view
+  (pink body text was tried and is ILLEGIBLE on the pink veil).
+  Inside it's a **VERTICAL CAROUSEL — the ring, but vertical** (NOT a
+  scroll container — earlier scroll-box/sticky-tile variants were rejected
+  for the blank-space "container" feel). `.album-viewport` (overflow
+  hidden) holds `.person-track`; JS `albumLayout()` sizes each
+  `.proj--person` to ~82% of the viewport with a gap and translateYs the
+  track so the active card is centred with neighbours peeking above/below
+  (`.is-active` full opacity, others 0.5). `albumStep(±1)` moves one person
+  at a time (clamped, no wrap); driven by the ring's own wheel (debounced,
+  from ANYWHERE on the page — no pointer-over-card needed), Up/Down keys,
+  and vertical swipe. Each card: full-bleed photo (object-position 50% 22%),
+  BLUE name bottom-left (name only — role lives in the left text), paper
+  pill bottom-right. The pill opens `.album-overlay` — a full-screen
   <dialog> (Esc/top-layer free; lightbox stacks above it) with that
-  person's photo grid from `photos[].album` in content.json. `album` is
-  OPTIONAL (guarded `is defined`) — the server's live content.json renders
-  fine without it, but album buttons only appear once it gains `album`
-  arrays (add via /editor, never git-reset). `profilePhotos.intro` is
-  currently unused. Mobile <900px: no side text, card stays centred.
+  person's photo grid from `photos[].album`. `album` is OPTIONAL (guarded
+  `is defined`) — server's live content.json renders fine without it;
+  buttons appear once it gains `album` arrays (add via /editor, never
+  git-reset). `profilePhotos.intro` unused. Mobile <900px: card keeps ring
+  size & stays centred, no side text; carousel works the same.
   All nav arrows (hero scroll cue, ring prev/next, ring up/down jumps) are
   plain straight arrows in index.html.tera — swapped from the earlier
   hand-drawn curvy paths.
