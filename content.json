@@ -173,6 +173,10 @@
     }
   ],
   "profilePhotos": {
+    "intro": {
+      "cs": "Portr\u00e9ty focen\u00e9 v ateli\u00e9ru i venku. Ka\u017ed\u00fd \u010dlov\u011bk m\u00e1 vlastn\u00ed album \u2014 otev\u0159ete ho tla\u010d\u00edtkem na kart\u011b.",
+      "en": "Portraits shot in the studio and outdoors. Each person has an album of their own \u2014 open it with the button on the card."
+    },
     "photos": [
       {
         "src": "/profilove-fotky/web-1.jpg",
@@ -183,7 +187,13 @@
         "text": {
           "cs": "/Foto, postprodukce/",
           "en": "/Photo, postproduction/"
-        }
+        },
+        "album": [
+          "/profilove-fotky/web-1.jpg",
+          "/profilove-fotky/web-2.jpg",
+          "/profilove-fotky/web-3.jpg",
+          "/profilove-fotky/web-4.jpg"
+        ]
       },
       {
         "src": "/profilove-fotky/web-2.jpg",
@@ -194,7 +204,13 @@
         "text": {
           "cs": "/Foto, postprodukce/",
           "en": "/Photo, postproduction/"
-        }
+        },
+        "album": [
+          "/profilove-fotky/web-2.jpg",
+          "/profilove-fotky/web-1.jpg",
+          "/profilove-fotky/web-4.jpg",
+          "/profilove-fotky/web-3.jpg"
+        ]
       },
       {
         "src": "/profilove-fotky/web-3.jpg",
@@ -205,7 +221,13 @@
         "text": {
           "cs": "/Foto, postprodukce/",
           "en": "/Photo, postproduction/"
-        }
+        },
+        "album": [
+          "/profilove-fotky/web-3.jpg",
+          "/profilove-fotky/web-4.jpg",
+          "/profilove-fotky/web-1.jpg",
+          "/profilove-fotky/web-2.jpg"
+        ]
       },
       {
         "src": "/profilove-fotky/web-4.jpg",
@@ -216,7 +238,13 @@
         "text": {
           "cs": "/Foto/",
           "en": "/Photo/"
-        }
+        },
+        "album": [
+          "/profilove-fotky/web-4.jpg",
+          "/profilove-fotky/web-3.jpg",
+          "/profilove-fotky/web-2.jpg",
+          "/profilove-fotky/web-1.jpg"
+        ]
       }
     ]
   },

@@ -60,9 +60,24 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   produkt: one page per productSet) with the set's label + caption up top
   and photos in rows (widths ∝ `--ar` aspect, from content.json where
   available) or a 2-col grid; `--contain` rows never crop (used for the viz
-  collages + devices). `.proj--portrait` = contain + padding, portraits
-  hang framed, never cropped. `.proj--kniha` books are padded smaller with
+  collages + devices). `.proj--kniha` books are padded smaller with
   air above/below; captions read "Title, Author · /activity/".
+  **Portréty = the ALBUMS CARD** (`.rcard--albums`, modelled on
+  pixel.melbourne/directors): opening it slides the card right
+  (`--tx !important` outbids layout()'s inline var; width grows to 56vw)
+  and a floating intro (`.ring-albums-intro` — paper title + blue body;
+  pink body text was tried and is ILLEGIBLE on the pink veil) fades in on
+  the left over a deepened veil (0.85); the rest of the ring stays visible
+  behind. One person per page (`.proj--person`: full-bleed cover photo,
+  object-position 50% 18% to keep faces, name + role bottom-left, paper
+  pill bottom-right). The pill opens `.album-overlay` — a full-screen
+  <dialog> (Esc/top-layer free; lightbox stacks above it) with that
+  person's photo grid from `photos[].album` in content.json. `album` and
+  `profilePhotos.intro` are OPTIONAL (guarded `is defined`, intro has a
+  hardcoded fallback) — the server's live content.json renders fine
+  without them, but the album buttons only appear once its content.json
+  gains `album` arrays (add via /editor, never git-reset). Mobile <900px:
+  no intro, card stays centred, everything else identical.
   All nav arrows (hero scroll cue, ring prev/next, ring up/down jumps) are
   plain straight arrows in index.html.tera — swapped from the earlier
   hand-drawn curvy paths.

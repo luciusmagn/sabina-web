@@ -652,6 +652,8 @@ function setupRing() {
   function flip(card) {
     card.classList.add("is-flipped");
     ring.classList.add("has-flip");
+    // the albums card opens off-centre with a floating intro beside it
+    ring.classList.toggle("has-flip--albums", card.classList.contains("rcard--albums"));
     const deck = card.querySelector(".rback-scroll");
     deck.scrollTop = 0;
     deck.focus({ preventScroll: true });
@@ -661,7 +663,7 @@ function setupRing() {
     const card = ring.querySelector(".rcard.is-flipped");
     if (!card) return;
     card.classList.remove("is-flipped");
-    ring.classList.remove("has-flip");
+    ring.classList.remove("has-flip", "has-flip--albums");
     card.querySelector(".rcard-front").focus();
   }
 
@@ -707,7 +709,7 @@ function setupRing() {
     if (reduceMotion.matches) return;
     if (ring.classList.contains("has-flip")) {
       // the open deck scrolls natively; anywhere else the page must hold still
-      if (!e.target.closest(".rback-scroll")) e.preventDefault();
+      if (!e.target.closest(".rback-scroll, .album-overlay")) e.preventDefault();
       return;
     }
     const r = ring.getBoundingClientRect();
@@ -801,6 +803,43 @@ lightbox.addEventListener("click", (event) => {
 });
 lightboxClose.addEventListener("click", () => lightbox.close());
 lightbox.addEventListener("close", () => lightboxMedia.replaceChildren());
+
+/* ---------------- person albums ----------------
+   The "Otevřít album" pill on a portrait page opens that person's photo
+   collection in a full-screen <dialog> over a pink veil — a grid built
+   from the paths the template baked into the button. Photos open in the
+   lightbox (a second dialog, stacking above); Esc walks back down. */
+
+function setupAlbums() {
+  const overlay = document.querySelector(".album-overlay");
+  if (!overlay) return;
+  const grid = overlay.querySelector(".album-grid");
+  const title = overlay.querySelector(".album-title");
+
+  document.querySelectorAll(".person-album-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      title.textContent = btn.dataset.person;
+      grid.replaceChildren(...btn.dataset.album.split("|").filter(Boolean).map((src) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "album-photo";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "";
+        img.loading = "lazy";
+        b.append(img);
+        b.addEventListener("click", () => openLightbox(src));
+        return b;
+      }));
+      overlay.showModal();
+    });
+  });
+
+  overlay.querySelector(".album-close").addEventListener("click", () => overlay.close());
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.close(); });
+  overlay.addEventListener("close", () => grid.replaceChildren());
+}
+setupAlbums();
 
 /* ---------------- reveal on scroll ---------------- */
 

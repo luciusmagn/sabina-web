@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=25">
+  <link rel="stylesheet" href="/css/style.css?v=26">
 </head>
 <body>
 
@@ -176,8 +176,9 @@
           </div>
         </div>
 
-        {# ---- 3 · portraits ---- #}
-        <div class="rcard">
+        {# ---- 3 · portraits — the albums card: opens off-centre, one person
+                per page (full-bleed photo + name + open-album pill) ---- #}
+        <div class="rcard rcard--albums">
           <div class="rcard-inner">
             <button class="rcard-front" type="button">
               <span class="rcard-cover" aria-hidden="true"><img src="/covers/portrety.jpg" alt=""></span>
@@ -189,13 +190,18 @@
             <div class="rcard-back">
               <div class="rback-scroll" tabindex="0">
                 {% for p in content.profilePhotos.photos %}
-                <article class="proj proj--portrait">
-                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                    <img src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
-                  </button>
-                  <p class="proj-cap">
-                    <span data-cs="{{ p.text.cs }}" data-en="{{ p.text.en }}">{{ p.text.cs }}</span>
-                  </p>
+                <article class="proj proj--person">
+                  <img class="person-photo" src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
+                  <div class="person-id">
+                    <h3 class="person-name" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</h3>
+                    <p class="person-role" data-cs="{{ p.text.cs }}" data-en="{{ p.text.en }}">{{ p.text.cs }}</p>
+                  </div>
+                  {% if p.album is defined %}
+                  <button class="person-album-btn" type="button"
+                          data-person="{{ p.title.cs }}"
+                          data-album="{% for a in p.album %}{{ a }}{% if not loop.last %}|{% endif %}{% endfor %}"
+                          data-cs="Otevřít album" data-en="Open album">Otevřít album</button>
+                  {% endif %}
                 </article>
                 {% endfor %}
               </div>
@@ -264,6 +270,20 @@
 
       </div>
 
+      {# floating intro beside the open albums card — over the veil, the
+         other cards stay visible behind (desktop only) #}
+      {% if content.profilePhotos.intro is defined %}
+        {% set albums_intro_cs = content.profilePhotos.intro.cs %}
+        {% set albums_intro_en = content.profilePhotos.intro.en %}
+      {% else %}
+        {% set albums_intro_cs = "Portréty focené v ateliéru i venku. Každý člověk má vlastní album — otevřete ho tlačítkem na kartě." %}
+        {% set albums_intro_en = "Portraits shot in the studio and outdoors. Each person has an album of their own — open it with the button on the card." %}
+      {% endif %}
+      <aside class="ring-albums-intro" aria-hidden="true">
+        <h3 class="albums-intro-title" data-cs="{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.profilovky.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}</h3>
+        <p class="albums-intro-text" data-cs="{{ albums_intro_cs }}" data-en="{{ albums_intro_en }}">{{ albums_intro_cs }}</p>
+      </aside>
+
       <div class="ring-nav">
         <button class="ring-btn ring-prev" type="button"
                 data-aria-cs="{{ content.ui.previous.cs }}" data-aria-en="{{ content.ui.previous.en }}"
@@ -330,6 +350,20 @@
 
   </main>
 
+  {# ---- album overlay: one person's photo collection over a pink veil.
+        A <dialog>, so Esc + top-layer stacking (lightbox above it) come free. #}
+  <dialog class="album-overlay" aria-label="Album">
+    <button class="album-close" type="button"
+            data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
+            aria-label="{{ content.ui.close.cs }}">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 4L20 20M20 4L4 20" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <h3 class="album-title"></h3>
+    <div class="album-grid"></div>
+  </dialog>
+
   <dialog class="lightbox" aria-label="Náhled">
     <button class="lightbox-close" type="button"
             data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
@@ -341,6 +375,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=25" defer></script>
+  <script src="/js/main.js?v=26" defer></script>
 </body>
 </html>
