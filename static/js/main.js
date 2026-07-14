@@ -791,7 +791,7 @@ function setupRing() {
         e.preventDefault();
         const dY = e.deltaY * (e.deltaMode === 1 ? 16 : 1);
         const now = Date.now();
-        if (now - wheelLock < 480 || Math.abs(dY) < 8) return;
+        if (now - wheelLock < 780 || Math.abs(dY) < 8) return; // pace with the slower transition
         wheelLock = now;
         albumStep(dY > 0 ? 1 : -1);
         return;
