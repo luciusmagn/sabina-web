@@ -135,11 +135,10 @@ html.has-cursor * { cursor: none !important; }
 /* the email is real text — native caret, no dot */
 html.has-cursor .hero-contact-email { cursor: text !important; }
 
-/* the custom cursor dot can't reach a <dialog>'s top layer, so restore the
-   native cursor inside the album overlay + lightbox (else no pointer shows) */
-html.has-cursor .album-overlay, html.has-cursor .album-overlay *,
+/* the lightbox is a modal <dialog> (top layer) the custom cursor can't
+   reach, so it uses the native cursor. The album overlay is a plain layer,
+   so the custom round cursor shows over it like the rest of the page. */
 html.has-cursor .lightbox, html.has-cursor .lightbox * { cursor: auto !important; }
-html.has-cursor .album-photo, html.has-cursor .album-close,
 html.has-cursor .lightbox-close { cursor: pointer !important; }
 
 /* ---- fixed chrome: language + theme ---- */
@@ -659,27 +658,18 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
 
 .proj--person.is-narrow .person-photo { object-fit: contain; }
 
-/* name + white note, lifted up off the very bottom edge */
-.person-id {
+/* just the name on the card — plain blue, no shadow, lifted off the edge
+   (the description lives in the left column) */
+.person-name {
   position: absolute;
   left: clamp(20px, 5%, 44px);
   bottom: clamp(30px, 10%, 72px);
-}
-
-.person-name {
   margin: 0;
   font-size: clamp(32px, 3.2vw, 54px);
   font-weight: 800;
   letter-spacing: -0.015em;
   line-height: 1;
   color: var(--main-a); /* plain blue, no shadow */
-}
-
-.person-note {
-  margin: 8px 0 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--paper); /* the white note per person */
 }
 
 .person-album-btn {
@@ -753,30 +743,39 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
   .ring-albums-intro { display: none; } /* phone: the card alone, centred */
 }
 
-/* ---- the album overlay ---- */
+/* ---- the album overlay (a plain fixed layer, NOT a dialog, so the custom
+   cursor sits above it — z-index below the cursor's 1000, above the grain) ---- */
 
 .album-overlay {
-  width: 100vw;
-  height: 100vh;
-  max-width: 100vw;
-  max-height: 100vh;
-  margin: 0;
-  border: none;
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: none;
+  overflow-y: auto;
   padding: clamp(84px, 12vh, 120px) var(--pad-x) clamp(28px, 5vh, 48px);
-  background: transparent;
-  outline: none;
+  background: rgba(255, 135, 177, 0.94); /* the pink veil */
 }
 
+.album-overlay.is-open { display: block; }
+
 .album-overlay .album-title {
-  margin: 0 0 clamp(14px, 2.5vh, 26px);
+  margin: 0 0 clamp(4px, 1vh, 10px);
   font-size: clamp(38px, 4vw, 72px);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1;
 }
 
+/* the white per-person note under the album title (same text as the left
+   column shows while browsing) */
+.album-overlay .album-sub {
+  margin: 0 0 clamp(16px, 2.6vh, 28px);
+  font-size: clamp(15px, 1.2vw, 18px);
+  font-weight: 700;
+}
+
 /* masonry columns so the real photo (natural aspect) and the assorted
-   gray placeholders tile together like a real album grid */
+   placeholders tile together like a real album grid */
 .album-grid {
   column-count: 3;
   column-gap: 14px;
@@ -801,8 +800,12 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
   transition: transform 0.3s ease;
 }
 
-/* plain gray placeholders for photos yet to come (aspect set inline per tile) */
-.album-ph { background: #d3cec4; }
+/* transparent-pink placeholders for photos yet to come (aspect set inline);
+   a faint paper inset edge keeps each tile crisp against the pink veil */
+.album-ph {
+  background: rgba(255, 135, 177, 0.5);
+  box-shadow: inset 0 0 0 1.5px rgba(251, 248, 241, 0.4);
+}
 
 .album-photo:hover img { transform: scale(1.02); }
 
@@ -1312,17 +1315,13 @@ body::after {
    deepens while it's open so the floating text reads */
 .person-album-btn { background: var(--paper); color: var(--ink-blue); }
 .ring.has-flip--albums .ring-stage::after { background: rgba(255, 135, 177, 0.93); }
-/* flat inks, no shadow plate: blue heading, paper description */
+/* flat inks, no shadow plate: blue heading, WHITE per-person description */
 .albums-intro-title { color: var(--ink-blue); }
-.albums-intro-text { color: var(--ink-blue); } /* plain blue, no shadow */
+.albums-intro-text { color: var(--paper); } /* white, follows the person */
 
-/* the album overlay: heavy pink veil, paper title with the blue plate,
-   paper close chip */
-.album-overlay::backdrop { background: rgba(255, 135, 177, 0.92); }
-.album-overlay .album-title {
-  color: var(--paper);
-  text-shadow: var(--sun-dx, 0.05em) var(--sun-dy, 0.045em) 0 var(--ink-blue);
-}
+/* the album overlay: blue title (no shadow), white note, paper close chip */
+.album-overlay .album-title { color: var(--ink-blue); }
+.album-overlay .album-sub { color: var(--paper); }
 .album-close { background: var(--paper); color: var(--ink-blue); }
 .album-close:hover { background: var(--ink-blue); color: var(--paper); }
 

@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=32">
+  <link rel="stylesheet" href="/css/style.css?v=34">
 </head>
 <body>
 
@@ -191,16 +191,14 @@
               <div class="album-viewport" tabindex="0">
                 <div class="person-track">
                   {% for p in content.profilePhotos.photos %}
-                  <article class="proj proj--person">
+                  <article class="proj proj--person" data-role-cs="{{ p.text.cs }}" data-role-en="{{ p.text.en }}">
                     <div class="person-bg" style="background-image: url('{{ p.src }}')" aria-hidden="true"></div>
                     <img class="person-photo" src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
-                    <div class="person-id">
-                      <h3 class="person-name" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</h3>
-                      <p class="person-note" data-cs="{{ p.text.cs }}" data-en="{{ p.text.en }}">{{ p.text.cs }}</p>
-                    </div>
+                    <h3 class="person-name" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</h3>
                     <button class="person-album-btn" type="button"
                             data-person="{{ p.title.cs }}"
                             data-photo="{{ p.src }}"
+                            data-note-cs="{{ p.text.cs }}" data-note-en="{{ p.text.en }}"
                             data-cs="Otevřít album" data-en="Open album">Otevřít album</button>
                   </article>
                   {% endfor %}
@@ -272,17 +270,11 @@
       </div>
 
       {# floating text beside the open albums card — plain blue heading +
-         static intro. Desktop only; the other cards stay visible behind. #}
-      {% if content.profilePhotos.intro is defined %}
-        {% set albums_intro_cs = content.profilePhotos.intro.cs %}
-        {% set albums_intro_en = content.profilePhotos.intro.en %}
-      {% else %}
-        {% set albums_intro_cs = "Portréty focené v ateliéru i venku. Každý má svoje album — otevřete ho tlačítkem na kartě." %}
-        {% set albums_intro_en = "Portraits shot in the studio and outdoors. Everyone has their own album — open it with the button on the card." %}
-      {% endif %}
+         WHITE description that follows the person in view (JS swaps it).
+         Desktop only; the other cards stay visible behind. #}
       <aside class="ring-albums-intro" aria-hidden="true">
         <h3 class="albums-intro-title" data-cs="{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}" data-en="{{ content.tiles.profilovky.en | replace(from="<br>", to=" ") | striptags }}">{{ content.tiles.profilovky.cs | replace(from="<br>", to=" ") | striptags }}</h3>
-        <p class="albums-intro-text" data-cs="{{ albums_intro_cs }}" data-en="{{ albums_intro_en }}">{{ albums_intro_cs }}</p>
+        <p class="albums-intro-text" data-cs="{{ content.profilePhotos.photos.0.text.cs }}" data-en="{{ content.profilePhotos.photos.0.text.en }}">{{ content.profilePhotos.photos.0.text.cs }}</p>
       </aside>
 
       <div class="ring-nav">
@@ -352,8 +344,10 @@
   </main>
 
   {# ---- album overlay: one person's photo collection over a pink veil.
-        A <dialog>, so Esc + top-layer stacking (lightbox above it) come free. #}
-  <dialog class="album-overlay" aria-label="Album">
+        A plain fixed layer (NOT a <dialog>) so the custom round cursor —
+        which can't reach a dialog's top layer — shows over it like the rest
+        of the page. JS toggles .is-open; Esc handled in the ring keydown. #}
+  <div class="album-overlay" role="dialog" aria-label="Album" aria-hidden="true">
     <button class="album-close" type="button"
             data-aria-cs="{{ content.ui.close.cs }}" data-aria-en="{{ content.ui.close.en }}"
             aria-label="{{ content.ui.close.cs }}">
@@ -362,8 +356,9 @@
       </svg>
     </button>
     <h3 class="album-title"></h3>
+    <p class="album-sub"></p>
     <div class="album-grid"></div>
-  </dialog>
+  </div>
 
   <dialog class="lightbox" aria-label="Náhled">
     <button class="lightbox-close" type="button"
@@ -376,6 +371,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=32" defer></script>
+  <script src="/js/main.js?v=34" defer></script>
 </body>
 </html>

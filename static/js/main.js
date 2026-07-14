@@ -678,13 +678,27 @@ function setupRing() {
     if (!albumTrack) return;
     const vp = albumCard.querySelector(".album-viewport");
     const H = vp.clientHeight;
-    // one card fills the view; neighbours sit fully off-screen and slide in
-    albumItems.forEach((c) => { c.style.height = H + "px"; c.style.marginBottom = "0px"; });
+    // each card fills the view, with a GAP between them — so the old card
+    // scrolls fully up and away, some veil shows, then the next rolls in
+    const gap = Math.round(H * 0.22);
+    albumItems.forEach((c, i) => {
+      c.style.height = H + "px";
+      c.style.marginBottom = (i === albumItems.length - 1 ? 0 : gap) + "px";
+    });
     albumFit();
     if (!animate) albumTrack.style.transition = "none";
-    albumTrack.style.transform = `translateY(${(-albumIdx * H).toFixed(1)}px)`;
+    albumTrack.style.transform = `translateY(${(-albumIdx * (H + gap)).toFixed(1)}px)`;
     if (!animate) { void albumTrack.offsetWidth; albumTrack.style.transition = ""; }
-    // (the left text is a static intro now; the per-person note lives on the card)
+    // the left WHITE description follows the person in view
+    const active = albumItems[albumIdx];
+    if (introText && active) {
+      introText.dataset.cs = active.dataset.roleCs || "";
+      introText.dataset.en = active.dataset.roleEn || "";
+      introText.textContent = lang === "cs" ? introText.dataset.cs : introText.dataset.en;
+      introText.classList.remove("swap");
+      void introText.offsetWidth;
+      introText.classList.add("swap");
+    }
   }
 
   function albumStep(dir) {
@@ -900,13 +914,24 @@ function setupAlbums() {
   if (!overlay) return;
   const grid = overlay.querySelector(".album-grid");
   const title = overlay.querySelector(".album-title");
+  const sub = overlay.querySelector(".album-sub");
 
-  // assorted aspect ratios for the gray "photo coming soon" placeholders
+  // assorted aspect ratios for the transparent-pink "photo coming soon" tiles
   const PH_ASPECTS = ["3 / 4", "16 / 9", "1 / 1", "4 / 5", "9 / 16", "16 / 9", "3 / 2", "1 / 1"];
+
+  function closeAlbum() {
+    overlay.classList.remove("is-open");
+    overlay.setAttribute("aria-hidden", "true");
+    grid.replaceChildren();
+  }
 
   document.querySelectorAll(".person-album-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       title.textContent = btn.dataset.person;
+      // the white note under the title = same description as the left column
+      sub.dataset.cs = btn.dataset.noteCs || "";
+      sub.dataset.en = btn.dataset.noteEn || "";
+      sub.textContent = lang === "cs" ? sub.dataset.cs : sub.dataset.en;
       const items = [];
       // the person's one real photo, in its natural dimensions
       if (btn.dataset.photo) {
@@ -920,8 +945,8 @@ function setupAlbums() {
         b.addEventListener("click", () => openLightbox(btn.dataset.photo));
         items.push(b);
       }
-      // the rest are plain gray placeholders in varied aspects (a scheme for
-      // albums yet to come) — no other real photos borrowed as fillers
+      // the rest are transparent-pink placeholders in varied aspects (a scheme
+      // for albums yet to come) — no other real photos borrowed as fillers
       PH_ASPECTS.forEach((ar) => {
         const ph = document.createElement("div");
         ph.className = "album-ph";
@@ -930,13 +955,22 @@ function setupAlbums() {
         items.push(ph);
       });
       grid.replaceChildren(...items);
-      overlay.showModal();
+      overlay.scrollTop = 0;
+      overlay.classList.add("is-open");
+      overlay.setAttribute("aria-hidden", "false");
     });
   });
 
-  overlay.querySelector(".album-close").addEventListener("click", () => overlay.close());
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.close(); });
-  overlay.addEventListener("close", () => grid.replaceChildren());
+  overlay.querySelector(".album-close").addEventListener("click", closeAlbum);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeAlbum(); });
+  // Esc closes the album (capture + stopPropagation keeps the ring from also
+  // closing); but if the lightbox is stacked on top, let it own Esc first
+  window.addEventListener("keydown", (e) => {
+    if (!overlay.classList.contains("is-open")) return;
+    if (document.querySelector("dialog[open]")) return; // lightbox on top
+    e.stopPropagation();
+    if (e.key === "Escape") closeAlbum();
+  }, true);
 }
 setupAlbums();
 

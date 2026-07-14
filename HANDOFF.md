@@ -69,15 +69,17 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   stays faintly behind. Clean 16:9 card that floats distinctly on the veil
   (the near-square version read as a "container"). ONE card showing at a
   time — no peeking neighbours (per user). Floating text on the left (`.ring-albums-intro`):
-  flat BLUE heading + PAPER description that FOLLOWS the person in view
-  (pink body text was tried and is ILLEGIBLE on the pink veil).
+  flat BLUE heading + WHITE description that FOLLOWS the person in view
+  (`albumLayout` reads each tile's `data-role-*`; the per-person note lives
+  here, NOT on the card — the card shows only the blue name).
   Inside it's a **VERTICAL CAROUSEL — the ring, but vertical** (NOT a
   scroll container — earlier scroll-box/sticky-tile variants were rejected
   for the blank-space "container" feel). `.album-viewport` (overflow
   hidden) holds `.person-track`; JS `albumLayout()` sizes each
-  `.proj--person` to the FULL viewport height and translateYs the track by
-  -idx*H, so only the active card shows and the old one slides fully up/out
-  as the next rises in. Photos NARROWER than the wide card (`albumFit()`
+  `.proj--person` to the FULL viewport height WITH a gap (~0.22H) between
+  them and translateYs the track by -idx*(H+gap), so the old card scrolls
+  fully up and away, a band of veil shows, then the next rolls in (per
+  user; a no-gap version read as one card morphing into the next). Photos NARROWER than the wide card (`albumFit()`
   toggles `.is-narrow`, e.g. Lukáš 0.90) show whole (contain) over a
   blurred scaled copy of themselves (`.person-bg`) that fills the sides —
   a non-AI substitute for generative fill (no image-gen tool available);
@@ -89,15 +91,20 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   shadow) + WHITE per-person note (role); paper pill bottom-right (also
   lifted). Left `.ring-albums-intro` is now a STATIC plain-blue heading +
   blue intro (from `profilePhotos.intro`, fallback baked in) — it no longer
-  follows the person (the per-person note moved onto the card). The pill (always rendered now, carries `data-photo`=p.src) opens
-  `.album-overlay` — a full-screen <dialog> (Esc/top-layer free; lightbox
-  stacks above it). Its grid = the person's ONE real photo at natural size
-  + assorted GRAY placeholders (`.album-ph`, aspect-ratios cycled in JS) in
-  a CSS-columns masonry — a placeholder scheme until real album photos
-  exist (no other real photos borrowed as fillers). NB the custom cursor
-  can't reach a dialog's top layer, so `html.has-cursor .album-overlay/.lightbox`
-  restore the native cursor. `photos[].album` in content.json is no longer
-  used by the template; `profilePhotos.intro` now feeds the left intro. Mobile <900px: card keeps ring
+  follows the person (the per-person note moved onto the card). The pill (always rendered, carries `data-photo`=p.src + `data-note-*`)
+  opens `.album-overlay` — now a PLAIN fixed layer (z-index 950, under the
+  cursor's 1000), NOT a <dialog>, so the custom round cursor shows over it
+  like the rest of the page (a modal dialog's top layer sits above the
+  cursor dot → it vanished). JS toggles `.is-open`; Esc handled via a
+  capture-phase listener (guarded so a stacked lightbox owns Esc first).
+  Overlay header = BLUE title (no shadow) + WHITE note (`.album-sub`, the
+  same per-person text as the left column). Its grid = the person's ONE real
+  photo at natural size + assorted TRANSPARENT-PINK placeholders (`.album-ph`,
+  rgba pink + faint paper inset edge, aspect-ratios cycled in JS) in a
+  CSS-columns masonry — a scheme until real album photos exist (no other
+  real photos borrowed). The lightbox is still a <dialog>, so it keeps the
+  native cursor. `photos[].album` in content.json is unused; the left intro
+  now follows per-person from `photos[].text`. Mobile <900px: card keeps ring
   size & stays centred, no side text; carousel works the same.
   All nav arrows (hero scroll cue, ring prev/next, ring up/down jumps) are
   plain straight arrows in index.html.tera — swapped from the earlier
