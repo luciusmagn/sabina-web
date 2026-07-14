@@ -69,9 +69,11 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   text on the left (`.ring-albums-intro`): flat BLUE heading (no shadow
   plate) + PAPER description that FOLLOWS the tile in view
   (`setupAlbumsIntro` reads each tile's `data-role-*`; pink body text was
-  tried and is ILLEGIBLE on the pink veil). Each person is their own TILE
-  (`.proj--person`, sticky top:0) — scrolling slides the next tile up OVER
-  the pinned previous one (the reference's cover motion), scrollbar hidden
+  tried and is ILLEGIBLE on the pink veil). Each person is their own
+  free-floating TILE (`.proj--person`, gap between tiles, the card's own
+  back transparent) — the whole tile scrolls away as the next arrives with
+  the veil showing through the gap (per user, matching the reference; a
+  sticky cover/stacking variant was tried and rejected), scrollbar hidden
   for this deck; full-bleed photo (object-position 50% 18% keeps faces),
   BLUE name bottom-left (only the name — the role lives in the left text),
   paper pill bottom-right. The pill opens `.album-overlay` — a full-screen

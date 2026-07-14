@@ -853,7 +853,12 @@ function setupAlbumsIntro() {
 
   let cur = 0;
   function apply() {
-    const idx = Math.max(0, Math.min(pages.length - 1, Math.round(deck.scrollTop / deck.clientHeight)));
+    // nearest tile to the current scroll position (tiles carry gaps, so
+    // plain division by page height would drift)
+    let idx = 0;
+    for (let i = 1; i < pages.length; i++) {
+      if (Math.abs(pages[i].offsetTop - deck.scrollTop) < Math.abs(pages[idx].offsetTop - deck.scrollTop)) idx = i;
+    }
     if (idx === cur) return;
     cur = idx;
     introText.dataset.cs = pages[idx].dataset.roleCs || "";

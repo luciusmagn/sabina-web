@@ -594,18 +594,22 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
    their album. The open card sits off-centre with a floating intro beside
    it (desktop only) — the rest of the ring stays visible behind the veil. */
 
-/* each person is their own TILE: sticky-stacked, so scrolling slides the
-   next tile up OVER the pinned previous one (the reference's cover motion)
-   — and the deck's scrollbar is hidden, it reads as cards, not a scroll */
+/* each person is their own free-floating TILE: the whole card scrolls
+   away as the next arrives, with a gap between them showing the veil
+   (the reference's motion). The card's own back goes transparent so the
+   tiles read as independent cards; the scrollbar is hidden. */
 .rcard--albums .rback-scroll { scrollbar-width: none; }
 .rcard--albums .rback-scroll::-webkit-scrollbar { display: none; }
+.rcard--albums .rcard-back { background: transparent; }
 
 .proj--person {
-  position: sticky;
-  top: 0;
+  position: relative;
   border-radius: var(--radius);
   overflow: hidden;
+  margin-bottom: clamp(16px, 3vh, 26px); /* the gap between tiles */
 }
+
+.proj--person:last-child { margin-bottom: 0; }
 
 .proj--person .person-photo {
   flex: 1;
