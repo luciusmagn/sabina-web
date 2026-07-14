@@ -135,6 +135,13 @@ html.has-cursor * { cursor: none !important; }
 /* the email is real text — native caret, no dot */
 html.has-cursor .hero-contact-email { cursor: text !important; }
 
+/* the custom cursor dot can't reach a <dialog>'s top layer, so restore the
+   native cursor inside the album overlay + lightbox (else no pointer shows) */
+html.has-cursor .album-overlay, html.has-cursor .album-overlay *,
+html.has-cursor .lightbox, html.has-cursor .lightbox * { cursor: auto !important; }
+html.has-cursor .album-photo, html.has-cursor .album-close,
+html.has-cursor .lightbox-close { cursor: pointer !important; }
+
 /* ---- fixed chrome: language + theme ---- */
 
 .top-controls {
@@ -652,22 +659,33 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
 
 .proj--person.is-narrow .person-photo { object-fit: contain; }
 
-.person-name {
+/* name + white note, lifted up off the very bottom edge */
+.person-id {
   position: absolute;
-  left: clamp(18px, 4.5%, 40px);
-  bottom: clamp(14px, 4%, 32px);
+  left: clamp(20px, 5%, 44px);
+  bottom: clamp(30px, 10%, 72px);
+}
+
+.person-name {
   margin: 0;
-  font-size: clamp(34px, 3.4vw, 58px);
+  font-size: clamp(32px, 3.2vw, 54px);
   font-weight: 800;
   letter-spacing: -0.015em;
   line-height: 1;
-  color: var(--main-a);
+  color: var(--main-a); /* plain blue, no shadow */
+}
+
+.person-note {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--paper); /* the white note per person */
 }
 
 .person-album-btn {
   position: absolute;
-  right: clamp(16px, 4%, 34px);
-  bottom: clamp(16px, 4%, 34px);
+  right: clamp(20px, 5%, 44px);
+  bottom: clamp(30px, 10%, 72px);
   padding: 12px 26px;
   border-radius: 999px;
   font-size: 14.5px;
@@ -684,8 +702,9 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   .rcard--albums { transition: transform 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), width 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), height 0.65s cubic-bezier(0.3, 0.7, 0.2, 1); }
   .rcard--albums.is-flipped {
     --tx: 15vw !important;
-    width: min(56vw, 940px);
-    height: min(82svh, 820px);
+    width: min(58vw, 1000px);
+    height: auto;
+    aspect-ratio: 16 / 9;    /* a clean 16:9 card floating on the veil */
   }
 }
 
@@ -756,25 +775,34 @@ html.has-cursor .hero-contact-email { cursor: text !important; }
   line-height: 1;
 }
 
+/* masonry columns so the real photo (natural aspect) and the assorted
+   gray placeholders tile together like a real album grid */
 .album-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(260px, 44vw), 1fr));
-  gap: 14px;
+  column-count: 3;
+  column-gap: 14px;
 }
 
-.album-photo {
+@media (max-width: 900px) { .album-grid { column-count: 2; } }
+
+.album-photo,
+.album-ph {
   display: block;
+  width: 100%;
+  margin: 0 0 14px;
   border-radius: 12px;
   overflow: hidden;
+  break-inside: avoid;
 }
 
 .album-photo img {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
+  height: auto;              /* the one real photo, in its natural dimensions */
   transition: transform 0.3s ease;
 }
+
+/* plain gray placeholders for photos yet to come (aspect set inline per tile) */
+.album-ph { background: #d3cec4; }
 
 .album-photo:hover img { transform: scale(1.02); }
 
@@ -1286,7 +1314,7 @@ body::after {
 .ring.has-flip--albums .ring-stage::after { background: rgba(255, 135, 177, 0.93); }
 /* flat inks, no shadow plate: blue heading, paper description */
 .albums-intro-title { color: var(--ink-blue); }
-.albums-intro-text { color: var(--paper); }
+.albums-intro-text { color: var(--ink-blue); } /* plain blue, no shadow */
 
 /* the album overlay: heavy pink veil, paper title with the blue plate,
    paper close chip */

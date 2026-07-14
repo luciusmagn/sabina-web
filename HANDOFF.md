@@ -64,10 +64,11 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   air above/below; captions read "Title, Author · /activity/".
   **Portréty = the ALBUMS CARD** (`.rcard--albums`, modelled on
   pixel.melbourne/directors). Opening it flips the card and grows it TALL &
-  NARROW (`.is-flipped`: `height: min(82svh,820px)`, `width: min(56vw,940px)`,
+  NARROW (`.is-flipped`: `width: min(58vw,1000px)`, `aspect-ratio: 16/9`,
   `--tx: 15vw !important`) slid right over a deep veil (0.93); the ring
-  stays faintly behind. WIDE landscape-ish card (was portrait), ONE card
-  showing at a time — no peeking neighbours (per user). Floating text on the left (`.ring-albums-intro`):
+  stays faintly behind. Clean 16:9 card that floats distinctly on the veil
+  (the near-square version read as a "container"). ONE card showing at a
+  time — no peeking neighbours (per user). Floating text on the left (`.ring-albums-intro`):
   flat BLUE heading + PAPER description that FOLLOWS the person in view
   (pink body text was tried and is ILLEGIBLE on the pink veil).
   Inside it's a **VERTICAL CAROUSEL — the ring, but vertical** (NOT a
@@ -84,13 +85,19 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   at a time (clamped, no wrap); driven by the ring's own wheel (debounced,
   from ANYWHERE on the page — no pointer-over-card needed), Up/Down keys,
   and vertical swipe. Each card: full-bleed photo (object-position 50% 22%),
-  BLUE name bottom-left (name only — role lives in the left text), paper
-  pill bottom-right. The pill opens `.album-overlay` — a full-screen
-  <dialog> (Esc/top-layer free; lightbox stacks above it) with that
-  person's photo grid from `photos[].album`. `album` is OPTIONAL (guarded
-  `is defined`) — server's live content.json renders fine without it;
-  buttons appear once it gains `album` arrays (add via /editor, never
-  git-reset). `profilePhotos.intro` unused. Mobile <900px: card keeps ring
+  bottom-left `.person-id` (lifted ~10% off the edge) = BLUE name (plain, no
+  shadow) + WHITE per-person note (role); paper pill bottom-right (also
+  lifted). Left `.ring-albums-intro` is now a STATIC plain-blue heading +
+  blue intro (from `profilePhotos.intro`, fallback baked in) — it no longer
+  follows the person (the per-person note moved onto the card). The pill (always rendered now, carries `data-photo`=p.src) opens
+  `.album-overlay` — a full-screen <dialog> (Esc/top-layer free; lightbox
+  stacks above it). Its grid = the person's ONE real photo at natural size
+  + assorted GRAY placeholders (`.album-ph`, aspect-ratios cycled in JS) in
+  a CSS-columns masonry — a placeholder scheme until real album photos
+  exist (no other real photos borrowed as fillers). NB the custom cursor
+  can't reach a dialog's top layer, so `html.has-cursor .album-overlay/.lightbox`
+  restore the native cursor. `photos[].album` in content.json is no longer
+  used by the template; `profilePhotos.intro` now feeds the left intro. Mobile <900px: card keeps ring
   size & stays centred, no side text; carousel works the same.
   All nav arrows (hero scroll cue, ring prev/next, ring up/down jumps) are
   plain straight arrows in index.html.tera — swapped from the earlier

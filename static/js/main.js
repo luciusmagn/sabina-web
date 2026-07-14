@@ -684,16 +684,7 @@ function setupRing() {
     if (!animate) albumTrack.style.transition = "none";
     albumTrack.style.transform = `translateY(${(-albumIdx * H).toFixed(1)}px)`;
     if (!animate) { void albumTrack.offsetWidth; albumTrack.style.transition = ""; }
-    // the floating description follows the person in view
-    const active = albumItems[albumIdx];
-    if (introText && active) {
-      introText.dataset.cs = active.dataset.roleCs || "";
-      introText.dataset.en = active.dataset.roleEn || "";
-      introText.textContent = lang === "cs" ? introText.dataset.cs : introText.dataset.en;
-      introText.classList.remove("swap");
-      void introText.offsetWidth;
-      introText.classList.add("swap");
-    }
+    // (the left text is a static intro now; the per-person note lives on the card)
   }
 
   function albumStep(dir) {
@@ -910,21 +901,35 @@ function setupAlbums() {
   const grid = overlay.querySelector(".album-grid");
   const title = overlay.querySelector(".album-title");
 
+  // assorted aspect ratios for the gray "photo coming soon" placeholders
+  const PH_ASPECTS = ["3 / 4", "16 / 9", "1 / 1", "4 / 5", "9 / 16", "16 / 9", "3 / 2", "1 / 1"];
+
   document.querySelectorAll(".person-album-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       title.textContent = btn.dataset.person;
-      grid.replaceChildren(...btn.dataset.album.split("|").filter(Boolean).map((src) => {
+      const items = [];
+      // the person's one real photo, in its natural dimensions
+      if (btn.dataset.photo) {
         const b = document.createElement("button");
         b.type = "button";
         b.className = "album-photo";
         const img = document.createElement("img");
-        img.src = src;
+        img.src = btn.dataset.photo;
         img.alt = "";
-        img.loading = "lazy";
         b.append(img);
-        b.addEventListener("click", () => openLightbox(src));
-        return b;
-      }));
+        b.addEventListener("click", () => openLightbox(btn.dataset.photo));
+        items.push(b);
+      }
+      // the rest are plain gray placeholders in varied aspects (a scheme for
+      // albums yet to come) — no other real photos borrowed as fillers
+      PH_ASPECTS.forEach((ar) => {
+        const ph = document.createElement("div");
+        ph.className = "album-ph";
+        ph.style.aspectRatio = ar;
+        ph.setAttribute("aria-hidden", "true");
+        items.push(ph);
+      });
+      grid.replaceChildren(...items);
       overlay.showModal();
     });
   });
