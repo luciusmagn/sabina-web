@@ -679,11 +679,13 @@ function setupRing() {
     const vp = albumCard.querySelector(".album-viewport");
     const H = vp.clientHeight;
     // each card fills the view, with a GAP between them — so the old card
-    // scrolls fully up and away, some veil shows, then the next rolls in
-    const gap = Math.round(H * 0.22);
+    // scrolls fully up and away, some veil shows, then the next rolls in;
+    // .is-active drives the shrink-and-fade (only the centred card is full)
+    const gap = Math.round(H * 0.16);
     albumItems.forEach((c, i) => {
       c.style.height = H + "px";
       c.style.marginBottom = (i === albumItems.length - 1 ? 0 : gap) + "px";
+      c.classList.toggle("is-active", i === albumIdx);
     });
     albumFit();
     if (!animate) albumTrack.style.transition = "none";

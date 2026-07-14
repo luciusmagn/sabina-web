@@ -76,10 +76,12 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   scroll container — earlier scroll-box/sticky-tile variants were rejected
   for the blank-space "container" feel). `.album-viewport` (overflow
   hidden) holds `.person-track`; JS `albumLayout()` sizes each
-  `.proj--person` to the FULL viewport height WITH a gap (~0.22H) between
+  `.proj--person` to the FULL viewport height WITH a gap (~0.16H) between
   them and translateYs the track by -idx*(H+gap), so the old card scrolls
-  fully up and away, a band of veil shows, then the next rolls in (per
-  user; a no-gap version read as one card morphing into the next). Photos NARROWER than the wide card (`albumFit()`
+  fully up and away, a band of veil shows, then the next rolls in. Each card
+  ALSO shrinks + fades as it leaves and grows + fades in as it arrives
+  (`.proj--person` opacity 0/scale 0.9 → `.is-active` 1/1 — the
+  pixel.melbourne move). Photos NARROWER than the wide card (`albumFit()`
   toggles `.is-narrow`, e.g. Lukáš 0.90) show whole (contain) over a
   blurred scaled copy of themselves (`.person-bg`) that fills the sides —
   a non-AI substitute for generative fill (no image-gen tool available);
@@ -102,7 +104,8 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   photo at natural size + assorted TRANSPARENT-PINK placeholders (`.album-ph`,
   rgba pink + faint paper inset edge, aspect-ratios cycled in JS) in a
   CSS-columns masonry — a scheme until real album photos exist (no other
-  real photos borrowed). The lightbox is still a <dialog>, so it keeps the
+  real photos borrowed). The overlay bg is SOLID pink (full opacity, unlike
+  the closed-card veil) and the tiles are a lighter full-opacity pink. The lightbox is still a <dialog>, so it keeps the
   native cursor. `photos[].album` in content.json is unused; the left intro
   now follows per-person from `photos[].text`. Mobile <900px: card keeps ring
   size & stays centred, no side text; carousel works the same.
