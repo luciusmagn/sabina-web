@@ -43,75 +43,33 @@ One merged look — risograph two-ink print (was: light/dark themes, see tags):
   "Kontakt" label anchors to #kontakt.
 - **Work ring** (`#prace`): 3D circular carousel, 5 category cards
   (viz / produkt / portréty / videa / typografie). Centre card faces you;
-  ±1 flank; ±2 peek deeper, counter-rotated. Wheel rotates it — vertical
-  (releases after a full loop so the page stays scrollable) AND horizontal
-  touchpad swipes (never release; also suppress the browser's back/forward
-  gesture over the section); arrows/keys/pointer-swipe too. Firefox line-
-  mode wheel deltas are normalised (×16).
-  Labels ride a slow conveyor (drop in from above 1.9s, exit down 0.6s,
-  input locked ~2.65s per turn). Clicking the centre card FLIPS it to a
-  vertical project deck (snap per page, slim blue scrollbar whose track
-  is inset `margin-block: var(--radius)` so the thumb clears the card's
-  rounded corners, 50%-pink veil dims everything behind; Esc / click outside
-  closes). NB headless Chrome doesn't paint custom scrollbars, so verify the
-  scrollbar visually in a real browser.
-  Deck page types (all data from content.json, template-side layout only):
-  `.proj--set` = grouped pages (viz: Krulichovi brand page + devices page;
-  produkt: one page per productSet) with the set's label + caption up top
-  and photos in rows (widths ∝ `--ar` aspect, from content.json where
-  available) or a 2-col grid; `--contain` rows never crop (used for the viz
-  collages + devices). `.proj--kniha` books are padded smaller with
-  air above/below; captions read "Title, Author · /activity/".
-  **Portréty = the ALBUMS CARD** (`.rcard--albums`, modelled on
-  pixel.melbourne/directors). Opening it flips the card and grows it TALL &
-  NARROW (`.is-flipped`: `width: min(58vw,1000px)`, `aspect-ratio: 16/9`,
-  `--tx: 15vw !important`) slid right over a deep veil (0.93); the ring
-  stays faintly behind. Clean 16:9 card that floats distinctly on the veil
-  (the near-square version read as a "container"). ONE card showing at a
-  time — no peeking neighbours (per user). Floating text on the left (`.ring-albums-intro`):
-  flat BLUE heading + WHITE description that FOLLOWS the person in view
-  (`albumLayout` reads each tile's `data-role-*`; the per-person note lives
-  here, NOT on the card — the card shows only the blue name).
-  Inside it's a **VERTICAL CAROUSEL — the ring, but vertical** (NOT a
-  scroll container — earlier scroll-box/sticky-tile variants were rejected
-  for the blank-space "container" feel). `.album-viewport` (overflow
-  hidden) holds `.person-track`; JS `albumLayout()` sizes each
-  `.proj--person` to the FULL viewport height WITH a gap (~0.16H) between
-  them and translateYs the track by -idx*(H+gap), so the old card scrolls
-  fully up and away, a band of veil shows, then the next rolls in. Each card
-  ALSO shrinks + fades as it leaves and grows + fades in as it arrives
-  (`.proj--person` opacity 0/scale 0.9 → `.is-active` 1/1 — the
-  pixel.melbourne move). Photos NARROWER than the wide card (`albumFit()`
-  toggles `.is-narrow`, e.g. Lukáš 0.90) show whole (contain) over a
-  blurred scaled copy of themselves (`.person-bg`) that fills the sides —
-  a non-AI substitute for generative fill (no image-gen tool available);
-  drop in true outpainted wides later and they just fill (cover). `albumStep(±1)` moves one person
-  at a time (clamped, no wrap); driven by the ring's own wheel (debounced,
-  from ANYWHERE on the page — no pointer-over-card needed), Up/Down keys,
-  and vertical swipe. Each card: full-bleed photo (object-position 50% 22%),
-  bottom-left `.person-id` (lifted ~10% off the edge) = BLUE name (plain, no
-  shadow) + WHITE per-person note (role); paper pill bottom-right (also
-  lifted). Left `.ring-albums-intro` is now a STATIC plain-blue heading +
-  blue intro (from `profilePhotos.intro`, fallback baked in) — it no longer
-  follows the person (the per-person note moved onto the card). The pill (always rendered, carries `data-photo`=p.src + `data-note-*`)
-  opens `.album-overlay` — now a PLAIN fixed layer (z-index 950, under the
-  cursor's 1000), NOT a <dialog>, so the custom round cursor shows over it
-  like the rest of the page (a modal dialog's top layer sits above the
-  cursor dot → it vanished). JS toggles `.is-open`; Esc handled via a
-  capture-phase listener (guarded so a stacked lightbox owns Esc first).
-  Overlay header = BLUE title (no shadow) + WHITE note (`.album-sub`, the
-  same per-person text as the left column). Its grid = the person's ONE real
-  photo at natural size + assorted TRANSPARENT-PINK placeholders (`.album-ph`,
-  rgba pink + faint paper inset edge, aspect-ratios cycled in JS) in a
-  CSS-columns masonry — a scheme until real album photos exist (no other
-  real photos borrowed). The overlay bg is SOLID pink (full opacity, unlike
-  the closed-card veil) and the tiles are a lighter full-opacity pink. The lightbox is still a <dialog>, so it keeps the
-  native cursor. `photos[].album` in content.json is unused; the left intro
-  now follows per-person from `photos[].text`. Mobile <900px: card keeps ring
-  size & stays centred, no side text; carousel works the same.
-  All nav arrows (hero scroll cue, ring prev/next, ring up/down jumps) are
-  plain straight arrows in index.html.tera — swapped from the earlier
-  hand-drawn curvy paths.
+  ±1 flank; ±2 peek deeper. Wheel/keys/pointer-swipe rotate it; Firefox
+  line deltas ×16. **Portréty is the default centred card** on scroll-in
+  (`.rcard--start`, picked in setupRing's `cur` init).
+  EVERY card now opens (flip) into the SAME vertical carousel — generalized
+  from the old albums card (`setupRing`: a `decks` Map, one entry per card
+  with its own idx; `deckLayout`/`deckStep`/`deckFit`; wheel/keys/swipe route
+  to the flipped card's deck). The flipped card grows to 16:9 (`.rcard.is-flipped`),
+  slides right (`--tx 15vw`), left column (`.ring-albums-intro`) shows the
+  card's category (blue heading) + the current item's description (white,
+  follows via `data-role-*`). Items are `.proj--person` cards: cover photo
+  (blur-fill if narrower than 16:9), blue name, and a pill. Old deck-page
+  markup (`.proj--set/.rback-scroll/.proj--kniha`) is GONE; that CSS is now
+  dead. Each item's pill (`.person-album-btn`) does one of two things by
+  `data-action`:
+    - `video` → plays `data-video` in the fullscreen player (Videos card;
+      poster cover + centred `.person-play` mark; no gallery).
+    - `gallery` → opens `.album-overlay` (solid pink, `setupAlbums`): masonry
+      of `data-gallery` real photos (pipe-separated) + placeholder tiles when
+      `data-ph` is set. Photos & Typography use placeholders (more coming);
+      Product & Visual identity show only real set photos. Cover per card:
+      Photos=person photo, Videos=poster, Typography=book image, Product=the
+      set's first photo (rest→gallery), Visual identity=the logo lockups
+      (mockups+devices→gallery). Overlay: blue title + white sub, custom
+      cursor (plain layer, not a dialog); lightbox stacks above for zoom.
+  The transition (shared): each item shrinks+fades as it leaves and grows+
+  fades in (1.15s ease), with a gap so the old one clears before the next.
+  Clicking the centre card flips; Esc / click-outside closes.
 - **Covers**: continuous-tone riso separations (`setupCoverArt` in main.js)
   — each source image reprints as three ink plates (orange/blue/black) via
   a 1px stochastic grain dither with CRUSH: heavy coverage fuses to SOLID

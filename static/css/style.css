@@ -604,7 +604,7 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
    tall person cards, one centred with the neighbours peeking, stepping one
    at a time (JS drives the track transform). No scroll container, so no
    box + blank space; the card's own back is transparent. */
-.rcard--albums .rcard-back { background: transparent; overflow: visible; }
+.rcard-back { overflow: visible; } /* the deck carousel manages its own clipping */
 
 .album-viewport {
   position: absolute;
@@ -692,16 +692,28 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
 
 .person-album-btn:hover { transform: translateY(-2px); }
 
+/* video cards: a play mark centred on the poster */
+.person-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(52px, 6vw, 80px);
+  transform: translate(-50%, -50%);
+  color: var(--paper);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.35));
+}
+
 @media (min-width: 900px) {
-  /* the open albums card grows TALL and narrow (better portrait crop) and
-     slides right, making room for the intro on the left. !important outbids
-     the inline --tx layout() writes; height overrides the ring-stage height. */
-  .rcard--albums { transition: transform 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), width 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), height 0.65s cubic-bezier(0.3, 0.7, 0.2, 1); }
-  .rcard--albums.is-flipped {
+  /* an open card grows to a clean 16:9 and slides right, making room for the
+     intro on the left. !important outbids the inline --tx layout() writes;
+     height/aspect override the ring-stage height. Applies to every card. */
+  .rcard { transition: transform 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), width 0.65s cubic-bezier(0.3, 0.7, 0.2, 1), height 0.65s cubic-bezier(0.3, 0.7, 0.2, 1); }
+  .rcard.is-flipped {
     --tx: 15vw !important;
     width: min(58vw, 1000px);
     height: auto;
-    aspect-ratio: 16 / 9;    /* a clean 16:9 card floating on the veil */
+    aspect-ratio: 16 / 9;
   }
 }
 
@@ -717,7 +729,7 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
   transition: opacity 0.4s ease, translate 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-.ring.has-flip--albums .ring-albums-intro {
+.ring.has-flip .ring-albums-intro {
   opacity: 1;
   translate: 0 -50%;
   transition-delay: 0.25s; /* arrives once the flip is mostly done */
@@ -1273,11 +1285,8 @@ body::after {
 .rcard-title { color: var(--paper); }
 .rcard-open { background: var(--paper); color: var(--ink-blue); }
 
-/* decks: paper ground, blue captions, photos in their own colours */
-.rcard-back { background: var(--paper); color: var(--ink-blue); }
-.proj-zoom, .proj-play { background: var(--paper); }
-.proj--kniha img { background: transparent; }
-.proj-play-mark { color: var(--ink-orange); }
+/* decks: transparent back so the veil shows in the gap between cards */
+.rcard-back { background: transparent; color: var(--ink-blue); }
 
 /* kontakt: blue flood, paper type, the sun again at the horizon */
 .kontakt > *:not(.walker-track) { position: relative; z-index: 1; }
@@ -1318,7 +1327,7 @@ body::after {
    hero (paper name, blue plate behind) with a pink body line; the veil
    deepens while it's open so the floating text reads */
 .person-album-btn { background: var(--paper); color: var(--ink-blue); }
-.ring.has-flip--albums .ring-stage::after { background: rgba(255, 135, 177, 0.93); }
+.ring.has-flip .ring-stage::after { background: rgba(255, 135, 177, 0.93); }
 /* flat inks, no shadow plate: blue heading, WHITE per-person description */
 .albums-intro-title { color: var(--ink-blue); }
 .albums-intro-text { color: var(--paper); } /* white, follows the person */

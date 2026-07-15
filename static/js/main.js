@@ -576,7 +576,8 @@ function setupRing() {
   const stage = ring.querySelector(".ring-stage");
   const cards = [...ring.querySelectorAll(".rcard")];
   const n = cards.length;
-  let cur = 0;
+  // the marked card (portréty) is centred by default when the section arrives
+  let cur = Math.max(0, cards.findIndex((c) => c.classList.contains("rcard--start")));
 
   function land() {
     const front = cards[cur].querySelector(".rcard-front");
@@ -649,50 +650,58 @@ function setupRing() {
     return true;
   }
 
-  /* ---- the albums card's vertical carousel (like the ring, but vertical) ---- */
-  const albumCard = ring.querySelector(".rcard--albums");
-  const albumTrack = albumCard && albumCard.querySelector(".person-track");
-  const albumItems = albumTrack ? [...albumTrack.querySelectorAll(".proj--person")] : [];
+  /* ---- every card opens into a vertical carousel (the ring, but vertical):
+     one 16:9 item per view, stepping shows the old card scroll up + shrink +
+     fade while the next rises in. Each card keeps its own index. ---- */
+  const introTitle = document.querySelector(".albums-intro-title");
   const introText = document.querySelector(".albums-intro-text");
-  let albumIdx = 0;
-  // re-check fit once each photo's real dimensions are known
-  albumItems.forEach((c) => {
-    const img = c.querySelector(".person-photo");
-    if (img) img.addEventListener("load", () => albumFit());
+  const decks = new Map();
+  cards.forEach((card) => {
+    const vp = card.querySelector(".album-viewport");
+    if (!vp) return;
+    const track = vp.querySelector(".person-track");
+    const items = [...track.querySelectorAll(".proj--person")];
+    decks.set(card, { vp, track, items, idx: 0, titleEl: card.querySelector(".rcard-title") });
+    // re-check fit once each cover's real dimensions are known
+    items.forEach((c) => {
+      const img = c.querySelector(".person-photo");
+      if (img) img.addEventListener("load", () => deckFit(card));
+    });
   });
 
-  function albumFit() {
-    // a photo narrower than the card shows whole (contain) over its own
+  function deckFit(card) {
+    // a cover narrower than the card shows whole (contain) over its own
     // blurred fill; wider ones fill (cover)
-    const vp = albumCard && albumCard.querySelector(".album-viewport");
-    if (!vp || !vp.clientWidth) return;
-    const cardAspect = vp.clientWidth / vp.clientHeight;
-    albumItems.forEach((c) => {
+    const d = decks.get(card);
+    if (!d || !d.vp.clientWidth) return;
+    const cardAspect = d.vp.clientWidth / d.vp.clientHeight;
+    d.items.forEach((c) => {
       const img = c.querySelector(".person-photo");
-      if (!img.naturalWidth) return;
-      c.classList.toggle("is-narrow", img.naturalWidth / img.naturalHeight < cardAspect - 0.02);
+      if (img && img.naturalWidth) c.classList.toggle("is-narrow", img.naturalWidth / img.naturalHeight < cardAspect - 0.02);
     });
   }
 
-  function albumLayout(animate) {
-    if (!albumTrack) return;
-    const vp = albumCard.querySelector(".album-viewport");
-    const H = vp.clientHeight;
-    // each card fills the view, with a GAP between them — so the old card
-    // scrolls fully up and away, some veil shows, then the next rolls in;
-    // .is-active drives the shrink-and-fade (only the centred card is full)
-    const gap = Math.round(H * 0.16);
-    albumItems.forEach((c, i) => {
+  function deckLayout(card, animate) {
+    const d = decks.get(card);
+    if (!d) return;
+    const H = d.vp.clientHeight;
+    const gap = Math.round(H * 0.16); // veil shows in the gap as a card leaves
+    d.items.forEach((c, i) => {
       c.style.height = H + "px";
-      c.style.marginBottom = (i === albumItems.length - 1 ? 0 : gap) + "px";
-      c.classList.toggle("is-active", i === albumIdx);
+      c.style.marginBottom = (i === d.items.length - 1 ? 0 : gap) + "px";
+      c.classList.toggle("is-active", i === d.idx);
     });
-    albumFit();
-    if (!animate) albumTrack.style.transition = "none";
-    albumTrack.style.transform = `translateY(${(-albumIdx * (H + gap)).toFixed(1)}px)`;
-    if (!animate) { void albumTrack.offsetWidth; albumTrack.style.transition = ""; }
-    // the left WHITE description follows the person in view
-    const active = albumItems[albumIdx];
+    deckFit(card);
+    if (!animate) d.track.style.transition = "none";
+    d.track.style.transform = `translateY(${(-d.idx * (H + gap)).toFixed(1)}px)`;
+    if (!animate) { void d.track.offsetWidth; d.track.style.transition = ""; }
+    // the left column: heading = this card's category, description = the item
+    if (introTitle && d.titleEl) {
+      introTitle.dataset.cs = d.titleEl.dataset.cs || "";
+      introTitle.dataset.en = d.titleEl.dataset.en || "";
+      introTitle.textContent = lang === "cs" ? introTitle.dataset.cs : introTitle.dataset.en;
+    }
+    const active = d.items[d.idx];
     if (introText && active) {
       introText.dataset.cs = active.dataset.roleCs || "";
       introText.dataset.en = active.dataset.roleEn || "";
@@ -703,29 +712,25 @@ function setupRing() {
     }
   }
 
-  function albumStep(dir) {
-    if (!albumItems.length) return false;
-    const next = Math.max(0, Math.min(albumItems.length - 1, albumIdx + dir));
-    if (next === albumIdx) return false;
-    albumIdx = next;
-    albumLayout(true);
+  function deckStep(card, dir) {
+    const d = decks.get(card);
+    if (!d || !d.items.length) return false;
+    const next = Math.max(0, Math.min(d.items.length - 1, d.idx + dir));
+    if (next === d.idx) return false;
+    d.idx = next;
+    deckLayout(card, true);
     return true;
   }
 
   function flip(card) {
     card.classList.add("is-flipped");
     ring.classList.add("has-flip");
-    // the albums card opens tall & off-centre as a vertical carousel
-    const isAlbums = card.classList.contains("rcard--albums");
-    ring.classList.toggle("has-flip--albums", isAlbums);
-    if (isAlbums) {
-      albumIdx = 0;
-      albumLayout(false);
-      setTimeout(() => albumLayout(false), 700); // re-measure once the card has grown
-      card.querySelector(".album-viewport").focus({ preventScroll: true });
-    } else {
-      const deck = card.querySelector(".rback-scroll");
-      if (deck) { deck.scrollTop = 0; deck.focus({ preventScroll: true }); }
+    const d = decks.get(card);
+    if (d) {
+      d.idx = 0;
+      deckLayout(card, false);
+      setTimeout(() => deckLayout(card, false), 700); // re-measure once the card has grown
+      d.vp.focus({ preventScroll: true });
     }
   }
 
@@ -733,7 +738,7 @@ function setupRing() {
     const card = ring.querySelector(".rcard.is-flipped");
     if (!card) return;
     card.classList.remove("is-flipped");
-    ring.classList.remove("has-flip", "has-flip--albums");
+    ring.classList.remove("has-flip");
     card.querySelector(".rcard-front").focus();
   }
 
@@ -760,13 +765,13 @@ function setupRing() {
   window.addEventListener("keydown", (e) => {
     if (document.querySelector("dialog[open]")) return; // the lightbox owns Esc
     if (e.key === "Escape") { unflip(); return; }
-    // the open albums card steps with up/down arrows
-    if (ring.classList.contains("has-flip--albums")) {
-      if (e.key === "ArrowDown") { e.preventDefault(); albumStep(1); }
-      if (e.key === "ArrowUp") { e.preventDefault(); albumStep(-1); }
+    // an open card steps its carousel with up/down arrows
+    if (ring.classList.contains("has-flip")) {
+      const card = ring.querySelector(".rcard.is-flipped");
+      if (card && e.key === "ArrowDown") { e.preventDefault(); deckStep(card, 1); }
+      if (card && e.key === "ArrowUp") { e.preventDefault(); deckStep(card, -1); }
       return;
     }
-    if (ring.classList.contains("has-flip")) return;
     const r = ring.getBoundingClientRect();
     const visible = r.top < window.innerHeight * 0.6 && r.bottom > window.innerHeight * 0.4;
     if (!visible) return;
@@ -784,23 +789,16 @@ function setupRing() {
   window.addEventListener("wheel", (e) => {
     if (reduceMotion.matches) return;
     if (ring.classList.contains("has-flip")) {
-      // the albums carousel steps one person per wheel notch, from anywhere
+      // the open card's carousel steps one item per wheel notch, from anywhere
       // on the page (like the ring) — no scroll container involved
-      if (ring.classList.contains("has-flip--albums")) {
-        if (e.target.closest(".album-overlay")) return; // the open album grid scrolls native
-        e.preventDefault();
-        const dY = e.deltaY * (e.deltaMode === 1 ? 16 : 1);
-        const now = Date.now();
-        if (now - wheelLock < 780 || Math.abs(dY) < 8) return; // pace with the slower transition
-        wheelLock = now;
-        albumStep(dY > 0 ? 1 : -1);
-        return;
-      }
-      // other decks: native scroll over them, redirected from elsewhere
-      if (e.target.closest(".rback-scroll, .album-overlay")) return;
+      if (e.target.closest(".album-overlay")) return; // the open gallery scrolls native
       e.preventDefault();
-      const deck = ring.querySelector(".rcard.is-flipped .rback-scroll");
-      if (deck) deck.scrollTop += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+      const dY = e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+      const now = Date.now();
+      if (now - wheelLock < 780 || Math.abs(dY) < 8) return; // pace with the slower transition
+      wheelLock = now;
+      const card = ring.querySelector(".rcard.is-flipped");
+      if (card) deckStep(card, dY > 0 ? 1 : -1);
       return;
     }
     const r = ring.getBoundingClientRect();
@@ -835,17 +833,18 @@ function setupRing() {
     }
   }, { passive: false });
 
-  // swipe rotates the ring (horizontal) or steps the albums carousel (vertical)
+  // swipe rotates the ring (horizontal) or steps the open card's carousel (vertical)
   let swipeX = null, swipeY = null;
   stage.addEventListener("pointerdown", (e) => {
-    if (ring.classList.contains("has-flip--albums")) swipeY = e.clientY;
-    else if (!ring.classList.contains("has-flip")) swipeX = e.clientX;
+    if (ring.classList.contains("has-flip")) swipeY = e.clientY;
+    else swipeX = e.clientX;
   });
   window.addEventListener("pointerup", (e) => {
     if (swipeY !== null) {
       const dy = e.clientY - swipeY;
       swipeY = null;
-      if (Math.abs(dy) > 48) albumStep(dy < 0 ? 1 : -1);
+      const card = ring.querySelector(".rcard.is-flipped");
+      if (card && Math.abs(dy) > 48) deckStep(card, dy < 0 ? 1 : -1);
       return;
     }
     if (swipeX === null) return;
@@ -854,19 +853,11 @@ function setupRing() {
     if (Math.abs(dx) > 48) go(dx < 0 ? 1 : -1);
   });
 
-  // media inside the backs
-  ring.querySelectorAll(".proj-play").forEach((btn) => {
-    btn.addEventListener("click", () => openVideoLightbox(btn.dataset.videoSrc));
-  });
-  ring.querySelectorAll(".proj-zoom").forEach((btn) => {
-    const img = btn.querySelector("img");
-    if (img) btn.addEventListener("click", () => openLightbox(img.currentSrc || img.src));
-  });
-
   wide.addEventListener("change", layout);
   window.addEventListener("resize", () => {
     layout();
-    if (ring.classList.contains("has-flip--albums")) albumLayout(false);
+    const card = ring.querySelector(".rcard.is-flipped");
+    if (card) deckLayout(card, false);
   });
 
   layout();
@@ -905,11 +896,12 @@ lightbox.addEventListener("click", (event) => {
 lightboxClose.addEventListener("click", () => lightbox.close());
 lightbox.addEventListener("close", () => lightboxMedia.replaceChildren());
 
-/* ---------------- person albums ----------------
-   The "Otevřít album" pill on a portrait page opens that person's photo
-   collection in a full-screen <dialog> over a pink veil — a grid built
-   from the paths the template baked into the button. Photos open in the
-   lightbox (a second dialog, stacking above); Esc walks back down. */
+/* ---------------- card actions: play + gallery ----------------
+   Each item card's pill either PLAYS a video (data-action="video") or opens
+   a GALLERY (data-action="gallery") — a full-screen layer over a solid pink
+   field with the item's real photos (masonry) plus, where more is coming,
+   transparent-pink placeholder tiles. Photos open in the lightbox (a dialog
+   stacking above); Esc walks back down. */
 
 function setupAlbums() {
   const overlay = document.querySelector(".album-overlay");
@@ -929,27 +921,31 @@ function setupAlbums() {
 
   document.querySelectorAll(".person-album-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      title.textContent = btn.dataset.person;
-      // the white note under the title = same description as the left column
+      // videos: the pill just plays the video, no gallery
+      if (btn.dataset.action === "video") { openVideoLightbox(btn.dataset.video); return; }
+
+      title.dataset.cs = btn.dataset.titleCs || "";
+      title.dataset.en = btn.dataset.titleEn || "";
+      title.textContent = lang === "cs" ? title.dataset.cs : title.dataset.en;
       sub.dataset.cs = btn.dataset.noteCs || "";
       sub.dataset.en = btn.dataset.noteEn || "";
       sub.textContent = lang === "cs" ? sub.dataset.cs : sub.dataset.en;
+
       const items = [];
-      // the person's one real photo, in its natural dimensions
-      if (btn.dataset.photo) {
+      // the item's real photos, each at its natural dimensions
+      (btn.dataset.gallery || "").split("|").filter(Boolean).forEach((src) => {
         const b = document.createElement("button");
         b.type = "button";
         b.className = "album-photo";
         const img = document.createElement("img");
-        img.src = btn.dataset.photo;
+        img.src = src;
         img.alt = "";
         b.append(img);
-        b.addEventListener("click", () => openLightbox(btn.dataset.photo));
+        b.addEventListener("click", () => openLightbox(src));
         items.push(b);
-      }
-      // the rest are transparent-pink placeholders in varied aspects (a scheme
-      // for albums yet to come) — no other real photos borrowed as fillers
-      PH_ASPECTS.forEach((ar) => {
+      });
+      // where more photos are coming (photos, typography), fill with tiles
+      if (btn.dataset.ph) PH_ASPECTS.forEach((ar) => {
         const ph = document.createElement("div");
         ph.className = "album-ph";
         ph.style.aspectRatio = ar;

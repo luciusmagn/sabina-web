@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=36">
+  <link rel="stylesheet" href="/css/style.css?v=37">
 </head>
 <body>
 
@@ -94,36 +94,20 @@
               </span>
             </button>
             <div class="rcard-back">
-              <div class="rback-scroll" tabindex="0">
-                {# page 1 — the Krulichovi brand set: logos + printed mockups #}
-                <article class="proj proj--set">
-                  <header class="proj-set-head">
-                    <h3 class="proj-set-title" data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</h3>
-                    <p class="proj-set-cap" data-cs="{{ content.visualIdentity.detail.caption.cs }}" data-en="{{ content.visualIdentity.detail.caption.en }}">{{ content.visualIdentity.detail.caption.cs }}</p>
-                  </header>
-                  <div class="proj-set-media">
-                    <div class="proj-set-row proj-set-row--contain">
-                      <button class="proj-zoom" type="button" style="--ar: 1.85" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                        <img src="{{ content.visualIdentity.detail.wideImage }}" alt="" loading="lazy">
-                      </button>
-                      <button class="proj-zoom" type="button" style="--ar: 1.28" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                        <img src="{{ content.visualIdentity.detail.sideImage }}" alt="" loading="lazy">
-                      </button>
-                    </div>
-                  </div>
-                </article>
-                {# page 2 — the web design on devices #}
-                <article class="proj proj--set">
-                  <div class="proj-set-media">
-                    <div class="proj-set-row proj-set-row--contain">
-                      {% for d in content.visualIdentity.devices %}
-                      <button class="proj-zoom" type="button" style="--ar: 0.72" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                        <img src="{{ d }}" alt="" loading="lazy">
-                      </button>
-                      {% endfor %}
-                    </div>
-                  </div>
-                </article>
+              <div class="album-viewport" tabindex="0">
+                <div class="person-track">
+                  {# one card: the logos as the cover, the rest in the gallery #}
+                  <article class="proj proj--person" data-role-cs="{{ content.visualIdentity.detail.caption.cs }}" data-role-en="{{ content.visualIdentity.detail.caption.en }}">
+                    <div class="person-bg" style="background-image: url('{{ content.visualIdentity.detail.wideImage }}')" aria-hidden="true"></div>
+                    <img class="person-photo" src="{{ content.visualIdentity.detail.wideImage }}" alt="{{ content.visualIdentity.detail.label.cs }}" loading="lazy">
+                    <h3 class="person-name" data-cs="{{ content.visualIdentity.detail.label.cs }}" data-en="{{ content.visualIdentity.detail.label.en }}">{{ content.visualIdentity.detail.label.cs }}</h3>
+                    <button class="person-album-btn" type="button" data-action="gallery"
+                            data-title-cs="{{ content.visualIdentity.detail.label.cs }}" data-title-en="{{ content.visualIdentity.detail.label.en }}"
+                            data-note-cs="{{ content.visualIdentity.detail.caption.cs }}" data-note-en="{{ content.visualIdentity.detail.caption.en }}"
+                            data-gallery="{{ content.visualIdentity.detail.sideImage }}{% for d in content.visualIdentity.devices %}|{{ d }}{% endfor %}"
+                            data-cs="Otevřít galerii" data-en="Open gallery">Otevřít galerii</button>
+                  </article>
+                </div>
               </div>
             </div>
           </div>
@@ -140,45 +124,32 @@
               </span>
             </button>
             <div class="rcard-back">
-              <div class="rback-scroll" tabindex="0">
-                {# one page per product set: its name + caption, photos grouped #}
-                {% for set in content.productSets %}
-                <article class="proj proj--set">
-                  <header class="proj-set-head">
-                    <h3 class="proj-set-title" data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</h3>
-                    <p class="proj-set-cap" data-cs="{{ set.caption.cs }}" data-en="{{ set.caption.en }}">{{ set.caption.cs }}</p>
-                  </header>
-                  {% if set.layout == "rows" %}
-                  <div class="proj-set-media">
-                    {% for row in set.rows %}
-                    <div class="proj-set-row">
-                      {% for img in row %}
-                      <button class="proj-zoom" type="button" style="--ar: {{ img.1 }}" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                        <img src="{{ img.0 }}" alt="" loading="lazy">
-                      </button>
-                      {% endfor %}
-                    </div>
-                    {% endfor %}
-                  </div>
-                  {% else %}
-                  <div class="proj-set-media proj-set-media--grid">
-                    {% for img in set.images %}
-                    <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                      <img src="{{ img.0 }}" alt="" loading="lazy">
-                    </button>
-                    {% endfor %}
-                  </div>
-                  {% endif %}
-                </article>
-                {% endfor %}
+              <div class="album-viewport" tabindex="0">
+                <div class="person-track">
+                  {# one card per product set — first photo is the cover, the
+                     rest of the set's photos go into the gallery #}
+                  {% for set in content.productSets %}
+                    {% if set.layout == "rows" %}{% set cover = set.rows.0.0.0 %}{% else %}{% set cover = set.images.0.0 %}{% endif %}
+                  <article class="proj proj--person" data-role-cs="{{ set.caption.cs }}" data-role-en="{{ set.caption.en }}">
+                    <div class="person-bg" style="background-image: url('{{ cover }}')" aria-hidden="true"></div>
+                    <img class="person-photo" src="{{ cover }}" alt="{{ set.label.cs }}" loading="lazy">
+                    <h3 class="person-name" data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</h3>
+                    <button class="person-album-btn" type="button" data-action="gallery"
+                            data-title-cs="{{ set.label.cs }}" data-title-en="{{ set.label.en }}"
+                            data-note-cs="{{ set.caption.cs }}" data-note-en="{{ set.caption.en }}"
+                            data-gallery="{% if set.layout == 'rows' %}{% for row in set.rows %}{% for img in row %}{% if img.0 != cover %}{{ img.0 }}|{% endif %}{% endfor %}{% endfor %}{% else %}{% for img in set.images %}{% if img.0 != cover %}{{ img.0 }}|{% endif %}{% endfor %}{% endif %}"
+                            data-cs="Otevřít galerii" data-en="Open gallery">Otevřít galerii</button>
+                  </article>
+                  {% endfor %}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {# ---- 3 · portraits — the albums card: opens off-centre, one person
-                per page (full-bleed photo + name + open-album pill) ---- #}
-        <div class="rcard rcard--albums">
+        {# ---- 3 · portraits — the DEFAULT card (centred on scroll-in);
+                one person per card, gallery = their photo + placeholders ---- #}
+        <div class="rcard rcard--albums rcard--start">
           <div class="rcard-inner">
             <button class="rcard-front" type="button">
               <span class="rcard-cover" aria-hidden="true"><img src="/covers/portrety.jpg" alt=""></span>
@@ -195,10 +166,10 @@
                     <div class="person-bg" style="background-image: url('{{ p.src }}')" aria-hidden="true"></div>
                     <img class="person-photo" src="{{ p.src }}" alt="{{ p.title.cs }}" loading="lazy">
                     <h3 class="person-name" data-cs="{{ p.title.cs }}" data-en="{{ p.title.en }}">{{ p.title.cs }}</h3>
-                    <button class="person-album-btn" type="button"
-                            data-person="{{ p.title.cs }}"
-                            data-photo="{{ p.src }}"
+                    <button class="person-album-btn" type="button" data-action="gallery"
+                            data-title-cs="{{ p.title.cs }}" data-title-en="{{ p.title.en }}"
                             data-note-cs="{{ p.text.cs }}" data-note-en="{{ p.text.en }}"
+                            data-gallery="{{ p.src }}" data-ph="1"
                             data-cs="Otevřít album" data-en="Open album">Otevřít album</button>
                   </article>
                   {% endfor %}
@@ -219,22 +190,23 @@
               </span>
             </button>
             <div class="rcard-back">
-              <div class="rback-scroll" tabindex="0">
-                {% for v in content.videos %}
-                <article class="proj proj--video">
-                  <button class="proj-play" type="button" data-video-src="{{ v.src }}"
-                          data-aria-cs="{{ v.name.cs }}" data-aria-en="{{ v.name.en }}" aria-label="{{ v.name.cs }}">
-                    <img src="{{ v.poster }}" alt="" loading="lazy">
-                    <svg class="proj-play-mark" viewBox="0 0 60 60" fill="none" aria-hidden="true">
+              <div class="album-viewport" tabindex="0">
+                <div class="person-track">
+                  {# one card per video — poster cover, the button plays it #}
+                  {% for v in content.videos %}
+                  <article class="proj proj--person proj--video" data-role-cs="/{{ v.work.cs }}/" data-role-en="/{{ v.work.en }}/">
+                    <div class="person-bg" style="background-image: url('{{ v.poster }}')" aria-hidden="true"></div>
+                    <img class="person-photo" src="{{ v.poster }}" alt="{{ v.name.cs }}" loading="lazy">
+                    <svg class="person-play" viewBox="0 0 60 60" fill="none" aria-hidden="true">
                       <path d="M30 4.5C13 6 4.8 14.6 5.6 30.8 6.4 46 15 55.4 30.6 55.5 46 55.6 55 45.8 55.4 30 55.8 13.8 46.6 5.4 30 4.5Z" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
                       <path d="M24.5 20.5C24.2 27.4 24.3 32.9 24.8 40.2 30.6 36.6 34.9 33.7 40.6 29.6 34.5 25.9 30.5 23.6 24.5 20.5Z" fill="currentColor"/>
                     </svg>
-                  </button>
-                  <p class="proj-cap">
-                    <span data-cs="/{{ v.work.cs }}/" data-en="/{{ v.work.en }}/">/{{ v.work.cs }}/</span>
-                  </p>
-                </article>
-                {% endfor %}
+                    <h3 class="person-name" data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</h3>
+                    <button class="person-album-btn" type="button" data-action="video" data-video="{{ v.src }}"
+                            data-cs="Přehrát" data-en="Play">Přehrát</button>
+                  </article>
+                  {% endfor %}
+                </div>
               </div>
             </div>
           </div>
@@ -251,17 +223,22 @@
               </span>
             </button>
             <div class="rcard-back">
-              <div class="rback-scroll" tabindex="0">
-                {% for b in content.books %}
-                <article class="proj proj--kniha">
-                  <button class="proj-zoom" type="button" data-aria-cs="{{ content.ui.enlarge.cs }}" data-aria-en="{{ content.ui.enlarge.en }}" aria-label="{{ content.ui.enlarge.cs }}">
-                    <img src="{{ b.image }}" alt="{{ b.title }} — {{ b.author }}" loading="lazy">
-                  </button>
-                  <p class="proj-cap">
-                    <span data-cs="{{ b.title }}, {{ b.author }} · /{{ b.activity.cs }}/" data-en="{{ b.title }}, {{ b.author }} · /{{ b.activity.en }}/">{{ b.title }}, {{ b.author }} · /{{ b.activity.cs }}/</span>
-                  </p>
-                </article>
-                {% endfor %}
+              <div class="album-viewport" tabindex="0">
+                <div class="person-track">
+                  {# one card per book — cover = the book, gallery = book + placeholders #}
+                  {% for b in content.books %}
+                  <article class="proj proj--person" data-role-cs="{{ b.author }} · /{{ b.activity.cs }}/" data-role-en="{{ b.author }} · /{{ b.activity.en }}/">
+                    <div class="person-bg" style="background-image: url('{{ b.image }}')" aria-hidden="true"></div>
+                    <img class="person-photo" src="{{ b.image }}" alt="{{ b.title }}" loading="lazy">
+                    <h3 class="person-name" data-cs="{{ b.title }}" data-en="{{ b.title }}">{{ b.title }}</h3>
+                    <button class="person-album-btn" type="button" data-action="gallery"
+                            data-title-cs="{{ b.title }}" data-title-en="{{ b.title }}"
+                            data-note-cs="{{ b.author }} · /{{ b.activity.cs }}/" data-note-en="{{ b.author }} · /{{ b.activity.en }}/"
+                            data-gallery="{{ b.image }}" data-ph="1"
+                            data-cs="Otevřít galerii" data-en="Open gallery">Otevřít galerii</button>
+                  </article>
+                  {% endfor %}
+                </div>
               </div>
             </div>
           </div>
@@ -371,6 +348,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=36" defer></script>
+  <script src="/js/main.js?v=37" defer></script>
 </body>
 </html>
