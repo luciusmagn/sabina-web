@@ -1,7 +1,16 @@
-# HANDOFF — sabinamacha.com redesign (branch `redesign`)
+# HANDOFF — sabinamacha.com redesign
 
-Context file for continuing this work in a fresh session. Read this, run the
-site, then pick up at **Open issue #1** below.
+Context file for continuing this work in a fresh session. Read this, then run
+the dev server (see **Run it**). No open bug — see **Git state** for exactly
+where things stand and what's not-yet-deployed.
+
+**Resume here (2026-07-15):** local is at `4d84a14`; every ring card now opens
+into the Photos-style vertical carousel (Portréty is the default centred card;
+Videos play, others open galleries). It is committed + pushed to `master` and
+`redesign` but **not deployed** — production is still `aef2469` (`?v=36`). The
+last thing the user did was ask to hand off to a new window; likely next steps
+are either "deploy the all-cards version" or more tweaks. There are NO
+uncommitted changes.
 
 ## What this is
 
@@ -124,50 +133,34 @@ The riso look is one deletable block at the END of `static/css/style.css`
 plus the riso cover renderer (`setupCoverArt`) in `static/js/main.js`
 (the `pre-riso` tag holds the pre-riso wireframe renderer).
 
-## Git state
+## Git state (as of 2026-07-15, handoff to a fresh window)
 
-- Branch `redesign`, pushed to origin (through the flip fix + riso
-  adjustments, 2026-07-06).
-- **Tags (pushed)**: `ring-v1`, `ring-v2` (photo covers + conveyor labels),
-  `pre-riso` (two-theme + depth wireframes — revert point for the whole riso
-  experiment).
-- `master` = old live site. Do not touch without the deploy steps below.
+- **`master` == `redesign` == `origin/*` = `4d84a14`** (working tree clean).
+  IMPORTANT: `master` is NO LONGER the old live site — the redesign was
+  merged to master and deployed a while back; both branches now track the
+  same redesign work. Keep pushing both (`git push origin master` then
+  `git branch -f redesign master && git push origin redesign`).
+- **Production (`root@sabinamacha.com`) = `aef2469` (assets `?v=36`)** — one
+  deploy BEHIND local. The "every card → vertical carousel" change (`4d84a14`,
+  `?v=37`) is committed/pushed but **NOT deployed**. Deploy = the zero-downtime
+  `git pull` in DEPLOYMENT.md, preserving the server's live `content.json`
+  (backup + stash + restore); no rebuild needed (no Rust changes). Always
+  dry-run the template against the server's live content.json first.
+- **Tags (pushed)**: `ring-v1`, `ring-v2`, `pre-riso` (revert points).
+- Assets are `?v=N` cache-busted in index.html.tera — bump on every
+  CSS/JS/template change (currently `v=37`).
 
-## Resolved — cards not opening in real browsers (root cause found)
+## Debugging technique (IMPORTANT)
 
-Symptom was: clicking the centre card does nothing visible in any real
-browser; never reproducible in the harness preview.
-
-**Root cause (verified by driving a real Chrome over CDP, headed and
-headless):** `setupCoverParallax` wrote its hover tilt as an inline
-`rotateY()/rotateX()` transform on **`.rcard-front`** — a backface-hidden
-face inside the preserve-3d flip. Any transform there (even a residual
-`rotateY(-0.09deg)`) breaks hit-testing of the face: `elementFromPoint` over
-the card returns `.rcard-inner`, clicks fall through the button, the click
-listener never fires. No pointermove ever runs in the harness preview, so
-the front there stays transform-free and clicks always worked; a real user
-always crosses the card with the mouse first, so it always failed. All the
-compositor/painting theories from earlier rounds were misdiagnoses of this.
-
-**Fix (commit on this branch):**
-- the tilt now targets `.rcard-cover` (flat decorative child) with
-  `perspective(1100px)` baked into the transform; `.rcard-front` is never
-  transformed. Transition moved to `.rcard-cover` in style.css.
-- the click listener moved from `.rcard-front` to the `.rcard` itself with
-  an `is-flipped` guard, so a stray fall-through click still lands on an
-  ancestor that handles it (belt and braces).
-- `.rcard.is-flipped .rcard-cover { transform: none !important }` joins the
-  mesh reset; asset query strings bumped to `?v=4`.
-
-Verified in real Chrome 149 via CDP: hover→click opens (the exact failing
-path), reopen after Esc works, outside-click closes, side-card click
-rotates the ring, deck clicks don't re-flip, hit-test grid stays clean
-after hovering, no console errors. Screenshots confirmed the riso look and
-the open deck render correctly. Not yet user-confirmed in their browsers.
-
-Note: clicking mid-conveyor (~1.3s while the ring is still turning) can hit
-a card that is mid-flight and merely re-centre it — pre-existing niggle,
-kept as is.
+The harness browser-preview FREEZES rAF/transitions/pointermove, so the ring,
+sun, covers, and carousels don't animate there and hover-driven bugs never
+reproduce. **Always verify in a real headed/headless Chrome over CDP**
+(`--remote-debugging-port=9222 --user-data-dir=/tmp/...`, Node ≥21 built-in
+WebSocket, `Input.dispatchMouseEvent` with `button:"left", clickCount:1` to
+generate real clicks). This is how every ring/album issue was actually found
+and verified. `curl` the local dev server for HTML/asset checks. The local
+dev server (port 8000) sometimes drops between turns — restart via the
+preview `preview_start` tool (name `sabina-web`).
 
 ## Other known follow-ups
 
