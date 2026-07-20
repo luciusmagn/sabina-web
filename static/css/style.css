@@ -199,7 +199,13 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
   display: flex;
   align-items: flex-end;
   transition: background-color 0.25s ease;
+  /* how far the sun's shadows reach; 1 at rest, grows while the sun is hovered
+     (the name's text-shadow + the orb's cast shadow both scale off it) */
+  --shadow-grow: 1;
+  --orb: clamp(100px, 12vw, 180px); /* the sun disc's diameter — also the shadow's thickness */
 }
+
+.hero.sun-hover { --shadow-grow: 7; }
 
 .hero-inner {
   position: relative;
@@ -215,8 +221,10 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
   font-weight: 800;
   line-height: 0.92;
   letter-spacing: -0.025em;
-  /* flat offset shadow — direction driven by the real sun (JS sets --sun-dx/--sun-dy) */
-  text-shadow: var(--sun-dx, 0.05em) var(--sun-dy, 0.045em) 0 var(--hero-accent);
+  /* flat offset shadow — direction driven by the real sun (JS sets --sun-dx/--sun-dy),
+     length scaled by --shadow-grow so it lengthens slowly when the sun is hovered */
+  text-shadow: calc(var(--sun-dx, 0.05em) * var(--shadow-grow, 1)) calc(var(--sun-dy, 0.045em) * var(--shadow-grow, 1)) 0 var(--hero-accent);
+  transition: text-shadow 2.8s cubic-bezier(0.22, 0.61, 0.28, 1);
 }
 
 .hero-tagline {
@@ -1237,8 +1245,8 @@ body::after {
 .hero::before {
   content: "";
   position: absolute;
-  z-index: 0;
-  width: clamp(100px, 12vw, 180px);
+  z-index: 1;                 /* the disc sits above its own cast shadow (::after) */
+  width: var(--orb);
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--ink-orange);
@@ -1249,35 +1257,58 @@ body::after {
   animation: sun-breathe 4.6s ease-in-out infinite;
 }
 
+/* the sun shining blue: a soft round blue bloom radiating from the disc while
+   it's hovered (~30% opacity), then fading back. Radial gradient, centred on
+   the disc, behind it — no ray, no directional shadow. Grows in as the name's
+   shadows shift, on the same slow timing. */
+.hero::after {
+  content: "";
+  position: absolute;
+  z-index: 0;                 /* behind the disc, above the pink field */
+  left: var(--ball-x, 82%);
+  top: var(--ball-y, 8%);
+  width: calc(var(--orb) * 3);
+  height: calc(var(--orb) * 3);
+  /* four SHORT rays, full ink — the light that casts the shadows. The fan is
+     drawn pointing straight down (conic 180deg = down), then the element
+     rotates to the shadow bearing (--shadow-angle − 90deg), so the rays
+     always run the same way the name's shadow falls. Lengths still differ
+     per ray via the union-of-blobs mask; blur keeps the tips hazy. */
+  background: conic-gradient(
+    transparent 152deg, var(--hero-accent) 155.5deg, transparent 159deg,
+    transparent 165deg, var(--hero-accent) 172deg,   transparent 179deg,
+    transparent 186deg, var(--hero-accent) 190deg,   transparent 194deg,
+    transparent 201deg, var(--hero-accent) 205.5deg, transparent 210deg
+  );
+  -webkit-mask-image:
+    radial-gradient(ellipse 30% 26% at 50% 58%, #000 30%, transparent 85%),
+    radial-gradient(ellipse 22% 34% at 44% 66%, #000 20%, transparent 85%),
+    radial-gradient(ellipse 16% 24% at 58% 62%, #000 15%, transparent 80%);
+  mask-image:
+    radial-gradient(ellipse 30% 26% at 50% 58%, #000 30%, transparent 85%),
+    radial-gradient(ellipse 22% 34% at 44% 66%, #000 20%, transparent 85%),
+    radial-gradient(ellipse 16% 24% at 58% 62%, #000 15%, transparent 80%);
+  filter: blur(5px);
+  transform: translate(-50%, -50%) rotate(calc(var(--shadow-angle, 90deg) - 90deg)) scale(0.7);
+  opacity: 0;
+  transition: opacity 2.8s ease, transform 2.8s cubic-bezier(0.22, 0.61, 0.28, 1);
+  pointer-events: none;
+}
+
+.hero.sun-hover::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(calc(var(--shadow-angle, 90deg) - 90deg)) scale(1);
+}
+
 @keyframes sun-breathe {
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
   50%      { transform: translate(-50%, -50%) scale(1.07); }
 }
 
-/* hovering the sun: one solid blue ray prints toward the name — the light
-   the flat blue shadow is cast by. JS builds it; it draws outward. */
-.sun-rays {
-  position: absolute;
-  inset: 0;
-  z-index: 1; /* over the disc, under the type (hero-inner sits at 2) */
-  pointer-events: none;
-}
-
-.sun-rays line {
-  stroke: var(--ink-blue); /* width set per-build in JS (scales with the disc) */
-  stroke-linecap: round;
-  opacity: 0;
-  transition: opacity 0.3s ease, stroke-dashoffset 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
-}
-
-.hero.sun-hover .sun-rays line {
-  opacity: 1;
-  stroke-dashoffset: 0 !important; /* over the JS-set full-length offset */
-}
-
 @media (prefers-reduced-motion: reduce) {
   .hero::before, .kontakt::before { animation: none; }
-  .sun-rays line { transition: opacity 0.3s ease; stroke-dashoffset: 0 !important; }
+  .hero-name { transition: none; }              /* no slow lengthen */
+  .hero::after { transition: opacity 0.3s ease; }
 }
 
 .hero-inner { z-index: 2; }

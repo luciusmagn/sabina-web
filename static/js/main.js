@@ -162,6 +162,7 @@ function setupSky() {
       // both below the horizon — a resting shadow
       root.style.setProperty("--sun-dx", "0.042em");
       root.style.setProperty("--sun-dy", "0.052em");
+      root.style.setProperty("--shadow-angle", (Math.atan2(0.052, 0.042) * 180 / Math.PI).toFixed(1) + "deg");
       return;
     }
 
@@ -172,8 +173,13 @@ function setupSky() {
     // (magnitudes tuned against ~190px display type).
     const mag = (22 - elev * 14) * (isMoon ? 0.8 : 1);
     const opp = (az + 180) * rad;
-    root.style.setProperty("--sun-dx", (Math.sin(opp) * mag / 190).toFixed(4) + "em");
-    root.style.setProperty("--sun-dy", (Math.max(4, Math.cos(opp) * mag * 0.7 + 8) / 190).toFixed(4) + "em");
+    const dxRaw = Math.sin(opp) * mag / 190;
+    const dyRaw = Math.max(4, Math.cos(opp) * mag * 0.7 + 8) / 190;
+    root.style.setProperty("--sun-dx", dxRaw.toFixed(4) + "em");
+    root.style.setProperty("--sun-dy", dyRaw.toFixed(4) + "em");
+    // the bearing the shadow is cast along — shared by the name's text-shadow
+    // and the orb's own cast shadow so they always agree
+    root.style.setProperty("--shadow-angle", (Math.atan2(dyRaw, dxRaw) * 180 / Math.PI).toFixed(1) + "deg");
   }
 
   sundialApply = apply;
@@ -182,22 +188,15 @@ function setupSky() {
 }
 setupSky();
 
-/* ---------------- the sun ray ----------------
-   Hovering the sun prints one solid blue ray toward the name — the light
-   the flat blue shadows are cast by. The disc is a ::before, so the hover
-   is a plain circle test on mousemove; the ray is an SVG line rebuilt on
-   each approach (the sun wanders as the day goes on). */
+/* ---------------- the sun hover ----------------
+   Hovering the sun (the ::before disc) wakes its cast shadow and lengthens
+   the name's shadows — the light source leaning in. The disc is a ::before,
+   so the hover is a plain circle test on mousemove; the shadows themselves
+   are pure CSS off the .sun-hover class. */
 
-function setupSunRays() {
+function setupSunHover() {
   const hero = document.querySelector(".hero");
-  const name = document.querySelector(".hero-name");
-  if (!hero || !name || !finePointer.matches) return;
-
-  const NS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(NS, "svg");
-  svg.setAttribute("class", "sun-rays");
-  svg.setAttribute("aria-hidden", "true");
-  hero.append(svg);
+  if (!hero || !finePointer.matches) return;
 
   const sunGeom = () => {
     const hr = hero.getBoundingClientRect();
@@ -209,56 +208,16 @@ function setupSunRays() {
     };
   };
 
-  function build() {
-    const { hr, x, y, r } = sunGeom();
-    svg.setAttribute("viewBox", `0 0 ${hr.width} ${hr.height}`);
-    svg.replaceChildren();
-    const nb = name.getBoundingClientRect();
-    const box = { x0: nb.left - hr.left, y0: nb.top - hr.top, x1: nb.right - hr.left, y1: nb.bottom - hr.top };
-
-    // one beam, aimed at the heart of the name
-    const a = Math.atan2((box.y0 + box.y1) / 2 - y, (box.x0 + box.x1) / 2 - x);
-    const dx = Math.cos(a), dy = Math.sin(a);
-
-    // march to the first name-box edge on this bearing, stop shy of it
-    let t = Infinity;
-    if (dx) for (const bx of [box.x0, box.x1]) {
-      const tt = (bx - x) / dx;
-      if (tt > 0) { const yy = y + tt * dy; if (yy >= box.y0 && yy <= box.y1) t = Math.min(t, tt); }
-    }
-    if (dy) for (const by of [box.y0, box.y1]) {
-      const tt = (by - y) / dy;
-      if (tt > 0) { const xx = x + tt * dx; if (xx >= box.x0 && xx <= box.x1) t = Math.min(t, tt); }
-    }
-    if (t === Infinity) t = Math.hypot((box.x0 + box.x1) / 2 - x, (box.y0 + box.y1) / 2 - y) * 0.7;
-
-    const w = Math.max(26, r * 0.42);      // the beam's thickness
-    const r0 = r + w / 2 + 8;              // clear of the rim (round cap included)
-    const r1 = Math.max(r0 + 30, t * 0.9); // just short of the glyphs
-    const line = document.createElementNS(NS, "line");
-    line.setAttribute("x1", (x + dx * r0).toFixed(1));
-    line.setAttribute("y1", (y + dy * r0).toFixed(1));
-    line.setAttribute("x2", (x + dx * r1).toFixed(1));
-    line.setAttribute("y2", (y + dy * r1).toFixed(1));
-    line.setAttribute("stroke-width", w.toFixed(1));
-    const len = (r1 - r0).toFixed(1);
-    line.style.strokeDasharray = len;
-    line.style.strokeDashoffset = len; // draws outward from the sun on hover
-    svg.append(line);
-  }
-
   let hot = false;
   hero.addEventListener("mousemove", (e) => {
     const { hr, x, y, r } = sunGeom();
     const on = Math.hypot(e.clientX - hr.left - x, e.clientY - hr.top - y) <= r + 10;
-    if (on && !hot) { build(); hero.classList.add("sun-hover"); }
-    else if (!on && hot) hero.classList.remove("sun-hover");
+    if (on !== hot) hero.classList.toggle("sun-hover", on);
     hot = on;
   }, { passive: true });
   hero.addEventListener("mouseleave", () => { hot = false; hero.classList.remove("sun-hover"); });
-  window.addEventListener("resize", () => { if (hot) build(); });
 }
-setupSunRays();
+setupSunHover();
 
 /* ---------------- the kontakt sun: flick it and it rolls ----------------
    The footer disc breathes via CSS. Here, swiping the cursor across it
