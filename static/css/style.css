@@ -665,8 +665,8 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
 
 .proj--person.is-narrow .person-photo { object-fit: contain; }
 
-/* just the name on the card — plain blue, no shadow, lifted off the edge
-   (the description lives in the left column) */
+/* just the name on the card — white, lifted off the edge, with a soft shadow
+   so it stays legible over light photos (the description lives in the left column) */
 .person-name {
   position: absolute;
   left: clamp(20px, 5%, 44px);
@@ -676,7 +676,8 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
   font-weight: 800;
   letter-spacing: -0.015em;
   line-height: 1;
-  color: var(--main-a); /* plain blue, no shadow */
+  color: var(--paper); /* white on the photo/rectangle */
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
 }
 
 .person-album-btn {
@@ -692,17 +693,21 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
 
 .person-album-btn:hover { transform: translateY(-2px); }
 
-/* video cards: a play mark centred on the poster */
-.person-play {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: clamp(52px, 6vw, 80px);
-  transform: translate(-50%, -50%);
-  color: var(--paper);
-  pointer-events: none;
-  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.35));
-}
+/* typography: the books are covers standing in the frame — shrink them so
+   they don't span the full card height, centred over their own blurred fill */
+.proj--book .person-photo { transform: scale(0.62); transform-origin: center; }
+
+/* product: fill the whole 16:9 frame (crop a little) instead of letterboxing.
+   Beats the .proj--person.is-narrow contain rule on specificity, so no !important */
+.proj--product .person-bg { display: none; }
+.proj--person.proj--product .person-photo,
+.proj--person.proj--product.is-narrow .person-photo { object-fit: cover; }
+
+/* ...but a set marked coverFit:"contain" (BMM 100) keeps the full image height
+   over a blurred fill, so nothing is cropped off the top/bottom */
+.proj--product.proj--fit .person-bg { display: block; opacity: 1; }
+.proj--person.proj--product.proj--fit .person-photo,
+.proj--person.proj--product.proj--fit.is-narrow .person-photo { object-fit: contain; }
 
 @media (min-width: 900px) {
   /* an open card grows to a clean 16:9 and slides right, making room for the
@@ -824,6 +829,11 @@ html.has-cursor .lightbox-close { cursor: pointer !important; }
 .album-ph { background: #ffb0cb; }
 
 .album-photo:hover img { transform: scale(1.02); }
+
+/* a full-bleed gallery item that spans every masonry column — used for the
+   combined iPads (visual identity), so the three devices sit side by side */
+.album-photo--wide { column-span: all; background: transparent; }
+.album-photo--wide img { object-fit: contain; }
 
 .album-close {
   position: fixed;

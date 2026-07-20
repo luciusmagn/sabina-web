@@ -114,15 +114,16 @@
         "cs": "/Foto/",
         "en": "/Photo/"
       },
+      "coverFit": "contain",
       "layout": "grid",
       "images": [
         [
-          "/produktove-fotky/set-1/web-1.png",
-          1.5
-        ],
-        [
           "/produktove-fotky/set-1/web-2.png",
           1.503
+        ],
+        [
+          "/produktove-fotky/set-1/web-1.png",
+          1.5
         ],
         [
           "/produktove-fotky/set-1/web-3.png",
@@ -170,6 +171,39 @@
           ]
         ]
       ]
+    },
+    {
+      "label": {
+        "cs": "Deck",
+        "en": "Deck"
+      },
+      "caption": {
+        "cs": "/Foto/",
+        "en": "/Photo/"
+      },
+      "layout": "grid",
+      "images": [
+        [
+          "/produktove-fotky/deck/1.jpg",
+          1.78
+        ],
+        [
+          "/produktove-fotky/deck/candlestick.jpg",
+          1.78
+        ],
+        [
+          "/produktove-fotky/deck/clock.jpg",
+          1.78
+        ],
+        [
+          "/produktove-fotky/deck/deck-4.jpg",
+          1
+        ],
+        [
+          "/produktove-fotky/deck/lifestyle.jpg",
+          1.78
+        ]
+      ]
     }
   ],
   "profilePhotos": {
@@ -189,17 +223,14 @@
           "en": "/Photo, postproduction/"
         },
         "album": [
-          "/profilove-fotky/web-1.jpg",
-          "/profilove-fotky/web-2.jpg",
-          "/profilove-fotky/web-3.jpg",
-          "/profilove-fotky/web-4.jpg"
+          "/profilove-fotky/web-1.jpg"
         ]
       },
       {
         "src": "/profilove-fotky/web-2.jpg",
         "title": {
-          "cs": "Luk\u00e1\u0161",
-          "en": "Luk\u00e1\u0161"
+          "cs": "Braiins",
+          "en": "Braiins"
         },
         "text": {
           "cs": "/Foto, postprodukce/",
@@ -207,9 +238,8 @@
         },
         "album": [
           "/profilove-fotky/web-2.jpg",
-          "/profilove-fotky/web-1.jpg",
-          "/profilove-fotky/web-4.jpg",
-          "/profilove-fotky/web-3.jpg"
+          "/profilove-fotky/braiins-1.jpg",
+          "/profilove-fotky/braiins-2.jpg"
         ]
       },
       {
@@ -224,9 +254,8 @@
         },
         "album": [
           "/profilove-fotky/web-3.jpg",
-          "/profilove-fotky/web-4.jpg",
-          "/profilove-fotky/web-1.jpg",
-          "/profilove-fotky/web-2.jpg"
+          "/profilove-fotky/jaja-1.jpg",
+          "/profilove-fotky/jaja-2.jpg"
         ]
       },
       {
@@ -240,10 +269,7 @@
           "en": "/Photo/"
         },
         "album": [
-          "/profilove-fotky/web-4.jpg",
-          "/profilove-fotky/web-3.jpg",
-          "/profilove-fotky/web-2.jpg",
-          "/profilove-fotky/web-1.jpg"
+          "/profilove-fotky/web-4.jpg"
         ]
       }
     ]
@@ -306,8 +332,8 @@
     },
     {
       "name": {
-        "cs": "Super Mario on the Braiins Deck",
-        "en": "Super Mario on the Braiins Deck"
+        "cs": "Braiins Deck",
+        "en": "Braiins Deck"
       },
       "work": {
         "cs": "Nat\u00e1\u010den\u00ed, st\u0159ih, color grading",

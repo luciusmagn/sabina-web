@@ -2,12 +2,14 @@
 extern crate rocket;
 
 use rocket::fs::{relative, FileServer};
-use rocket::http::{ContentType, Status};
+use rocket::http::{ContentType, Header, Status};
 use rocket::request::{FromRequest, Outcome};
+use rocket::response::{self, Responder, Response};
 use rocket::Request;
 use rocket_dyn_templates::{context, Template};
 use std::fs;
-use std::io::Read;
+use std::io::{Cursor, Read, Seek, SeekFrom};
+use std::path::{Path, PathBuf};
 
 /// The editor password — from EDITOR_PASSWORD, or randomly generated at startup
 /// (and printed to the log) if that env var is unset.
@@ -75,6 +77,126 @@ fn login(_auth: EditorAuth) -> Status {
     Status::Ok
 }
 
+/// Captures the raw `Range` request header (if present) so the media route can
+/// answer partial requests. Without them, browsers can't seek inside a video.
+struct RangeHeader(Option<String>);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for RangeHeader {
+    type Error = std::convert::Infallible;
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        Outcome::Success(RangeHeader(
+            req.headers().get_one("Range").map(|s| s.to_owned()),
+        ))
+    }
+}
+
+/// A byte body plus the headers a browser needs to seek: `Accept-Ranges`, and
+/// for partial responses a `Content-Range` alongside a 206 status.
+struct MediaResponse {
+    status: Status,
+    content_type: ContentType,
+    content_range: Option<String>,
+    body: Vec<u8>,
+}
+
+impl<'r> Responder<'r, 'static> for MediaResponse {
+    fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
+        let mut build = Response::build();
+        build
+            .status(self.status)
+            .header(self.content_type)
+            .header(Header::new("Accept-Ranges", "bytes"))
+            .sized_body(self.body.len(), Cursor::new(self.body));
+        if let Some(cr) = self.content_range {
+            build.header(Header::new("Content-Range", cr));
+        }
+        build.ok()
+    }
+}
+
+/// Serve everything under `static/videa` WITH HTTP range support. Rocket's
+/// `FileServer` answers every request with a full `200` and no `Accept-Ranges`,
+/// which makes scrubbing a `<video>` impossible; this route (ranked above the
+/// FileServer) parses `Range: bytes=…` and replies `206 Partial Content`.
+#[get("/videa/<file..>", rank = 1)]
+fn media(file: PathBuf, range: RangeHeader) -> Option<MediaResponse> {
+    // Resolve inside static/videa. PathBuf's FromSegments already strips `..`,
+    // but re-check the canonical path never escapes the directory.
+    let base = Path::new(relative!("static/videa")).canonicalize().ok()?;
+    let path = base.join(&file).canonicalize().ok()?;
+    if !path.starts_with(&base) {
+        return None;
+    }
+
+    let mut f = fs::File::open(&path).ok()?;
+    let total = f.metadata().ok()?.len();
+    let content_type = path
+        .extension()
+        .and_then(|e| e.to_str())
+        .and_then(ContentType::from_extension)
+        .unwrap_or(ContentType::Binary);
+
+    // Cap each partial response so memory stays bounded — a shorter-than-asked
+    // range is a valid 206; the browser simply requests the next chunk.
+    const MAX_CHUNK: u64 = 2 * 1024 * 1024;
+
+    match range.0.as_deref().and_then(|h| parse_range(h, total)) {
+        Some((start, end)) => {
+            let end = end.min(start + MAX_CHUNK - 1).min(total.saturating_sub(1));
+            let len = (end - start + 1) as usize;
+            let mut body = vec![0u8; len];
+            f.seek(SeekFrom::Start(start)).ok()?;
+            f.read_exact(&mut body).ok()?;
+            Some(MediaResponse {
+                status: Status::PartialContent,
+                content_type,
+                content_range: Some(format!("bytes {start}-{end}/{total}")),
+                body,
+            })
+        }
+        None => {
+            let mut body = Vec::with_capacity(total as usize);
+            f.read_to_end(&mut body).ok()?;
+            Some(MediaResponse {
+                status: Status::Ok,
+                content_type,
+                content_range: None,
+                body,
+            })
+        }
+    }
+}
+
+/// Parse a single `bytes=start-end` / `bytes=start-` / `bytes=-suffix` range
+/// into inclusive `[start, end]` offsets, clamped to the file size.
+fn parse_range(header: &str, total: u64) -> Option<(u64, u64)> {
+    if total == 0 {
+        return None;
+    }
+    let spec = header.trim().strip_prefix("bytes=")?;
+    let spec = spec.split(',').next()?.trim(); // first range only
+    let (a, b) = spec.split_once('-')?;
+    let (start, end) = match (a.trim(), b.trim()) {
+        ("", "") => return None,
+        ("", suf) => {
+            let suf: u64 = suf.parse().ok()?;
+            let suf = suf.min(total);
+            (total - suf, total - 1)
+        }
+        (s, "") => (s.parse().ok()?, total - 1),
+        (s, e) => {
+            let start: u64 = s.parse().ok()?;
+            let end: u64 = e.parse().ok()?;
+            (start, end.min(total - 1))
+        }
+    };
+    if start > end || start >= total {
+        return None;
+    }
+    Some((start, end))
+}
+
 /// Resolve the editor password: the EDITOR_PASSWORD env var, or a random hex
 /// string. Returns (password, was_generated).
 fn resolve_editor_password() -> (String, bool) {
@@ -101,7 +223,7 @@ fn rocket() -> _ {
     }
     rocket::build()
         .manage(EditorPassword(password))
-        .mount("/", routes![index, editor, get_content, save_content, login])
+        .mount("/", routes![index, editor, get_content, save_content, login, media])
         .mount("/", FileServer::from(relative!("static")))
         .attach(Template::fairing())
         // Browsers must revalidate everything on each load: stale CSS/JS kept

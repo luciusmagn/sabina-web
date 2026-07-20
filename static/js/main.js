@@ -880,12 +880,23 @@ function openLightbox(src) {
   lightbox.showModal();
 }
 
-function openVideoLightbox(src) {
+function openVideoLightbox(src, hd) {
   const video = document.createElement("video");
-  video.src = src;
   video.controls = true;
   video.autoplay = true;
   video.playsInline = true;
+  // hd (webm/1080p) first so Chrome/Firefox pick it; the mp4 is the fallback
+  // Safari uses when it can't play the webm
+  if (hd) {
+    const s = document.createElement("source");
+    s.src = hd;
+    s.type = "video/webm";
+    video.append(s);
+  }
+  const mp4 = document.createElement("source");
+  mp4.src = src;
+  mp4.type = "video/mp4";
+  video.append(mp4);
   lightboxMedia.replaceChildren(video);
   lightbox.showModal();
 }
@@ -922,7 +933,7 @@ function setupAlbums() {
   document.querySelectorAll(".person-album-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       // videos: the pill just plays the video, no gallery
-      if (btn.dataset.action === "video") { openVideoLightbox(btn.dataset.video); return; }
+      if (btn.dataset.action === "video") { openVideoLightbox(btn.dataset.video, btn.dataset.videoHd); return; }
 
       title.dataset.cs = btn.dataset.titleCs || "";
       title.dataset.en = btn.dataset.titleEn || "";
@@ -932,6 +943,18 @@ function setupAlbums() {
       sub.textContent = lang === "cs" ? sub.dataset.cs : sub.dataset.en;
 
       const items = [];
+      // full-bleed images (e.g. the combined iPads) span every column, up top
+      (btn.dataset.wide || "").split("|").filter(Boolean).forEach((src) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "album-photo album-photo--wide";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "";
+        b.append(img);
+        b.addEventListener("click", () => openLightbox(src));
+        items.push(b);
+      });
       // the item's real photos, each at its natural dimensions
       (btn.dataset.gallery || "").split("|").filter(Boolean).forEach((src) => {
         const b = document.createElement("button");

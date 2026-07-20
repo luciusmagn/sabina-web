@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="/css/style.css?v=37">
+  <link rel="stylesheet" href="/css/style.css?v=40">
 </head>
 <body>
 
@@ -104,7 +104,8 @@
                     <button class="person-album-btn" type="button" data-action="gallery"
                             data-title-cs="{{ content.visualIdentity.detail.label.cs }}" data-title-en="{{ content.visualIdentity.detail.label.en }}"
                             data-note-cs="{{ content.visualIdentity.detail.caption.cs }}" data-note-en="{{ content.visualIdentity.detail.caption.en }}"
-                            data-gallery="{{ content.visualIdentity.detail.sideImage }}{% for d in content.visualIdentity.devices %}|{{ d }}{% endfor %}"
+                            data-gallery="{{ content.visualIdentity.detail.sideImage }}"
+                            data-wide="/vizualni-identita/ipads-row.png"
                             data-cs="Otevřít galerii" data-en="Open gallery">Otevřít galerii</button>
                   </article>
                 </div>
@@ -130,7 +131,7 @@
                      rest of the set's photos go into the gallery #}
                   {% for set in content.productSets %}
                     {% if set.layout == "rows" %}{% set cover = set.rows.0.0.0 %}{% else %}{% set cover = set.images.0.0 %}{% endif %}
-                  <article class="proj proj--person" data-role-cs="{{ set.caption.cs }}" data-role-en="{{ set.caption.en }}">
+                  <article class="proj proj--person proj--product{% if set.coverFit | default(value="") == "contain" %} proj--fit{% endif %}" data-role-cs="{{ set.caption.cs }}" data-role-en="{{ set.caption.en }}">
                     <div class="person-bg" style="background-image: url('{{ cover }}')" aria-hidden="true"></div>
                     <img class="person-photo" src="{{ cover }}" alt="{{ set.label.cs }}" loading="lazy">
                     <h3 class="person-name" data-cs="{{ set.label.cs }}" data-en="{{ set.label.en }}">{{ set.label.cs }}</h3>
@@ -169,7 +170,7 @@
                     <button class="person-album-btn" type="button" data-action="gallery"
                             data-title-cs="{{ p.title.cs }}" data-title-en="{{ p.title.en }}"
                             data-note-cs="{{ p.text.cs }}" data-note-en="{{ p.text.en }}"
-                            data-gallery="{{ p.src }}" data-ph="1"
+                            data-gallery="{% for a in p.album %}{{ a }}|{% endfor %}"{% if p.album | length <= 1 %} data-ph="1"{% endif %}
                             data-cs="Otevřít album" data-en="Open album">Otevřít album</button>
                   </article>
                   {% endfor %}
@@ -197,12 +198,9 @@
                   <article class="proj proj--person proj--video" data-role-cs="/{{ v.work.cs }}/" data-role-en="/{{ v.work.en }}/">
                     <div class="person-bg" style="background-image: url('{{ v.poster }}')" aria-hidden="true"></div>
                     <img class="person-photo" src="{{ v.poster }}" alt="{{ v.name.cs }}" loading="lazy">
-                    <svg class="person-play" viewBox="0 0 60 60" fill="none" aria-hidden="true">
-                      <path d="M30 4.5C13 6 4.8 14.6 5.6 30.8 6.4 46 15 55.4 30.6 55.5 46 55.6 55 45.8 55.4 30 55.8 13.8 46.6 5.4 30 4.5Z" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
-                      <path d="M24.5 20.5C24.2 27.4 24.3 32.9 24.8 40.2 30.6 36.6 34.9 33.7 40.6 29.6 34.5 25.9 30.5 23.6 24.5 20.5Z" fill="currentColor"/>
-                    </svg>
                     <h3 class="person-name" data-cs="{{ v.name.cs }}" data-en="{{ v.name.en }}">{{ v.name.cs }}</h3>
                     <button class="person-album-btn" type="button" data-action="video" data-video="{{ v.src }}"
+                            {% if v.src == "/videa/video-1.mp4" %}data-video-hd="/videa/video-1.webm"{% endif %}
                             data-cs="Přehrát" data-en="Play">Přehrát</button>
                   </article>
                   {% endfor %}
@@ -227,7 +225,7 @@
                 <div class="person-track">
                   {# one card per book — cover = the book, gallery = book + placeholders #}
                   {% for b in content.books %}
-                  <article class="proj proj--person" data-role-cs="{{ b.author }} · /{{ b.activity.cs }}/" data-role-en="{{ b.author }} · /{{ b.activity.en }}/">
+                  <article class="proj proj--person proj--book" data-role-cs="{{ b.author }} · /{{ b.activity.cs }}/" data-role-en="{{ b.author }} · /{{ b.activity.en }}/">
                     <div class="person-bg" style="background-image: url('{{ b.image }}')" aria-hidden="true"></div>
                     <img class="person-photo" src="{{ b.image }}" alt="{{ b.title }}" loading="lazy">
                     <h3 class="person-name" data-cs="{{ b.title }}" data-en="{{ b.title }}">{{ b.title }}</h3>
@@ -348,6 +346,6 @@
     <div class="lightbox-media"></div>
   </dialog>
 
-  <script src="/js/main.js?v=37" defer></script>
+  <script src="/js/main.js?v=40" defer></script>
 </body>
 </html>
